@@ -9,7 +9,7 @@ namespace Reversi_mcts.MCTS_medium
         public State state { get; }
 
         public Dictionary<string, Tuple<Play, Node>> children { get; }
-        Play play;
+        Play play; // TODO có cần dùng tới cái này ko ?
 
         public int n_plays { get; set; }
         public int n_wins { get; set; }
