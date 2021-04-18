@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Reversi_mcts.MCTS_medium
 {
 	// https://github.com/EivindEE/Reversi/blob/master/src/com/eivind/reversi/game/Move.java
 	class Move
     {
-		public int Player { get; }
+		public byte Player { get; }
 		public Coordinate Coordinate { get; }
 
-		public Move(int player, Coordinate coordinate)
+		public Move(byte player, Coordinate coordinate)
 		{
 			Player = player;
 			Coordinate = coordinate;

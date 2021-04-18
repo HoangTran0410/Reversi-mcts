@@ -44,78 +44,80 @@ namespace Reversi_mcts.MCTS_medium
         /// </summary>
         /// <param name="c">other coordinate object</param>
         /// <returns>List of coordinate between two coordinates</returns>
-        public List<Coordinate> Between(Coordinate c)
+        public static List<Coordinate> Between(Coordinate a, Coordinate b)
         {
+            // Use static method: https://stackoverflow.com/a/1496656/11898496
+
             List<Coordinate> between = new List<Coordinate>();
 
             // Horizontally
-            if (this.X == c.Y)
+            if (a.X == b.X)
             {
-                int MinY = Math.Min(Y, c.Y) + 1;
-                int MaxY = Math.Max(Y, c.Y);
+                int MinY = Math.Min(a.Y, b.Y) + 1;
+                int MaxY = Math.Max(a.Y, b.Y);
                 while (MinY < MaxY)
                 {
-                    between.Add(new Coordinate(X, MinY));
+                    between.Add(new Coordinate(a.X, MinY));
                     MinY++;
                 }
             }
             // Vertically
-            else if (this.Y == c.Y)
+            else if (a.Y == b.Y)
             {
-                int MinX = Math.Min(X, c.X) + 1;
-                int MaxX = Math.Max(X, c.X);
+                int MinX = Math.Min(a.X, b.X) + 1;
+                int MaxX = Math.Max(a.X, b.X);
                 while (MinX < MaxX)
                 {
-                    between.Add(new Coordinate(MinX, Y));
+                    between.Add(new Coordinate(MinX, a.Y));
                     MinX++;
                 }
             }
             // Diagonal up right
-            else if (this.Y < c.Y && this.X < c.X)
+            else if (a.Y < b.Y && a.X < b.X)
             {
-                int xC = this.X + 1;
-                int yC = this.Y + 1;
-                while (yC < c.Y)
+                int xB = a.X + 1;
+                int yB = a.Y + 1;
+                while (yB < b.Y)
                 {
-                    between.Add(new Coordinate(xC, yC));
-                    yC++;
-                    xC++;
+                    between.Add(new Coordinate(xB, yB));
+                    yB++;
+                    xB++;
                 }
             }
             // Diagonal down right
-            else if (this.Y > c.Y && this.X < c.X)
+            else if (a.Y > b.Y && a.X < b.X)
             {
-                int xC = this.X + 1;
-                int yC = this.Y - 1;
-                while (yC > c.Y)
+                int xB = a.X + 1;
+                int yB = a.Y - 1;
+                while (yB > b.Y)
                 {
-                    between.Add(new Coordinate(xC, yC));
-                    yC--;
-                    xC++;
+                    between.Add(new Coordinate(xB, yB));
+                    yB--;
+                    xB++;
                 }
             }
             // Diagonal up left
-            else if (this.Y < c.Y && this.X > c.X)
+            else if (a.Y < b.Y && a.X > b.X)
             {
-                int xC = this.X - 1;
-                int yC = this.Y + 1;
-                while (yC < c.Y)
+                int xB = a.X - 1;
+                int yB = a.Y + 1;
+                while (yB < b.Y)
                 {
-                    between.Add(new Coordinate(xC, yC));
-                    yC++;
-                    xC--;
+                    between.Add(new Coordinate(xB, yB));
+                    yB++;
+                    xB--;
                 }
             }
             // Diagonal down left
-            else if (this.Y > c.Y && this.X > c.X)
+            else if (a.Y > b.Y && a.X > b.X)
             {
-                int xC = this.X - 1;
-                int yC = this.Y - 1;
-                while (yC > c.Y)
+                int xB = a.X - 1;
+                int yB = a.Y - 1;
+                while (yB > b.Y)
                 {
-                    between.Add(new Coordinate(xC, yC));
-                    yC--;
-                    xC--;
+                    between.Add(new Coordinate(xB, yB));
+                    yB--;
+                    xB--;
                 }
             }
 

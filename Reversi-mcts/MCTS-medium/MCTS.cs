@@ -44,11 +44,11 @@ namespace Reversi_mcts.MCTS_medium
         /// If state does not exist, create dangling node.
         /// </summary>
         /// <param name="state">The state to make a dangling node for; its parent is set to null.</param>
-        public void MakeNode(State state)
+        public void MakeNode(ReversiState state)
         {
             if (!this.nodes.ContainsKey(state.hash()))
             {
-                List<Play> unexpandedPlays = this.game.LegalPlays(state);
+                List<Move> unexpandedPlays = this.game.LegalPlays(state);
                 this.nodes[state.hash()] = new Node(null, null, state, unexpandedPlays);
             }
         }
@@ -59,7 +59,7 @@ namespace Reversi_mcts.MCTS_medium
         /// <param name="state">The state to run the search from.</param>
         /// <param name="timeout">The time to run the simulations for, in seconds.</param>
         /// <returns>Search statistics.</returns>
-        public SearchStatistic RunSearch(State state, double timeout = 3)
+        public SearchStatistic RunSearch(ReversiState state, double timeout = 3)
         {
             MakeNode(state);
 
@@ -74,7 +74,7 @@ namespace Reversi_mcts.MCTS_medium
                 var node = Select(state);
                 var winner = this.game.Winner(node.state);
 
-                if (node.isLeaf() == false && winner == -2)
+                if (node.IsLeaf() == false && winner == -2)
                 {
                     node = Expand(node);
                     winner = Simulate(node);
@@ -94,7 +94,7 @@ namespace Reversi_mcts.MCTS_medium
         /// <param name="state">The state to get the best play from.</param>
         /// <param name="policy">The selection policy for the "best" play.</param>
         /// <returns>The best play, according to the given policy.</returns>
-        public Play BestPlay(State state, string policy = "robust")
+        public Move BestMove(ReversiState state, string policy = "robust")
         {
 
             MakeNode(state);
@@ -102,11 +102,11 @@ namespace Reversi_mcts.MCTS_medium
             Node node = this.nodes.GetValueOrDefault(state.hash());
 
             // If not all children are expanded, not enough information
-            if (node.isFullyExpanded() == false)
+            if (node.IsFullyExpanded() == false)
                 throw null; //new Error("Not enough information!")
 
-            var allPlays = node.allPlays();
-            Play bestPlay = null;
+            var allPlays = node.AllMoves();
+            Move bestPlay = null;
 
             // Most visits (robust child)
             if (policy == "robust")
@@ -148,24 +148,24 @@ namespace Reversi_mcts.MCTS_medium
         /// </summary>
         /// <param name="state">The root state to start selection from.</param>
         /// <returns>The selected node.</returns>
-        public Node Select(State state)
+        public Node Select(ReversiState state)
         {
             var node = this.nodes.GetValueOrDefault(state.hash());
-            while (node.isFullyExpanded() && !node.isLeaf())
+            while (node.IsFullyExpanded() && !node.IsLeaf())
             {
-                var plays = node.allPlays();
-                Play bestPlay = null;
+                var plays = node.AllMoves();
+                Move bestMove = null;
                 var bestUCB1 = Double.MinValue;
                 foreach (var play in plays)
                 {
-                    var childUCB1 = node.ChildNode(play).getUCB1(this.UCB1ExploreParam);
+                    var childUCB1 = node.ChildNode(play).GetUCB1(this.UCB1ExploreParam);
                     if (childUCB1 > bestUCB1)
                     {
-                        bestPlay = play;
+                        bestMove = play;
                         bestUCB1 = childUCB1;
                     }
                 }
-                node = node.ChildNode(bestPlay);
+                node = node.ChildNode(bestMove);
             }
             return node;
         }
@@ -178,7 +178,7 @@ namespace Reversi_mcts.MCTS_medium
         /// <returns>The new expanded child node.</returns>
         public Node Expand(Node node)
         {
-            var plays = node.unexpandedPlays();
+            var plays = node.UnexpandedMoves();
             var index = rand.Next(0, plays.Count);
             var play = plays[index];
 

@@ -17,8 +17,8 @@ namespace Reversi_mcts
             while (winner == -2)
             {
                 mcts.RunSearch(state, 1);
-                Play play = mcts.BestPlay(state);
-                state = game.NextState(state, play);
+                Move move = mcts.BestMove(state);
+                state = game.NextState(state, move);
                 winner = game.Winner(state);
             }
 

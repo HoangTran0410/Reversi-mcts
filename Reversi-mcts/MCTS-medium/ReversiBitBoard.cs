@@ -15,21 +15,21 @@ namespace Reversi_mcts.MCTS_medium
 
     // https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/enum
     // https://github.com/EivindEE/Reversi/blob/master/src/com/eivind/reversi/game/Color.java
-    public enum Color : byte
-    {
-        Black = (byte)0,
-        White = (byte)1
-    }
+    //public enum Color : byte
+    //{
+    //    Black = (byte)0,
+    //    White = (byte)1
+    //}
 
     // https://github.com/EivindEE/Reversi/blob/master/src/com/eivind/reversi/game/ReversiBitboard.java
     class ReversiBitBoard
     {
-        public readonly static int
+        public readonly static byte
             BLACK = 0,
-            EMPTY = -1,
-            WHITE = 1;
+            WHITE = 1,
+            EMPTY = 2;
 
-        public readonly static int
+        public readonly static byte
             NUMBER_OF_ROWS = 8,
             NUMBER_OF_COLUMNS = 8;
 
@@ -82,7 +82,7 @@ namespace Reversi_mcts.MCTS_medium
 
         // https://stackoverflow.com/questions/169973/when-should-i-use-a-list-vs-a-linkedlist
         // https://stackoverflow.com/questions/5983059/why-is-a-linkedlist-generally-slower-than-a-list
-        public List<Coordinate> GetLegalMoves(int player)
+        public List<Coordinate> GetLegalMoves(byte player)
         {
             List<Coordinate> legalMoves = new List<Coordinate>();
             legalMoves.AddRange(MovesUpLeft(player));
@@ -103,7 +103,7 @@ namespace Reversi_mcts.MCTS_medium
         /// </summary>
         /// <param name="color">color of player u want to calculate score</param>
         /// <returns>score of given player's color</returns>
-        public int GetScore(int color)
+        public int GetScore(byte color)
         {
             int score = 0;
             long remainingPieces = pieces[color];
@@ -142,7 +142,7 @@ namespace Reversi_mcts.MCTS_medium
         /// </summary>
         /// <param name="color"></param>
         /// <returns></returns>
-        public bool HasLegalMoves(int color)
+        public bool HasLegalMoves(byte color)
         {
             return GetLegalMoves(color).Count > 0;
         }
@@ -247,7 +247,7 @@ namespace Reversi_mcts.MCTS_medium
             throw new Exception("long " + position + "does not map to a coordinate on the BitBoard");
         }
 
-        private List<Coordinate> GetEndPointDown(int color, long startPoint)
+        private List<Coordinate> GetEndPointDown(byte color, long startPoint)
         {
             long potentialEndPoint = ShiftDown(startPoint);
             while (potentialEndPoint != 0)
@@ -261,7 +261,7 @@ namespace Reversi_mcts.MCTS_medium
             return new List<Coordinate>();
         }
 
-        private List<Coordinate> GetEndPointDownLeft(int color, long startPoint)
+        private List<Coordinate> GetEndPointDownLeft(byte color, long startPoint)
         {
             long potentialEndPoint = ShiftDownLeft(startPoint);
 
@@ -276,7 +276,7 @@ namespace Reversi_mcts.MCTS_medium
             return new List<Coordinate>();
         }
 
-        private List<Coordinate> GetEndPointDownRight(int color, long startPoint)
+        private List<Coordinate> GetEndPointDownRight(byte color, long startPoint)
         {
             long potentialEndPoint = ShiftDownRight(startPoint);
             while (potentialEndPoint != 0)
@@ -290,7 +290,7 @@ namespace Reversi_mcts.MCTS_medium
             return new List<Coordinate>();
         }
 
-        private List<Coordinate> GetEndPointLeft(int color, long startPoint)
+        private List<Coordinate> GetEndPointLeft(byte color, long startPoint)
         {
             long potentialEndPoint = ShiftLeft(startPoint);
             while (potentialEndPoint != 0)
@@ -304,7 +304,7 @@ namespace Reversi_mcts.MCTS_medium
             return new List<Coordinate>();
         }
 
-        private List<Coordinate> GetEndPointRight(int color, long startPoint)
+        private List<Coordinate> GetEndPointRight(byte color, long startPoint)
         {
             long potentialEndPoint = ShiftRight(startPoint);
             while (potentialEndPoint != 0)
@@ -318,7 +318,7 @@ namespace Reversi_mcts.MCTS_medium
             return new List<Coordinate>();
         }
 
-        private List<Coordinate> GetEndPoints(int color, Coordinate coordinate)
+        private List<Coordinate> GetEndPoints(byte color, Coordinate coordinate)
         {
             List<Coordinate> endPoints = new List<Coordinate>();
             long startPoint = Getlong(coordinate);
@@ -335,7 +335,7 @@ namespace Reversi_mcts.MCTS_medium
 
             return endPoints;
         }
-        private List<Coordinate> GetEndPointUp(int color, long startPoint)
+        private List<Coordinate> GetEndPointUp(byte color, long startPoint)
         {
             long potentialEndPoint = ShiftUp(startPoint);
             while (potentialEndPoint != 0)
@@ -349,7 +349,7 @@ namespace Reversi_mcts.MCTS_medium
             return new List<Coordinate>();
         }
 
-        private List<Coordinate> GetEndPointUpLeft(int color, long startPoint)
+        private List<Coordinate> GetEndPointUpLeft(byte color, long startPoint)
         {
             long potentialEndPoint = ShiftUpLeft(startPoint);
             while (potentialEndPoint != 0)
@@ -362,7 +362,7 @@ namespace Reversi_mcts.MCTS_medium
             }
             return new List<Coordinate>();
         }
-        private List<Coordinate> GetEndPointUpRight(int color, long startPoint)
+        private List<Coordinate> GetEndPointUpRight(byte color, long startPoint)
         {
             long potentialEndPoint = ShiftUpRight(startPoint);
             while (potentialEndPoint != 0)
@@ -399,7 +399,7 @@ namespace Reversi_mcts.MCTS_medium
             return coordinates;
         }
 
-        private bool IsLegalMove(int color, Coordinate coordinate)
+        private bool IsLegalMove(byte color, Coordinate coordinate)
         {
             foreach (Coordinate c in GetLegalMoves(color))
             {
@@ -437,14 +437,13 @@ namespace Reversi_mcts.MCTS_medium
             //return s.ToString();
         }
 
-        /**
-		 * Places a piece at coordinate, and turns appropriate pieces.
-		 * Returns true iff move is legal and completed.
-		 * @param color
-		 * @param coordinate
-		 * @return
-		 */
-        private bool MakeMove(int color, Coordinate coordinate)
+        /// <summary>
+        /// Places a piece at coordinate, and turns appropriate pieces
+        /// </summary>
+        /// <param name="color"></param>
+        /// <param name="coordinate"></param>
+        /// <returns>Returns true if move is legal and completed.</returns>
+        private bool MakeMove(byte color, Coordinate coordinate)
         {
             if (IsLegalMove(color, coordinate))
             {
@@ -453,7 +452,7 @@ namespace Reversi_mcts.MCTS_medium
                 List<Coordinate> endPoints = GetEndPoints(color, coordinate);
                 piecesToTurn.AddRange(endPoints);
                 foreach (Coordinate c in endPoints)
-                    piecesToTurn.AddRange(coordinate.Between(c));
+                    piecesToTurn.AddRange(Coordinate.Between(coordinate, c));
                 foreach (Coordinate c in piecesToTurn)
                 {
                     SetPieceAtPosition(color, Getlong(c));
@@ -463,7 +462,7 @@ namespace Reversi_mcts.MCTS_medium
             return false;
         }
 
-        private List<Coordinate> MovesDown(int player)
+        private List<Coordinate> MovesDown(byte player)
         {
             List<Coordinate> downMoves = new List<Coordinate>();
             int otherPlayer = 1 - player;
@@ -478,7 +477,7 @@ namespace Reversi_mcts.MCTS_medium
             return downMoves;
         }
 
-        private List<Coordinate> MovesDownLeft(int player)
+        private List<Coordinate> MovesDownLeft(byte player)
         {
             List<Coordinate> downLeftMoves = new List<Coordinate>();
             int otherPlayer = 1 - player;
@@ -493,7 +492,7 @@ namespace Reversi_mcts.MCTS_medium
             return downLeftMoves;
         }
 
-        private List<Coordinate> MovesDownRight(int player)
+        private List<Coordinate> MovesDownRight(byte player)
         {
             List<Coordinate> downRightMoves = new List<Coordinate>();
             int otherPlayer = 1 - player;
@@ -508,7 +507,7 @@ namespace Reversi_mcts.MCTS_medium
             return downRightMoves;
         }
 
-        private List<Coordinate> MovesLeft(int player)
+        private List<Coordinate> MovesLeft(byte player)
         {
             List<Coordinate> leftMoves = new List<Coordinate>();
             int otherPlayer = 1 - player;
@@ -523,7 +522,7 @@ namespace Reversi_mcts.MCTS_medium
             return leftMoves;
         }
 
-        private List<Coordinate> MovesRight(int player)
+        private List<Coordinate> MovesRight(byte player)
         {
             List<Coordinate> rightMoves = new List<Coordinate>();
             int otherPlayer = 1 - player;
@@ -538,7 +537,7 @@ namespace Reversi_mcts.MCTS_medium
             return rightMoves;
         }
 
-        private List<Coordinate> MovesUp(int player)
+        private List<Coordinate> MovesUp(byte player)
         {
             List<Coordinate> upMoves = new List<Coordinate>();
             int otherPlayer = 1 - player;
@@ -553,7 +552,7 @@ namespace Reversi_mcts.MCTS_medium
             return upMoves;
         }
 
-        private List<Coordinate> MovesUpLeft(int player)
+        private List<Coordinate> MovesUpLeft(byte player)
         {
             List<Coordinate> upLeftMoves = new List<Coordinate>();
             int otherPlayer = 1 - player;
@@ -568,7 +567,7 @@ namespace Reversi_mcts.MCTS_medium
             return upLeftMoves;
         }
 
-        private List<Coordinate> MovesUpRight(int player)
+        private List<Coordinate> MovesUpRight(byte player)
         {
             List<Coordinate> upRightMoves = new List<Coordinate>();
             int otherPlayer = 1 - player;
@@ -583,7 +582,7 @@ namespace Reversi_mcts.MCTS_medium
             return upRightMoves;
         }
 
-        private void SetPieceAtPosition(int color, long position)
+        private void SetPieceAtPosition(byte color, long position)
         {
             this.pieces[1 - color] &= ~position;
             this.pieces[color] = this.pieces[color] | position;
@@ -636,7 +635,7 @@ namespace Reversi_mcts.MCTS_medium
             return urShift & ~LEFT_MASK;
         }
 
-        private bool ValidEndPoint(int color, long potentialEndPoint)
+        private bool ValidEndPoint(byte color, long potentialEndPoint)
         {
             return (potentialEndPoint & pieces[color]) == potentialEndPoint;
         }
