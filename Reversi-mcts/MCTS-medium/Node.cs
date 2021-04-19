@@ -33,10 +33,10 @@ namespace Reversi_mcts.MCTS_medium
             // Tree stuff
             this.parent = parent;
             this.children = new Dictionary<string, Tuple<Move, Node>>();
-            foreach (Move _move in unexpandedPlays)
-            {
-                this.children.Add(_move.hash(), new Tuple<Move, Node>(_move, null));
-            }
+            //foreach (Move _move in unexpandedPlays)
+            //{
+            //    this.children.Add(_move.hash(), new Tuple<Move, Node>(_move, null));
+            //}
         }
 
         /// <summary>
@@ -46,8 +46,9 @@ namespace Reversi_mcts.MCTS_medium
         /// <returns>The child node corresponding to the play given.</returns>
         public Node ChildNode(Move play)
         {
-            Tuple<Move, Node> child = this.children.GetValueOrDefault(play.hash());
-            return child.Item2;
+            //Tuple<Move, Node> child = this.children.GetValueOrDefault(play.hash());
+            //return child.Item2;
+            return null;
         }
 
         /// <summary>
@@ -61,10 +62,11 @@ namespace Reversi_mcts.MCTS_medium
         /// <returns>The new child node.</returns>
         public Node Expand(Move move, ReversiState childState, List<Move> unexpandedPlays)
         {
-            if (!this.children.ContainsKey(move.hash())) return null;
-            Node childNode = new Node(this, move, childState, unexpandedPlays);
-            this.children[move.hash()] = new Tuple<Move, Node>(move, childNode);
-            return childNode;
+            //if (!this.children.ContainsKey(move.hash())) return null;
+            //Node childNode = new Node(this, move, childState, unexpandedPlays);
+            //this.children[move.hash()] = new Tuple<Move, Node>(move, childNode);
+            //return childNode;
+            return null;
         }
 
         /// <summary>

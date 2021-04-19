@@ -64,13 +64,13 @@ namespace Reversi_mcts.MCTS_medium
         {
             if (IsGameComplete())
             {
-                int blackScore = CurrentState.GetScore(ReversiBitBoard.BLACK);
-                int whiteScore = CurrentState.GetScore(ReversiBitBoard.WHITE);
+                int blackScore = CurrentState.GetScore(ReversiBitBoardOld.BLACK);
+                int whiteScore = CurrentState.GetScore(ReversiBitBoardOld.WHITE);
                 if (blackScore > whiteScore)
-                    return ReversiBitBoard.BLACK;
+                    return ReversiBitBoardOld.BLACK;
                 if (blackScore < whiteScore)
-                    return ReversiBitBoard.WHITE;
-                return -1;
+                    return ReversiBitBoardOld.WHITE;
+                return 2;
             }
             throw new Exception("Asked for the winner before game was completed");
         }

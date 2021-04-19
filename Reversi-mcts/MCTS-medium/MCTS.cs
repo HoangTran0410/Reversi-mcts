@@ -20,7 +20,7 @@ namespace Reversi_mcts.MCTS_medium
     class MCTS
     {
 
-        Game game;
+        ReversiGame game;
         double UCB1ExploreParam;
         Dictionary<string, Node> nodes;
         
@@ -31,7 +31,7 @@ namespace Reversi_mcts.MCTS_medium
         /// </summary>
         /// <param name="game">The game to query regarding legal moves and state advancement.</param>
         /// <param name="UCB1ExploreParam">The square of the bias parameter in the UCB1 algorithm; defaults to 2.</param>
-        public MCTS(Game game, double UCB1ExploreParam = 2)
+        public MCTS(ReversiGame game, double UCB1ExploreParam = 2)
         {
             this.game = game;
             this.UCB1ExploreParam = UCB1ExploreParam;
@@ -46,11 +46,11 @@ namespace Reversi_mcts.MCTS_medium
         /// <param name="state">The state to make a dangling node for; its parent is set to null.</param>
         public void MakeNode(ReversiState state)
         {
-            if (!this.nodes.ContainsKey(state.hash()))
-            {
-                List<Move> unexpandedPlays = this.game.LegalPlays(state);
-                this.nodes[state.hash()] = new Node(null, null, state, unexpandedPlays);
-            }
+            //if (!this.nodes.ContainsKey(state.hash()))
+            //{
+            //    List<Move> unexpandedPlays = this.game.PossibleMoves(state);
+            //    this.nodes[state.hash()] = new Node(null, null, state, unexpandedPlays);
+            //}
         }
 
         /// <summary>
@@ -69,21 +69,21 @@ namespace Reversi_mcts.MCTS_medium
             var timeLimit = TimeSpan.FromSeconds(timeout);
             var start = DateTime.Now;
 
-            while (DateTime.Now - start < timeLimit)
-            {
-                var node = Select(state);
-                var winner = this.game.Winner(node.state);
+            //while (DateTime.Now - start < timeLimit)
+            //{
+            //    var node = Select(state);
+            //    var winner = this.game.Winner(node.state);
 
-                if (node.IsLeaf() == false && winner == -2)
-                {
-                    node = Expand(node);
-                    winner = Simulate(node);
-                }
-                Backpropagate(node, winner);
+            //    if (node.IsLeaf() == false && winner == -2)
+            //    {
+            //        node = Expand(node);
+            //        winner = Simulate(node);
+            //    }
+            //    Backpropagate(node, winner);
 
-                if (winner == 0) draws++;
-                totalSims++;
-            }
+            //    if (winner == 0) draws++;
+            //    totalSims++;
+            //}
 
             return new SearchStatistic(timeout, totalSims, draws);
         }
@@ -97,47 +97,47 @@ namespace Reversi_mcts.MCTS_medium
         public Move BestMove(ReversiState state, string policy = "robust")
         {
 
-            MakeNode(state);
+            //MakeNode(state);
 
-            Node node = this.nodes.GetValueOrDefault(state.hash());
+            //Node node = this.nodes.GetValueOrDefault(state.hash());
 
-            // If not all children are expanded, not enough information
-            if (node.IsFullyExpanded() == false)
-                throw null; //new Error("Not enough information!")
+            //// If not all children are expanded, not enough information
+            //if (node.IsFullyExpanded() == false)
+            //    throw null; //new Error("Not enough information!")
 
-            var allPlays = node.AllMoves();
+            //var allPlays = node.AllMoves();
             Move bestPlay = null;
 
-            // Most visits (robust child)
-            if (policy == "robust")
-            {
-                var max = Int32.MinValue;
-                foreach (var play in allPlays)
-                {
-                    var childNode = node.ChildNode(play);
-                    if (childNode.n_plays > max)
-                    {
-                        bestPlay = play;
-                        max = childNode.n_plays;
-                    }
-                }
-            }
+            //// Most visits (robust child)
+            //if (policy == "robust")
+            //{
+            //    var max = Int32.MinValue;
+            //    foreach (var play in allPlays)
+            //    {
+            //        var childNode = node.ChildNode(play);
+            //        if (childNode.n_plays > max)
+            //        {
+            //            bestPlay = play;
+            //            max = childNode.n_plays;
+            //        }
+            //    }
+            //}
 
-            // Highest winrate (max child)
-            else if (policy == "max")
-            {
-                var max = Int32.MinValue;
-                foreach (var play in allPlays)
-                {
-                    var childNode = node.ChildNode(play);
-                    var ratio = childNode.n_wins / childNode.n_plays;
-                    if (ratio > max)
-                    {
-                        bestPlay = play;
-                        max = ratio;
-                    }
-                }
-            }
+            //// Highest winrate (max child)
+            //else if (policy == "max")
+            //{
+            //    var max = Int32.MinValue;
+            //    foreach (var play in allPlays)
+            //    {
+            //        var childNode = node.ChildNode(play);
+            //        var ratio = childNode.n_wins / childNode.n_plays;
+            //        if (ratio > max)
+            //        {
+            //            bestPlay = play;
+            //            max = ratio;
+            //        }
+            //    }
+            //}
 
             return bestPlay;
         }
@@ -150,24 +150,25 @@ namespace Reversi_mcts.MCTS_medium
         /// <returns>The selected node.</returns>
         public Node Select(ReversiState state)
         {
-            var node = this.nodes.GetValueOrDefault(state.hash());
-            while (node.IsFullyExpanded() && !node.IsLeaf())
-            {
-                var plays = node.AllMoves();
-                Move bestMove = null;
-                var bestUCB1 = Double.MinValue;
-                foreach (var play in plays)
-                {
-                    var childUCB1 = node.ChildNode(play).GetUCB1(this.UCB1ExploreParam);
-                    if (childUCB1 > bestUCB1)
-                    {
-                        bestMove = play;
-                        bestUCB1 = childUCB1;
-                    }
-                }
-                node = node.ChildNode(bestMove);
-            }
-            return node;
+            //var node = this.nodes.GetValueOrDefault(state.hash());
+            //while (node.IsFullyExpanded() && !node.IsLeaf())
+            //{
+            //    var plays = node.AllMoves();
+            //    Move bestMove = null;
+            //    var bestUCB1 = Double.MinValue;
+            //    foreach (var play in plays)
+            //    {
+            //        var childUCB1 = node.ChildNode(play).GetUCB1(this.UCB1ExploreParam);
+            //        if (childUCB1 > bestUCB1)
+            //        {
+            //            bestMove = play;
+            //            bestUCB1 = childUCB1;
+            //        }
+            //    }
+            //    node = node.ChildNode(bestMove);
+            //}
+            //return node;
+            return null;
         }
 
         /// <summary>
@@ -178,16 +179,17 @@ namespace Reversi_mcts.MCTS_medium
         /// <returns>The new expanded child node.</returns>
         public Node Expand(Node node)
         {
-            var plays = node.UnexpandedMoves();
-            var index = rand.Next(0, plays.Count);
-            var play = plays[index];
+            //var plays = node.UnexpandedMoves();
+            //var index = rand.Next(0, plays.Count);
+            //var play = plays[index];
 
-            var childState = this.game.NextState(node.state, play);
-            var childUnexpandedPlays = this.game.LegalPlays(childState);
-            var childNode = node.Expand(play, childState, childUnexpandedPlays);
-            this.nodes[childState.hash()] = childNode;
+            //var childState = this.game.NextState(node.state, play);
+            //var childUnexpandedPlays = this.game.LegalPlays(childState);
+            //var childNode = node.Expand(play, childState, childUnexpandedPlays);
+            //this.nodes[childState.hash()] = childNode;
 
-            return childNode;
+            //return childNode;
+            return null;
         }
 
         /// <summary>
@@ -198,19 +200,20 @@ namespace Reversi_mcts.MCTS_medium
         /// <returns>The winner of the terminal game state.</returns>
         public int Simulate(Node node)
         {
-            var state = node.state;
-            var winner = this.game.Winner(state);
+            //var state = node.state;
+            //var winner = this.game.Winner(state);
 
-            while (winner == -2)
-            {
-                var plays = this.game.LegalPlays(state);
-                var index = rand.Next(0, plays.Count);
-                var play = plays[index];
-                state = this.game.NextState(state, play);
-                winner = this.game.Winner(state);
-            }
+            //while (winner == -2)
+            //{
+            //    var plays = this.game.LegalPlays(state);
+            //    var index = rand.Next(0, plays.Count);
+            //    var play = plays[index];
+            //    state = this.game.NextState(state, play);
+            //    winner = this.game.Winner(state);
+            //}
 
-            return winner;
+            //return winner;
+            return 0;
         }
 
         /// <summary>
@@ -222,16 +225,16 @@ namespace Reversi_mcts.MCTS_medium
         public void Backpropagate(Node node, int winner)
         {
 
-            while (node != null)
-            {
-                node.n_plays += 1;
-                // Parent's choice
-                if (node.state.isPlayer(-winner))
-                {
-                    node.n_wins += 1;
-                }
-                node = node.parent;
-            }
+            //while (node != null)
+            //{
+            //    node.n_plays += 1;
+            //    // Parent's choice
+            //    if (node.state.isPlayer(-winner))
+            //    {
+            //        node.n_wins += 1;
+            //    }
+            //    node = node.parent;
+            //}
         }
     }
 }

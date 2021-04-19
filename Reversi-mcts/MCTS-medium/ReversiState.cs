@@ -8,7 +8,7 @@ namespace Reversi_mcts.MCTS_medium
     {
         public byte Player { get; }
         public byte Opponent { get { return (byte)(1 - Player); } }
-        public ReversiBitBoard Board { get; }
+        public ReversiBitBoardOld Board { get; }
         /// <summary>
         /// The calculated value of this state
         /// </summary>
@@ -19,7 +19,7 @@ namespace Reversi_mcts.MCTS_medium
         private List<ReversiState> successors;
 
 
-        public ReversiState(byte player, ReversiBitBoard board)
+        public ReversiState(byte player, ReversiBitBoardOld board)
         {
             Player = player;
             Board = board;
@@ -37,7 +37,7 @@ namespace Reversi_mcts.MCTS_medium
             return Board.IsGameComplete();
         }
 
-        public int GetScore(int color)
+        public int GetScore(byte color)
         {
             return Board.GetScore(color);
         }
@@ -53,7 +53,7 @@ namespace Reversi_mcts.MCTS_medium
             }
             foreach (Move m in legalMoves)
             {
-                ReversiBitBoard successorBoard = new ReversiBitBoard(Board, m);
+                ReversiBitBoardOld successorBoard = new ReversiBitBoardOld(Board, m);
                 if (successorBoard.HasLegalMoves(Opponent))
                 {
                     successors.Add(new ReversiState(Opponent, successorBoard));
