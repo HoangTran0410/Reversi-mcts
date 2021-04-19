@@ -108,9 +108,9 @@ namespace Reversi_mcts
         /// <param name="player">Color of player make move</param>
         /// <param name="coordinate">Position of move</param>
         /// <returns>Returns true if move is legal and completed</returns>
-        public static bool MakeMove(this ReversiBitBoard board, Color player, (byte row, byte col) coordinate)
+        public static bool MakeMove(this ReversiBitBoard board, Color player, byte row, byte col)
         {
-            if (board.IsLegalMove(player, coordinate))
+            if (board.IsLegalMove(player, row, col))
             {
                 //List<Coordinate> piecesToTurn = new List<Coordinate>();
                 //piecesToTurn.Add(coordinate);
@@ -153,9 +153,9 @@ namespace Reversi_mcts
         /// <param name="player">Color of player</param>
         /// <param name="coordinate">Position of move</param>
         /// <returns>Valid or not</returns>
-        public static bool IsLegalMove(this ReversiBitBoard board, Color player, (byte row, byte col) coordinate)
+        public static bool IsLegalMove(this ReversiBitBoard board, Color player, byte row, byte col)
         {
-            long position = coordinate.ToLong();
+            long position = CoordinateToLong(row, col);
             long legalMoves = board.GetLegalMoves(player);
             return (position & legalMoves) > 0;
         }
@@ -320,11 +320,11 @@ namespace Reversi_mcts
         /// </summary>
         /// <param name="coordinate">Coordinate (row, col) to convert</param>
         /// <returns>Bits that represent coordinate</returns>
-        public static long ToLong(this (byte row, byte col) coordinate)
+        public static long CoordinateToLong(byte row, byte col)
         {
             // https://stackoverflow.com/a/24250656/11898496
             var ret = 0L;
-            int index = (8 - coordinate.row) * 8 + (8 - coordinate.col);
+            int index = (8 - row) * 8 + (8 - col);
             return ret | (1L << index);
         }
 
