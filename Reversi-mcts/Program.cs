@@ -34,7 +34,7 @@ namespace Reversi_mcts
             //var clone = board.Clone();
             //Console.WriteLine(clone.ToDisplayString());
 
-            Console.WriteLine(board.IsLegalMove(Color.Black, (3, 5)));
+            Console.WriteLine(board.IsLegalMove(Color.Black, 3, 5));
         }
     }
 }

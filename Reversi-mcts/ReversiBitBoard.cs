@@ -130,7 +130,7 @@ namespace Reversi_mcts
             return false;
         }
 
-        public static long GetEndPoints(this ReversiBitBoard board, Color player, (byte row, byte col) startPoint)
+        public static long GetEndPoints(this ReversiBitBoard board, Color player, byte row, byte col)
         {
             return 0;
         }
