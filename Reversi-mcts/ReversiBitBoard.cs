@@ -26,10 +26,10 @@ namespace Reversi_mcts
     public class ReversiBitBoard
     {
         public readonly static long
-            InitialPositionBlack = 68853694464L,    // 00000000 00000000 00000000 00010000 00001000 00000000 00000000 00000000
-            InitialPositionWhite = 34628173824L,    // 00000000 00000000 00000000 00001000 00010000 00000000 00000000 00000000
-            LeftMask = -9187201950435737472L,       // 10000000 10000000 10000000 10000000 10000000 10000000 10000000 10000000
-            RightMask = 72340172838076673L;         // 00000001 00000001 00000001 00000001 00000001 00000001 00000001 00000001
+            InitialPositionBlack = 34628173824L,    // 00000000 00000000 00000000 00001000 00010000 00000000 00000000 00000000
+            InitialPositionWhite = 68853694464L,    // 00000000 00000000 00000000 00010000 00001000 00000000 00000000 00000000
+            LeftMask = 9187201950435737471L,        // 01111111 01111111 01111111 01111111 01111111 01111111 01111111 10000000
+            RightMask = -72340172838076673L;        // 11111110 11111110 11111110 11111110 11111110 11111110 11111110 11111111
 
         public long BlackPiece { get; }
         public long WhitePiece { get; }
@@ -112,6 +112,10 @@ namespace Reversi_mcts
         {
             if (board.IsLegalMove(player, row, col))
             {
+                long endPoints = board.GetEndPoints(player, row, col);
+
+                Console.WriteLine(endPoints.ToPrettyString());
+
                 //List<Coordinate> piecesToTurn = new List<Coordinate>();
                 //piecesToTurn.Add(coordinate);
 
@@ -128,11 +132,6 @@ namespace Reversi_mcts
                 return true;
             }
             return false;
-        }
-
-        public static long GetEndPoints(this ReversiBitBoard board, Color player, byte row, byte col)
-        {
-            return 0;
         }
 
         /// <summary>
@@ -190,6 +189,43 @@ namespace Reversi_mcts
             return moves;
         }
 
+        /// <summary>
+        /// Get all cells can be flip if player play at position (row, col)
+        /// </summary>
+        /// <param name="board"></param>
+        /// <param name="player">Color of player</param>
+        /// <param name="row">Row to play</param>
+        /// <param name="col">Col to play</param>
+        /// <returns>Bits that represent all valid cells</returns>
+        public static long GetEndPoints(this ReversiBitBoard board, Color player, byte row, byte col)
+        {
+            long startPoint = CoordinateToLong(row, col);
+            long endPoints = 0L;
+
+            foreach (Direction dir in (Direction[])Enum.GetValues(typeof(Direction)))
+            {
+                long potentialEndPoint = startPoint.Shift(dir);
+                while (potentialEndPoint != 0)
+                {
+                    if (board.IsValidEndPoint(player, potentialEndPoint))
+                    {
+                        endPoints |= potentialEndPoint;
+                        Console.WriteLine(endPoints.ToPrettyString());
+                        break;
+                    }
+
+                    potentialEndPoint = potentialEndPoint.Shift(dir);
+                }
+            }
+
+            return endPoints;
+        }
+
+        public static bool IsValidEndPoint(this ReversiBitBoard board, Color player, long potentialEndPoint)
+        {
+            return (potentialEndPoint & board.GetPieceOf(player)) == potentialEndPoint;
+        }
+
         // ------------------------------------ Board Filters Stuffs ------------------------------------
         /// <summary>
         /// Get all empty-neighbour cells of both players
@@ -215,14 +251,14 @@ namespace Reversi_mcts
             {
                 ret =
                     ret |
+                    ret.ShiftUp() |
                     ret.ShiftDown() |
-                    ret.ShiftDownLeft() |
-                    ret.ShiftDownRight() |
                     ret.ShiftLeft() |
                     ret.ShiftRight() |
-                    ret.ShiftUp() |
                     ret.ShiftUpLeft() |
-                    ret.ShiftUpRight();
+                    ret.ShiftUpRight() |
+                    ret.ShiftDownLeft() |
+                    ret.ShiftDownRight();
             }
             return ret;
         }
@@ -240,14 +276,14 @@ namespace Reversi_mcts
             {
                 ret =
                     ret &
+                    ret.ShiftUp() &
                     ret.ShiftDown() &
-                    ret.ShiftDownLeft() &
-                    ret.ShiftDownRight() &
                     ret.ShiftLeft() &
                     ret.ShiftRight() &
-                    ret.ShiftUp() &
                     ret.ShiftUpLeft() &
-                    ret.ShiftUpRight();
+                    ret.ShiftUpRight() &
+                    ret.ShiftDownLeft() &
+                    ret.ShiftDownRight();
             }
             return ret;
         }
@@ -263,69 +299,111 @@ namespace Reversi_mcts
         {
             switch (direction)
             {
-                case Direction.UpLeft: return bits.ShiftUpLeft();
                 case Direction.Up: return bits.ShiftUp();
-                case Direction.UpRight: return bits.ShiftUpRight();
+                case Direction.Down: return bits.ShiftDown();
                 case Direction.Left: return bits.ShiftLeft();
                 case Direction.Right: return bits.ShiftRight();
+                case Direction.UpLeft: return bits.ShiftUpLeft();
+                case Direction.UpRight: return bits.ShiftUpRight();
                 case Direction.DownLeft: return bits.ShiftDownLeft();
-                case Direction.Down: return bits.ShiftDown();
                 case Direction.DownRight: return bits.ShiftDownRight();
             }
             return 0;
         }
 
-        public static long ShiftDown(this long bits)
-        {
-            return bits >> 8;
-        }
-        public static long ShiftDownLeft(this long bits)
-        {
-            long dlShift = bits >> 7;
-            return dlShift & ~ReversiBitBoard.RightMask;
-        }
-        public static long ShiftDownRight(this long bits)
-        {
-            long drShift = bits >> 9;
-            return drShift & ~ReversiBitBoard.LeftMask;
-        }
-        public static long ShiftLeft(this long bits)
-        {
-            long lShift = bits << 1;
-            return lShift & ~ReversiBitBoard.RightMask;
-        }
-        public static long ShiftRight(this long bits)
-        {
-            long rShift = bits >> 1;
-            return rShift & ~ReversiBitBoard.LeftMask;
-        }
+        // https://www.gamedev.net/forums/topic/646988-generating-moves-in-reversi/
         public static long ShiftUp(this long bits)
         {
             return bits << 8;
         }
+        public static long ShiftDown(this long bits)
+        {
+            return bits >> 8;
+        }
+        public static long ShiftLeft(this long bits)
+        {
+            return (bits & ReversiBitBoard.RightMask) << 1;
+        }
+        public static long ShiftRight(this long bits)
+        {
+            return (bits & ReversiBitBoard.LeftMask) >> 1;
+        }
         public static long ShiftUpLeft(this long bits)
         {
-            long ulShift = bits << 9;
-            return ulShift & ~ReversiBitBoard.RightMask;
+            return bits.ShiftUp().ShiftLeft();
         }
         public static long ShiftUpRight(this long bits)
         {
-            long urShift = bits << 7;
-            return urShift & ~ReversiBitBoard.LeftMask;
+            return bits.ShiftUp().ShiftRight();
+        }
+        public static long ShiftDownLeft(this long bits)
+        {
+            return bits.ShiftDown().ShiftLeft();
+        }
+        public static long ShiftDownRight(this long bits)
+        {
+            return bits.ShiftDown().ShiftRight();
         }
 
         // ------------------------------------ Bit Stuffs ------------------------------------
         /// <summary>
-        /// Convert coordinate (row, col) to bits (long)
+        /// Convert coordinate (row, col) to binary bits (long)
         /// </summary>
         /// <param name="coordinate">Coordinate (row, col) to convert</param>
         /// <returns>Bits that represent coordinate</returns>
         public static long CoordinateToLong(byte row, byte col)
         {
+            return 0L.SetBitAtCoordinate(row, col);
+        }
+
+        /// <summary>
+        /// Set bit 1 to position (row,col)
+        /// </summary>
+        /// <param name="bits"></param>
+        /// <param name="row"></param>
+        /// <param name="col"></param>
+        /// <returns></returns>
+        public static long SetBitAtCoordinate(this long bits, byte row, byte col)
+        {
             // https://stackoverflow.com/a/24250656/11898496
-            var ret = 0L;
-            int index = (8 - row) * 8 + (8 - col);
-            return ret | (1L << index);
+            return bits | (1L << Ix(row, col));
+        }
+
+        /// <summary>
+        /// Set bit 0 to position (row,col)
+        /// </summary>
+        /// <param name="bits"></param>
+        /// <param name="row"></param>
+        /// <param name="col"></param>
+        /// <returns></returns>
+        public static long RemoveBitAtCoordinate(this long bits, byte row, byte col)
+        {
+            return bits & ~(1L << Ix(row, col));
+        }
+
+        /// <summary>
+        /// Convert position (row, col) to index (0-64)
+        /// </summary>
+        /// <param name="row"></param>
+        /// <param name="col"></param>
+        /// <returns></returns>
+        public static int Ix(byte row, byte col)
+        {
+            return (8 - row) * 8 + (8 - col);
+        }
+
+        /// <summary>
+        /// Count the number of bits set to 1 in a bitboard (long)
+        /// </summary>
+        /// <param name="bits"></param>
+        /// <returns>Count number of bit 1</returns>
+        public static int PopCount(this long bits)
+        {
+            //https://stackoverflow.com/a/51388846/11898496
+            int count = 0;
+            for (; bits != 0; ++count)
+                bits &= bits - 1;
+            return count;
         }
 
         public static long HighestOneBit(this long bits)
