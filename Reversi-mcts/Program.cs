@@ -26,16 +26,15 @@ namespace Reversi_mcts
             //Console.WriteLine(winner);
 
             var board = new ReversiBitBoard();
-            Console.WriteLine(board.ToDisplayString());
+            //Console.WriteLine(board.ToDisplayString());
+            //Console.WriteLine(board.EmptyNeighbours().ToPrettyString());
+            Console.WriteLine(board.GetLegalMoves(Color.Black).ToPrettyString());
+            Console.WriteLine(board.GetLegalMoves(Color.White).ToPrettyString());
 
-            var neibor = board.EmptyNeighbours();
-            Console.WriteLine(neibor.ToBinaryString().Pretty());
+            //var clone = board.Clone();
+            //Console.WriteLine(clone.ToDisplayString());
 
-            var lineCapMovesBlack = board.LineCapMoves(0);
-            Console.WriteLine(lineCapMovesBlack.ToBinaryString().Pretty());
-
-            var lineCapMovesWhite = board.LineCapMoves(1);
-            Console.WriteLine(lineCapMovesWhite.ToBinaryString().Pretty());
+            Console.WriteLine(board.IsLegalMove(Color.Black, (3, 5)));
         }
     }
 }

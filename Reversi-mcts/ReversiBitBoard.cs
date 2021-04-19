@@ -4,32 +4,56 @@ using System.Text;
 
 namespace Reversi_mcts
 {
+    public enum Color : byte
+    {
+        Black = 0,
+        White = 1,
+        Empty = 2
+    }
+
+    public enum Direction : byte
+    {
+        UpLeft = 1,
+        Up = 2,
+        UpRight = 3,
+        Left = 4,
+        Right = 6,
+        DownLeft = 7,
+        Down = 8,
+        DownRight = 9
+    }
+
     public class ReversiBitBoard
     {
         public readonly static long
-            INITIAL_POSITION_BLACK = 68853694464L,  // 00000000 00000000 00000000 00010000 00001000 00000000 00000000 00000000
-            INITIAL_POSITION_WHITE = 34628173824L,  // 00000000 00000000 00000000 00001000 00010000 00000000 00000000 00000000
-            LEFT_MASK = -9187201950435737472L,      // 10000000 10000000 10000000 10000000 10000000 10000000 10000000 10000000
-            RIGHT_MASK = 72340172838076673L;        // 00000001 00000001 00000001 00000001 00000001 00000001 00000001 00000001
+            InitialPositionBlack = 68853694464L,    // 00000000 00000000 00000000 00010000 00001000 00000000 00000000 00000000
+            InitialPositionWhite = 34628173824L,    // 00000000 00000000 00000000 00001000 00010000 00000000 00000000 00000000
+            LeftMask = -9187201950435737472L,       // 10000000 10000000 10000000 10000000 10000000 10000000 10000000 10000000
+            RightMask = 72340172838076673L;         // 00000001 00000001 00000001 00000001 00000001 00000001 00000001 00000001
 
-        public long BlackPiece { get; set; }
-        public long WhitePiece { get; set; }
+        public long BlackPiece { get; }
+        public long WhitePiece { get; }
 
-        public ReversiBitBoard()
+        public ReversiBitBoard() : this(InitialPositionBlack, InitialPositionWhite) { }
+
+        public ReversiBitBoard(long blackPiece, long whitePiece)
         {
-            BlackPiece = INITIAL_POSITION_BLACK;
-            WhitePiece = INITIAL_POSITION_WHITE;
+            BlackPiece = blackPiece;
+            WhitePiece = whitePiece;
         }
     }
 
     public static class Extensions
     {
         // ------------------------------------ Basic Stuffs ------------------------------------
-        public enum Color : byte
+        /// <summary>
+        /// Return a clone of board
+        /// </summary>
+        /// <param name="board"></param>
+        /// <returns>New board cloned</returns>
+        public static ReversiBitBoard Clone(this ReversiBitBoard board)
         {
-            Black = 0,
-            White = 1,
-            Empty = 2
+            return new ReversiBitBoard(board.BlackPiece, board.WhitePiece);
         }
 
         /// <summary>
@@ -78,14 +102,92 @@ namespace Reversi_mcts
 
         // ------------------------------------ Move Stuffs ------------------------------------
         /// <summary>
-        /// Get all legal moves of player
+        /// Places a piece at coordinate, and turns appropriate pieces
         /// </summary>
         /// <param name="board"></param>
-        /// <param name="player"></param>
-        /// <returns></returns>
-        public static long GetLegalMoves(this ReversiBitBoard board, Color player)
+        /// <param name="player">Color of player make move</param>
+        /// <param name="coordinate">Position of move</param>
+        /// <returns>Returns true if move is legal and completed</returns>
+        public static bool MakeMove(this ReversiBitBoard board, Color player, (byte row, byte col) coordinate)
+        {
+            if (board.IsLegalMove(player, coordinate))
+            {
+                //List<Coordinate> piecesToTurn = new List<Coordinate>();
+                //piecesToTurn.Add(coordinate);
+
+                //List<Coordinate> endPoints = GetEndPoints(color, coordinate);
+                //piecesToTurn.AddRange(endPoints);
+
+                //foreach (Coordinate c in endPoints)
+                //    piecesToTurn.AddRange(Coordinate.Between(coordinate, c));
+
+                //foreach (Coordinate c in piecesToTurn)
+                //{
+                //    SetPieceAtPosition(color, GetLong(c));
+                //}
+                return true;
+            }
+            return false;
+        }
+
+        public static long GetEndPoints(this ReversiBitBoard board, Color player, (byte row, byte col) startPoint)
         {
             return 0;
+        }
+
+        /// <summary>
+        /// Check if player has legal moves on current board
+        /// </summary>
+        /// <param name="board"></param>
+        /// <param name="player">Color of player</param>
+        /// <returns>Has legal moves or not</returns>
+        public static bool HasLegalMoves(this ReversiBitBoard board, Color player)
+        {
+            return board.GetLegalMoves(player) > 0;
+        }
+
+        /// <summary>
+        /// Check valid move
+        /// </summary>
+        /// <param name="board"></param>
+        /// <param name="player">Color of player</param>
+        /// <param name="coordinate">Position of move</param>
+        /// <returns>Valid or not</returns>
+        public static bool IsLegalMove(this ReversiBitBoard board, Color player, (byte row, byte col) coordinate)
+        {
+            long position = coordinate.ToLong();
+            long legalMoves = board.GetLegalMoves(player);
+            return (position & legalMoves) > 0;
+        }
+
+        /// <summary>
+        /// Get all legal moves of player (Line Cap Moves Algorithm)
+        /// </summary>
+        /// <param name="board"></param>
+        /// <param name="player">Player want to get legal moves</param>
+        /// <returns>Bits that contains all legal moves</returns>
+        public static long GetLegalMoves(this ReversiBitBoard board, Color player)
+        {
+            // https://intellitect.com/when-to-use-and-not-use-var-in-c/
+            // https://stackoverflow.com/a/41505/11898496
+            var moves = 0L;
+            long bitsp = board.GetPieceOf(player);
+            long bitso = board.GetOpponentPieceOf(player);
+            long empty = board.EmptyCells();
+
+            // https://stackoverflow.com/a/105402/11898496
+            foreach (Direction dir in (Direction[])Enum.GetValues(typeof(Direction)))
+            {
+                long candidates = bitso & bitsp.Shift(dir);
+                while (candidates != 0)
+                {
+                    long candidatesShifted = candidates.Shift(dir);
+                    moves |= empty & candidatesShifted;
+                    candidates = bitso & candidatesShifted;
+                }
+            }
+
+            return moves;
         }
 
         // ------------------------------------ Board Filters Stuffs ------------------------------------
@@ -99,41 +201,58 @@ namespace Reversi_mcts
             return board.PlayedCells().Delation() & board.EmptyCells();
         }
 
-        // ------------------------------------ Line Move Filters ------------------------------------
-        public static long LineCapMoves(this ReversiBitBoard board, Color player)
+        // ------------------------------------ Morphological Operations ------------------------------------
+        /// <summary>
+        /// Expand the on-bits in all square (diagonal) directions.
+        /// </summary>
+        /// <param name="bits"></param>
+        /// <param name="step">Number of steps to expand</param>
+        /// <returns></returns>
+        public static long Delation(this long bits, byte step = 1)
         {
-            var moves = 0L;
-            var bitsp = board.GetPieceOf(player);
-            var bitso = board.GetOpponentPieceOf(player);
-            var empty = board.EmptyCells();
-
-            // https://stackoverflow.com/a/105402/11898496
-            foreach (Direction dir in (Direction[])Enum.GetValues(typeof(Direction)))
+            long ret = bits;
+            while (step-- > 0)
             {
-                long candidates = bitso & bitsp.Shift(dir);
-                while (candidates != 0)
-                {
-                    moves |= empty & candidates.Shift(dir);
-                    candidates = bitso & candidates.Shift(dir);
-                }
+                ret =
+                    ret |
+                    ret.ShiftDown() |
+                    ret.ShiftDownLeft() |
+                    ret.ShiftDownRight() |
+                    ret.ShiftLeft() |
+                    ret.ShiftRight() |
+                    ret.ShiftUp() |
+                    ret.ShiftUpLeft() |
+                    ret.ShiftUpRight();
             }
+            return ret;
+        }
 
-            return moves;
+        /// <summary>
+        /// Shrinks the on-bits in all square (diagonal) directions. Reverse operation of dilation.
+        /// </summary>
+        /// <param name="bits"></param>
+        /// <param name="step">Number of steps to shrink</param>
+        /// <returns></returns>
+        public static long Erosion(this long bits, byte step = 1)
+        {
+            long ret = bits;
+            while (step-- > 0)
+            {
+                ret =
+                    ret &
+                    ret.ShiftDown() &
+                    ret.ShiftDownLeft() &
+                    ret.ShiftDownRight() &
+                    ret.ShiftLeft() &
+                    ret.ShiftRight() &
+                    ret.ShiftUp() &
+                    ret.ShiftUpLeft() &
+                    ret.ShiftUpRight();
+            }
+            return ret;
         }
 
         // ------------------------------------ Shift Stuffs ------------------------------------
-        public enum Direction : byte
-        {
-            UpLeft = 1,
-            Up = 2,
-            UpRight = 3,
-            Left = 4,
-            Right = 6,
-            DownLeft = 7,
-            Down = 8,
-            DownRight = 9
-        }
-
         /// <summary>
         /// Shifts the bits in the direction
         /// </summary>
@@ -163,22 +282,22 @@ namespace Reversi_mcts
         public static long ShiftDownLeft(this long bits)
         {
             long dlShift = bits >> 7;
-            return dlShift & ~ReversiBitBoard.RIGHT_MASK;
+            return dlShift & ~ReversiBitBoard.RightMask;
         }
         public static long ShiftDownRight(this long bits)
         {
             long drShift = bits >> 9;
-            return drShift & ~ReversiBitBoard.LEFT_MASK;
+            return drShift & ~ReversiBitBoard.LeftMask;
         }
         public static long ShiftLeft(this long bits)
         {
             long lShift = bits << 1;
-            return lShift & ~ReversiBitBoard.RIGHT_MASK;
+            return lShift & ~ReversiBitBoard.RightMask;
         }
         public static long ShiftRight(this long bits)
         {
             long rShift = bits >> 1;
-            return rShift & ~ReversiBitBoard.LEFT_MASK;
+            return rShift & ~ReversiBitBoard.LeftMask;
         }
         public static long ShiftUp(this long bits)
         {
@@ -187,68 +306,31 @@ namespace Reversi_mcts
         public static long ShiftUpLeft(this long bits)
         {
             long ulShift = bits << 9;
-            return ulShift & ~ReversiBitBoard.RIGHT_MASK;
+            return ulShift & ~ReversiBitBoard.RightMask;
         }
         public static long ShiftUpRight(this long bits)
         {
             long urShift = bits << 7;
-            return urShift & ~ReversiBitBoard.LEFT_MASK;
-        }
-
-        // ------------------------------------ Morphological Operations ------------------------------------
-        /// <summary>
-        /// Expand the on-bits in all square (diagonal) directions.
-        /// </summary>
-        /// <param name="bits"></param>
-        /// <param name="step">Number of steps to expand</param>
-        /// <returns></returns>
-        public static long Delation(this long bits, int step = 1)
-        {
-            long ret = bits;
-            while (step-- > 0)
-            {
-                ret =
-                    ret |
-                    ret.ShiftDown() |
-                    ret.ShiftDownLeft() |
-                    ret.ShiftDownRight() |
-                    ret.ShiftLeft() |
-                    ret.ShiftRight() |
-                    ret.ShiftUp() |
-                    ret.ShiftUpLeft() |
-                    ret.ShiftUpRight();
-            }
-            return ret;
-        }
-
-        /// <summary>
-        /// Shrinks the on-bits in all square (diagonal) directions. Reverse operation of dilation.
-        /// </summary>
-        /// <param name="bits"></param>
-        /// <param name="step">Number of steps to shrink</param>
-        /// <returns></returns>
-        public static long Erosion(this long bits, int step = 1)
-        {
-            long ret = bits;
-            while (step-- > 0)
-            {
-                ret =
-                    ret &
-                    ret.ShiftDown() &
-                    ret.ShiftDownLeft() &
-                    ret.ShiftDownRight() &
-                    ret.ShiftLeft() &
-                    ret.ShiftRight() &
-                    ret.ShiftUp() &
-                    ret.ShiftUpLeft() &
-                    ret.ShiftUpRight();
-            }
-            return ret;
+            return urShift & ~ReversiBitBoard.LeftMask;
         }
 
         // ------------------------------------ Bit Stuffs ------------------------------------
-        public static long HighestOneBit(this long i)
+        /// <summary>
+        /// Convert coordinate (row, col) to bits (long)
+        /// </summary>
+        /// <param name="coordinate">Coordinate (row, col) to convert</param>
+        /// <returns>Bits that represent coordinate</returns>
+        public static long ToLong(this (byte row, byte col) coordinate)
         {
+            // https://stackoverflow.com/a/24250656/11898496
+            var ret = 0L;
+            int index = (8 - coordinate.row) * 8 + (8 - coordinate.col);
+            return ret | (1L << index);
+        }
+
+        public static long HighestOneBit(this long bits)
+        {
+            var i = bits;
             i |= (i >> 1);
             i |= (i >> 2);
             i |= (i >> 4);
@@ -262,7 +344,7 @@ namespace Reversi_mcts
             // https://www.tutorialspoint.com/java/lang/long_highestonebit.htm
             // https://stackoverflow.com/questions/28846601/java-integer-highestonebit-in-c-sharp
 
-            // right shift co 2 loại:
+            // trong c# không có >>>, nên mới phải cast ulong-long:
             // https://stackoverflow.com/a/2811372/11898496
             // https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/bitwise-and-shift-operators#right-shift-operator-
         }
@@ -282,18 +364,28 @@ namespace Reversi_mcts
         }
 
         /// <summary>
+        /// Phiên bản ngắn gọn của l.ToBinaryString().Pretty()
+        /// </summary>
+        /// <param name="bits"></param>
+        /// <returns>Chuỗi string được định dạng giống 1 board 8x8</returns> 
+        public static string ToPrettyString(this long bits)
+        {
+            return bits.ToBinaryString().Pretty();
+        }
+
+        /// <summary>
         /// Chuyển biến kiểu long về kiểu string (binary) với độ dài cụ thể.
         /// <para>Tự động thêm 0 phía trước nếu ko đủ dài</para>
         /// </summary>
         /// <param name="l"></param>
         /// <param name="totalWidth">Độ dài chuỗi binary string (mặc định là 64)</param>
         /// <returns>Chuỗi binary string với độ dài truyền vào</returns>
-        public static string ToBinaryString(this long l, int totalWidth = 64)
+        public static string ToBinaryString(this long l, byte totalWidth = 64)
         {
             // https://stackoverflow.com/a/23905301/11898496
             StringBuilder s = new StringBuilder(128);
             string binString = Convert.ToString(l, 2).PadLeft(totalWidth, '0');
-            for (int i = 0; i < binString.Length; i++)
+            for (byte i = 0; i < binString.Length; i++)
             {
                 s.Append(binString[i]);
             }
@@ -313,8 +405,8 @@ namespace Reversi_mcts
         public static string CombineBinaryString(string white, string black)
         {
             // https://www.stdio.vn/java/toi-uu-xu-ly-chuoi-voi-stringbuilder-phan-1-9RG31h
-            StringBuilder s = new StringBuilder(white.Length);
-            for (int i = 0; i < white.Length && i < black.Length; i++)
+            var s = new StringBuilder(white.Length);
+            for (byte i = 0; i < white.Length && i < black.Length; i++)
                 if (white[i] == '1' && black[i] == '1')
                     s.Append('X');
                 else if (white[i] == '1')
@@ -333,13 +425,13 @@ namespace Reversi_mcts
         /// <param name="binaryStr">Chuỗi CombineBinaryString của black và white</param>
         /// <param name="one">Ký tự thay thế cho ký tự "1"</param>
         /// <param name="zero">Ký tự thay thế cho ký tự "0"</param>
-        /// <returns>Chuỗi string sau khi làm đẹp</returns>
+        /// <returns>Chuỗi string được định dạng giống 1 board 8x8</returns>
         public static string Pretty(this string binaryStr, char one = 'o', char zero = '.')
         {
-            StringBuilder s = new StringBuilder();
-            int lineLength = 8;
-            int beginIndex = 0;
-            int endIndex = lineLength;
+            var s = new StringBuilder();
+            byte lineLength = 8;
+            byte beginIndex = 0;
+            byte endIndex = lineLength;
             while (endIndex <= binaryStr.Length)
             {
                 string sub = binaryStr.Substring(beginIndex, lineLength);
