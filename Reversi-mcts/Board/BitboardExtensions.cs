@@ -4,13 +4,6 @@ using System.Text;
 
 namespace Reversi_mcts
 {
-    public enum Color : byte
-    {
-        Black = 0,
-        White = 1,
-        Empty = 2
-    }
-
     public enum Direction : byte
     {
         UpLeft = 1,
@@ -23,220 +16,8 @@ namespace Reversi_mcts
         DownRight = 9
     }
 
-    public class ReversiBitBoard
+    public static class BitboardExtensions
     {
-        // Why use ulong instead of long: https://stackoverflow.com/a/9924991/11898496
-        public readonly static ulong
-            InitialPositionBlack = 0x810000000, // 00000000 00000000 00000000 00001000 00010000 00000000 00000000 00000000
-            InitialPositionWhite = 0x1008000000,// 00000000 00000000 00000000 00010000 00001000 00000000 00000000 00000000
-            LeftMask = 0x7F7F7F7F7F7F7F7F,      // 01111111 01111111 01111111 01111111 01111111 01111111 01111111 01111111
-            RightMask = 0xFEFEFEFEFEFEFEFE;     // 11111110 11111110 11111110 11111110 11111110 11111110 11111110 11111110
-
-        public ulong BlackPiece { get; }
-        public ulong WhitePiece { get; }
-
-        public ReversiBitBoard() : this(InitialPositionBlack, InitialPositionWhite) { }
-
-        public ReversiBitBoard(ulong blackPiece, ulong whitePiece)
-        {
-            BlackPiece = blackPiece;
-            WhitePiece = whitePiece;
-        }
-    }
-
-    public static class Extensions
-    {
-        // ------------------------------------ Pre Define ------------------------------------
-        /** Caches the direction enum values in a array. */
-        public static Direction[] DirectionValues = (Direction[])Enum.GetValues(typeof(Direction));
-
-        // ------------------------------------ Basic Stuffs ------------------------------------
-        /// <summary>
-        /// Return a clone of board
-        /// </summary>
-        /// <param name="board"></param>
-        /// <returns>New board cloned</returns>
-        public static ReversiBitBoard Clone(this ReversiBitBoard board)
-        {
-            return new ReversiBitBoard(board.BlackPiece, board.WhitePiece);
-        }
-
-        /// <summary>
-        /// Get pieces of color
-        /// </summary>
-        /// <param name="board"></param>
-        /// <param name="player"></param>
-        /// <returns>Pieces of color in board</returns>
-        public static ulong GetPieceOf(this ReversiBitBoard board, Color player)
-        {
-            if (player == Color.Black) return board.BlackPiece;
-            return board.WhitePiece;
-        }
-
-        /// <summary>
-        /// Get pieces of opponent color
-        /// </summary>
-        /// <param name="board"></param>
-        /// <param name="player"></param>
-        /// <returns>Pieces of opponent color in board</returns>
-        public static ulong GetOpponentPieceOf(this ReversiBitBoard board, Color player)
-        {
-            if (player == Color.Black) return board.WhitePiece;
-            return board.BlackPiece;
-        }
-
-        /// <summary>
-        /// Get all empty cells of board
-        /// </summary>
-        /// <param name="board"></param>
-        /// <returns>Bits that contains all empty cells</returns>
-        public static ulong EmptyCells(this ReversiBitBoard board)
-        {
-            return ~board.BlackPiece & ~board.WhitePiece;
-        }
-
-        /// <summary>
-        /// Get all played cells (white/black cells) of board
-        /// </summary>
-        /// <param name="board"></param>
-        /// <returns>Bits that contains all played cells</returns>
-        public static ulong PlayedCells(this ReversiBitBoard board)
-        {
-            return board.BlackPiece | board.WhitePiece;
-        }
-
-        // ------------------------------------ Move Stuffs ------------------------------------
-        /// <summary>
-        /// Places a piece at coordinate, and turns appropriate pieces
-        /// </summary>
-        /// <param name="board"></param>
-        /// <param name="player">Color of player make move</param>
-        /// <param name="coordinate">Position of move</param>
-        /// <returns>Returns true if move is legal and completed</returns>
-        public static bool MakeMove(this ReversiBitBoard board, Color player, byte row, byte col)
-        {
-            if (board.IsLegalMove(player, row, col))
-            {
-                ulong endPoints = board.GetEndPoints(player, row, col);
-
-                Console.WriteLine(endPoints.ToPrettyString());
-
-                //List<Coordinate> piecesToTurn = new List<Coordinate>();
-                //piecesToTurn.Add(coordinate);
-
-                //List<Coordinate> endPoints = GetEndPoints(color, coordinate);
-                //piecesToTurn.AddRange(endPoints);
-
-                //foreach (Coordinate c in endPoints)
-                //    piecesToTurn.AddRange(Coordinate.Between(coordinate, c));
-
-                //foreach (Coordinate c in piecesToTurn)
-                //{
-                //    SetPieceAtPosition(color, GetLong(c));
-                //}
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Check if player has legal moves on current board
-        /// </summary>
-        /// <param name="board"></param>
-        /// <param name="player">Color of player</param>
-        /// <returns>Has legal moves or not</returns>
-        public static bool HasLegalMoves(this ReversiBitBoard board, Color player)
-        {
-            return board.GetLegalMoves(player) != 0;
-        }
-
-        /// <summary>
-        /// Returns the boolean value telling if the move, done by the specified player, is legal.
-        /// </summary>
-        /// <param name="board"></param>
-        /// <param name="player">The player moving</param>
-        /// <param name="coordinate">The square where to put the new disk</param>
-        /// <returns>True if the move is legal, otherwise false</returns>
-        public static bool IsLegalMove(this ReversiBitBoard board, Color player, byte row, byte col)
-        {
-            ulong position = CoordinateToLong(row, col);
-            ulong legalMoves = board.GetLegalMoves(player);
-            return (position & legalMoves) != 0;
-        }
-
-        /// <summary>
-        /// Get all legal moves of player (Line Cap Moves Algorithm)
-        /// </summary>
-        /// <param name="board"></param>
-        /// <param name="player">Player want to get legal moves</param>
-        /// <returns>Bits that contains all legal moves</returns>
-        public static ulong GetLegalMoves(this ReversiBitBoard board, Color player)
-        {
-            // https://intellitect.com/when-to-use-and-not-use-var-in-c/
-            // https://stackoverflow.com/a/41505/11898496
-            ulong moves = 0UL;
-            ulong bitsp = board.GetPieceOf(player);
-            ulong bitso = board.GetOpponentPieceOf(player);
-            ulong empty = board.EmptyCells();
-
-            // https://stackoverflow.com/a/105402/11898496
-            foreach (Direction dir in DirectionValues)
-            {
-                ulong candidates = bitso & bitsp.Shift(dir);
-                while (candidates != 0)
-                {
-                    ulong candidatesShifted = candidates.Shift(dir);
-                    moves |= empty & candidatesShifted;
-                    candidates = bitso & candidatesShifted;
-                }
-            }
-
-            return moves;
-        }
-
-        /// <summary>
-        /// Get all cells can be flip if player play at position (row, col)
-        /// </summary>
-        /// <param name="board"></param>
-        /// <param name="player">Color of player</param>
-        /// <param name="row">Row to play</param>
-        /// <param name="col">Col to play</param>
-        /// <returns>Bits that represent all valid cells</returns>
-        public static ulong GetEndPoints(this ReversiBitBoard board, Color player, byte row, byte col)
-        {
-            ulong playerPiece = board.GetPieceOf(player);
-            ulong startPoint = CoordinateToLong(row, col);
-            ulong endPoints = 0L;
-
-            foreach (Direction dir in DirectionValues)
-            {
-                ulong potentialEndPoint = startPoint.Shift(dir);
-                while (potentialEndPoint != 0)
-                {
-                    if ((potentialEndPoint & playerPiece) == potentialEndPoint)
-                    {
-                        endPoints |= potentialEndPoint;
-                        break;
-                    }
-
-                    potentialEndPoint = potentialEndPoint.Shift(dir);
-                }
-            }
-
-            return endPoints;
-        }
-
-        // ------------------------------------ Board Filters Stuffs ------------------------------------
-        /// <summary>
-        /// Get all empty-neighbour cells of both players
-        /// </summary>
-        /// <param name="board"></param>
-        /// <returns>Bits that contains all neighbour cells</returns>
-        public static ulong EmptyNeighbours(this ReversiBitBoard board)
-        {
-            return board.PlayedCells().Delation() & board.EmptyCells();
-        }
-
         // ------------------------------------ Morphological Operations ------------------------------------
         /// <summary>
         /// Expand the on-bits in all square (diagonal) directions.
@@ -322,11 +103,13 @@ namespace Reversi_mcts
         }
         public static ulong ShiftLeft(this ulong bits)
         {
-            return (bits & ReversiBitBoard.RightMask) << 1;
+            // RightMask: 11111110 11111110 11111110 11111110 11111110 11111110 11111110 11111110
+            return (bits & 0xFEFEFEFEFEFEFEFE) << 1;
         }
         public static ulong ShiftRight(this ulong bits)
         {
-            return (bits & ReversiBitBoard.LeftMask) >> 1;
+            // LeftMask: 01111111 01111111 01111111 01111111 01111111 01111111 01111111 01111111
+            return (bits & 0x7F7F7F7F7F7F7F7F) >> 1;
         }
         public static ulong ShiftUpLeft(this ulong bits)
         {
@@ -351,9 +134,14 @@ namespace Reversi_mcts
         /// </summary>
         /// <param name="coordinate">Coordinate (row, col) to convert</param>
         /// <returns>Bits that represent coordinate</returns>
-        public static ulong CoordinateToLong(byte row, byte col)
+        public static ulong CoordinateToULong(byte row, byte col)
         {
             return 0UL.SetBitAtCoordinate(row, col);
+        }
+
+        public static (int row, int col) ULongToCoordinate(ulong bits)
+        {
+            return (1, 2);
         }
 
         /// <summary>
@@ -428,19 +216,6 @@ namespace Reversi_mcts
         }
 
         // ------------------------------------ Display Stuffs ------------------------------------
-        /// <summary>
-        /// Chuyển board về dạng chuỗi để có thể hiển thị lên console
-        /// </summary>
-        /// <param name="bitBoard"></param>
-        /// <returns>Chuỗi đã được làm đẹp, chứa các quân cờ của black và white</returns>
-        public static string ToDisplayString(this ReversiBitBoard bitBoard)
-        {
-            string white = bitBoard.WhitePiece.ToBinaryString();
-            string black = bitBoard.BlackPiece.ToBinaryString();
-            string both = CombineBinaryString(white, black);
-            return both.Pretty();
-        }
-
         /// <summary>
         /// Phiên bản ngắn gọn của l.ToBinaryString().Pretty()
         /// </summary>
