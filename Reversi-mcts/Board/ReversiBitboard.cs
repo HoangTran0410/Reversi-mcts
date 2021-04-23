@@ -4,7 +4,6 @@ using System.Text;
 
 namespace Reversi_mcts
 {
-
     public class ReversiBitboard
     {
         // Why use ulong instead of long: https://stackoverflow.com/a/9924991/11898496

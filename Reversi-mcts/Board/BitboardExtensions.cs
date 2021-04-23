@@ -136,12 +136,63 @@ namespace Reversi_mcts
         /// <returns>Bits that represent coordinate</returns>
         public static ulong CoordinateToULong(byte row, byte col)
         {
+            // TODO faster implementation: use predefine ulong table
             return 0UL.SetBitAtCoordinate(row, col);
         }
 
-        public static (int row, int col) ULongToCoordinate(ulong bits)
+        public static (byte row, byte col) ToCoordinate(this ulong bits)
         {
-            return (1, 2);
+            int index = BitScanReverse(bits);
+            return (
+                (byte)(index / 8),
+                (byte)(index % 8)
+            );
+        }
+
+        // https://www.chessprogramming.org/BitScan#De_Bruijn_Multiplication
+        static int[] index64_reverse =
+        {
+            0, 47,  1, 56, 48, 27,  2, 60,
+           57, 49, 41, 37, 28, 16,  3, 61,
+           54, 58, 35, 52, 50, 42, 21, 44,
+           38, 32, 29, 23, 17, 11,  4, 62,
+           46, 55, 26, 59, 40, 36, 15, 53,
+           34, 51, 20, 43, 31, 22, 10, 45,
+           25, 39, 14, 33, 19, 30,  9, 24,
+           13, 18,  8, 12,  7,  6,  5, 63
+        };
+        static int BitScanReverse(ulong bb)
+        {
+            ulong debruijn64 = 0x03f79d71b4cb0a89;
+            // assert(bb != 0);
+            bb |= bb >> 1;
+            bb |= bb >> 2;
+            bb |= bb >> 4;
+            bb |= bb >> 8;
+            bb |= bb >> 16;
+            bb |= bb >> 32;
+            return index64_reverse[(bb * debruijn64) >> 58];
+        }
+
+        // https://www.chessprogramming.org/BitScan#Matt_Taylor.27s_Folding_trick
+        static int[] index64_forward =
+        {
+            63, 30,  3, 32, 59, 14, 11, 33,
+            60, 24, 50,  9, 55, 19, 21, 34,
+            61, 29,  2, 53, 51, 23, 41, 18,
+            56, 28,  1, 43, 46, 27,  0, 35,
+            62, 31, 58,  4,  5, 49, 54,  6,
+            15, 52, 12, 40,  7, 42, 45, 16,
+            25, 57, 48, 13, 10, 39,  8, 44,
+            20, 47, 38, 22, 17, 37, 36, 26
+        };
+        static int BitScanForward(ulong bb)
+        {
+            uint folded;
+            //assert(bb != 0);
+            bb ^= bb - 1;
+            folded = (uint)bb ^ (uint)(bb >> 32);
+            return index64_forward[folded * 0x78291ACF >> 26];
         }
 
         /// <summary>
@@ -177,7 +228,7 @@ namespace Reversi_mcts
         /// <returns></returns>
         public static int Ix(byte row, byte col)
         {
-            return (8 - row) * 8 + (8 - col);
+            return row * 8 + col;
         }
 
         /// <summary>
@@ -185,10 +236,10 @@ namespace Reversi_mcts
         /// </summary>
         /// <param name="bits"></param>
         /// <returns>Count number of bit 1</returns>
-        public static int PopCount(this ulong bits)
+        public static byte PopCount(this ulong bits)
         {
             //https://stackoverflow.com/a/51388846/11898496
-            int count = 0;
+            byte count = 0;
             for (; bits != 0; ++count)
                 bits &= bits - 1;
             return count;
@@ -226,50 +277,15 @@ namespace Reversi_mcts
             return bits.ToBinaryString().Pretty();
         }
 
-        /// <summary>
-        /// Chuyển biến kiểu long về kiểu string (binary) với độ dài cụ thể.
-        /// <para>Tự động thêm 0 phía trước nếu ko đủ dài</para>
-        /// </summary>
-        /// <param name="bits"></param>
-        /// <param name="totalWidth">Độ dài chuỗi binary string (mặc định là 64)</param>
-        /// <returns>Chuỗi binary string với độ dài truyền vào</returns>
         public static string ToBinaryString(this ulong bits, byte totalWidth = 64)
         {
             // https://stackoverflow.com/a/23905301/11898496
-            StringBuilder s = new StringBuilder(128);
             string binString = Convert.ToString((long)bits, 2).PadLeft(totalWidth, '0');
-            for (byte i = 0; i < binString.Length; i++)
-            {
-                s.Append(binString[i]);
-            }
-            return s.ToString();
+            char[] charArray = binString.ToCharArray();
+            Array.Reverse(charArray);
+            return  new string(charArray);
         }
 
-        /// <summary>
-        /// Gộp 2 binary string của 2 pieces vào 1 single string.
-        /// <para>Vị trí của white sẽ đánh dấu 'w'</para>
-        /// <para>Vị trí của black sẽ đánh dấu 'b'</para>
-        /// <para>Vị trí trống đánh dấu '.' (chấm)</para>
-        /// <para>Vị trí không hợp lệ (vừa white vừa black 1 chỗ) đánh dấu 'X'</para>
-        /// </summary>
-        /// <param name="white">Binary string của white</param>
-        /// <param name="black">Binary string của black</param>
-        /// <returns>Chuỗi string biểu diễn vị trí của black và white trên board</returns>
-        public static string CombineBinaryString(string white, string black)
-        {
-            // https://www.stdio.vn/java/toi-uu-xu-ly-chuoi-voi-stringbuilder-phan-1-9RG31h
-            var s = new StringBuilder(white.Length);
-            for (byte i = 0; i < white.Length && i < black.Length; i++)
-                if (white[i] == '1' && black[i] == '1')
-                    s.Append('X');
-                else if (white[i] == '1')
-                    s.Append('w');
-                else if (black[i] == '1')
-                    s.Append('b');
-                else
-                    s.Append('.');
-            return s.ToString();
-        }
 
         /// <summary>
         /// Làm đẹp chuỗi binary string để hiển thị lên console

@@ -27,18 +27,18 @@ namespace Reversi_mcts
 
             var board = new ReversiBitboard();
             Console.WriteLine(board.ToDisplayString());
-            //Console.WriteLine(board.EmptyNeighbours().ToPrettyString());
-            Console.WriteLine(board.GetLegalMoves(0).ToPrettyString());
-            Console.WriteLine(board.GetLegalMoves(1).ToPrettyString());
 
-            //var clone = board.Clone();
-            //Console.WriteLine(clone.ToDisplayString());
-
-            board.MakeMove(0, 3, 4);
+            board.MakeMove(0, 2, 3);
             Console.WriteLine(board.ToDisplayString());
 
-            board.MakeMove(1, 5, 3);
+            board.MakeMove(1, 4, 2);
             Console.WriteLine(board.ToDisplayString());
+
+            ulong l = BitboardExtensions.CoordinateToULong(5, 3);
+            Console.WriteLine(l.ToPrettyString());
+            Console.WriteLine(l.ToCoordinate());
+
+            Console.WriteLine(board.GetScore(0));
         }
     }
 }
