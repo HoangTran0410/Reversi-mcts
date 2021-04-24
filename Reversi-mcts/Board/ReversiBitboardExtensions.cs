@@ -142,28 +142,22 @@ namespace Reversi_mcts
         }
 
         // ------------------------------------ Display Stuffs ------------------------------------
-        public static string ToDisplayString(this ReversiBitboard bitBoard)
+        public static void Draw(this ReversiBitboard board)
         {
-            string white = bitBoard.BitBoard[White].ToBinaryString();
-            string black = bitBoard.BitBoard[Black].ToBinaryString();
-            string both = CombineBinaryString(white, black);
-            return both.Pretty();
-        }
+            for (var i = 0; i < 64; i++)
+            {
+                if (i % 8 == 0) Console.WriteLine();
 
-        public static string CombineBinaryString(string white, string black)
-        {
-            // https://www.stdio.vn/java/toi-uu-xu-ly-chuoi-voi-stringbuilder-phan-1-9RG31h
-            var s = new StringBuilder(white.Length);
-            for (byte i = 0; i < white.Length && i < black.Length; i++)
-                if (white[i] == '1' && black[i] == '1')
-                    s.Append('X');
-                else if (white[i] == '1')
-                    s.Append('w');
-                else if (black[i] == '1')
-                    s.Append('b');
-                else
-                    s.Append('.');
-            return s.ToString();
+                var pos = 1UL << i;
+                bool isBlack = (board.BitBoard[Black] & pos) > 0;
+                bool isWhite = (board.BitBoard[White] & pos) > 0;
+
+                if (isBlack && isWhite) Console.Write("X ");
+                else if (isBlack) Console.Write("b ");
+                else if (isWhite) Console.Write("w ");
+                else Console.Write(". ");
+            }
+            Console.WriteLine();
         }
     }
 }

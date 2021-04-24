@@ -267,53 +267,19 @@ namespace Reversi_mcts
         }
 
         // ------------------------------------ Display Stuffs ------------------------------------
-        /// <summary>
-        /// Phiên bản ngắn gọn của l.ToBinaryString().Pretty()
-        /// </summary>
-        /// <param name="bits"></param>
-        /// <returns>Chuỗi string được định dạng giống 1 board 8x8</returns> 
-        public static string ToPrettyString(this ulong bits)
+        public static void Draw(this ulong bits)
         {
-            return bits.ToBinaryString().Pretty();
-        }
-
-        public static string ToBinaryString(this ulong bits, byte totalWidth = 64)
-        {
-            // https://stackoverflow.com/a/23905301/11898496
-            string binString = Convert.ToString((long)bits, 2).PadLeft(totalWidth, '0');
-            char[] charArray = binString.ToCharArray();
-            Array.Reverse(charArray);
-            return  new string(charArray);
-        }
-
-
-        /// <summary>
-        /// Làm đẹp chuỗi binary string để hiển thị lên console
-        /// <para>Thêm các ký tự xuống dòng, khoảng trắng để tạo thành chuỗi có hình vuông 8x8</para>
-        /// </summary>
-        /// <param name="binaryStr">Chuỗi CombineBinaryString của black và white</param>
-        /// <param name="one">Ký tự thay thế cho ký tự "1"</param>
-        /// <param name="zero">Ký tự thay thế cho ký tự "0"</param>
-        /// <returns>Chuỗi string được định dạng giống 1 board 8x8</returns>
-        public static string Pretty(this string binaryStr, char one = 'o', char zero = '.')
-        {
-            var s = new StringBuilder();
-            byte lineLength = 8;
-            byte beginIndex = 0;
-            byte endIndex = lineLength;
-            while (endIndex <= binaryStr.Length)
+            for (var i = 0; i < 64; i++)
             {
-                string sub = binaryStr.Substring(beginIndex, lineLength);
-                foreach (char c in sub)
-                {
-                    char ch = c == '1' ? one : (c == '0' ? zero : c);
-                    s.Append(ch + " ");
-                }
-                s.Append('\n');
-                beginIndex = endIndex;
-                endIndex += lineLength;
+                if (i % 8 == 0) Console.WriteLine();
+
+                var pos = 1UL << i;
+                bool isSetOne = (bits & pos) > 0;
+
+                if (isSetOne) Console.Write("o ");
+                else Console.Write(". ");
             }
-            return s.ToString();
+            Console.WriteLine();
         }
     }
 }
