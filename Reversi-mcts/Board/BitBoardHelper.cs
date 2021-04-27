@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Reversi_mcts
 {
@@ -16,7 +15,7 @@ namespace Reversi_mcts
         DownRight = 9
     }
 
-    public static class BitboardExtensions
+    public static class BitBoardHelper
     {
         // ------------------------------------ Morphological Operations ------------------------------------
         /// <summary>
@@ -138,6 +137,18 @@ namespace Reversi_mcts
         {
             // TODO faster implementation: use predefine ulong table
             return 0UL.SetBitAtCoordinate(row, col);
+        }
+
+        public static List<ulong> ToListUlong(this ulong bits)
+        {
+            List<ulong> ret = new List<ulong>();
+            while(bits != 0)
+            {
+                ulong m = bits.HighestOneBit();
+                bits ^= m;
+                ret.Add(m);
+            }
+            return ret;
         }
 
         public static (byte row, byte col) ToCoordinate(this ulong bits)
