@@ -5,22 +5,11 @@ namespace Reversi_mcts
     public class BitBoard
     {
         // Why use ulong instead of long: https://stackoverflow.com/a/9924991/11898496
-        public readonly static ulong
-            InitialPositionBlack = 0x810000000, // 00000000 00000000 00000000 00001000 00010000 00000000 00000000 00000000
-            InitialPositionWhite = 0x1008000000;// 00000000 00000000 00000000 00010000 00001000 00000000 00000000 00000000
-
-        public ulong[] Pieces { get; }
+        public ulong[] Pieces { get; set; }
 
         public BitBoard()
         {
-            Pieces = new ulong[] { InitialPositionBlack, InitialPositionWhite};
-        }
-        public BitBoard(BitBoard other) {
-            Pieces = new ulong[] { other.Pieces[0], other.Pieces[1] };
-        }
-        public BitBoard(ulong blackPiece, ulong whitePiece)
-        {
-            Pieces = new ulong[] { blackPiece, whitePiece };
+            Pieces = new ulong[] { 0x810000000, 0x1008000000 };
         }
     }
 
@@ -28,13 +17,15 @@ namespace Reversi_mcts
     {
         // -------------------------- Cached - For performance boost --------------------------
         public static Direction[] DirectionValues = (Direction[])Enum.GetValues(typeof(Direction));
-        public static byte Black = 0;
-        public static byte White = 1;
+        public static byte Black = Constant.Black;
+        public static byte White = Constant.White;
 
         // ------------------------------------ Basic Stuffs ------------------------------------
         public static BitBoard Clone(this BitBoard board)
         {
-            return new BitBoard(board);
+            BitBoard cloned = new BitBoard();
+            cloned.Pieces = new ulong[] { board.Pieces[0], board.Pieces[1] };
+            return cloned;
         }
 
         public static bool Equals(this BitBoard board, BitBoard other)
@@ -59,27 +50,29 @@ namespace Reversi_mcts
         }
 
         // ------------------------------------ Move Stuffs ------------------------------------
-        public static bool MakeMove(this BitBoard board, byte player, byte row, byte col)
+        public static BitBoard MakeMove(this BitBoard board, Move move)
         {
-            return board.MakeMove(player, BitBoardHelper.CoordinateToULong(row, col));
+            return board.MakeMove(move.Player, move.BitMove);
         }
-        public static bool MakeMove(this BitBoard board, byte player, ulong movePoint)
+
+        public static BitBoard MakeMove(this BitBoard board, byte player, byte row, byte col)
         {
-            if (!IsLegalMove(board, player, movePoint))
+            ulong bitToMove = BitBoardHelper.CoordinateToULong(row, col);
+            return board.MakeMove(player, bitToMove);
+        }
+
+        public static BitBoard MakeMove(this BitBoard board, byte player, ulong bitMove)
+        {
+            var newBitBoard = board.Clone();
+
+            ulong wouldFlips = board.GetWouldFlips(player, bitMove);
+            if (wouldFlips != 0)
             {
-                return false;
+                newBitBoard.Pieces[player] |= wouldFlips | bitMove;
+                newBitBoard.Pieces[1 ^ player] ^= wouldFlips;
             }
 
-            ulong wouldFlips = board.GetWouldFlips(player, movePoint);
-            if (wouldFlips == 0)
-            {
-                return false;
-            }
-
-            board.Pieces[player] |= wouldFlips | movePoint;
-            board.Pieces[1 ^ player] ^= wouldFlips;
-
-            return true;
+            return newBitBoard;
         }
 
         public static bool IsGameComplete(this BitBoard board)
@@ -97,10 +90,10 @@ namespace Reversi_mcts
             return board.HasLegalMoves(Black) || board.HasLegalMoves(White);
         }
 
-        public static bool IsLegalMove(this BitBoard board, byte player, ulong movePoint)
+        public static bool IsLegalMove(this BitBoard board, byte player, ulong bitMove)
         {
             ulong legalMoves = board.GetLegalMoves(player);
-            return (movePoint & legalMoves) != 0;
+            return (bitMove & legalMoves) != 0;
         }
 
         public static ulong GetLegalMoves(this BitBoard board, byte player)
@@ -127,7 +120,8 @@ namespace Reversi_mcts
             return moves;
         }
 
-        public static ulong GetWouldFlips(this BitBoard board, byte player, ulong movePoint)
+        // https://github.com/ledpup/Othello/blob/cf3f21ebe2550393cf9300d01f02182184364b91/Othello.Model/Play.cs#L61
+        public static ulong GetWouldFlips(this BitBoard board, byte player, ulong bitMove)
         {
             // TODO improve this function, make it faster
             ulong playerPiece = board.Pieces[player];
@@ -136,7 +130,7 @@ namespace Reversi_mcts
 
             foreach (Direction dir in DirectionValues)
             {
-                ulong potentialEndPoint = movePoint.Shift(dir);
+                ulong potentialEndPoint = bitMove.Shift(dir);
                 ulong potentialWouldFlips = 0;
 
                 do
@@ -162,7 +156,7 @@ namespace Reversi_mcts
         {
             for (var i = 0; i < 64; i++)
             {
-                if (i % 8 == 0) Console.WriteLine();
+                if (i % 8 == 0 && i != 0) Console.WriteLine();
 
                 var pos = 1UL << i;
                 bool isBlack = (board.Pieces[Black] & pos) != 0;
@@ -171,6 +165,69 @@ namespace Reversi_mcts
                 if (isBlack && isWhite) Console.Write("X ");
                 else if (isBlack) Console.Write("b ");
                 else if (isWhite) Console.Write("w ");
+                else Console.Write(". ");
+            }
+            Console.WriteLine();
+        }
+
+        public static void DrawWithLastMove(this BitBoard board, ulong lastBitMove)
+        {
+            int moveIndex = lastBitMove.BitScanReverse();
+
+            for (var i = 0; i < 64; i++)
+            {
+                if (i % 8 == 0 && i != 0) Console.WriteLine();
+
+                var pos = 1UL << i;
+                bool isBlack = (board.Pieces[Black] & pos) != 0;
+                bool isWhite = (board.Pieces[White] & pos) != 0;
+
+                if (isBlack && isWhite) Console.Write("X ");
+                else if (isBlack) Console.Write(moveIndex == i ? "B " : "b ");
+                else if (isWhite) Console.Write(moveIndex == i ? "W " : "w ");
+                else Console.Write(". ");
+            }
+            Console.WriteLine();
+        }
+
+        public static void DrawWithLegalMoves(this BitBoard board, byte player)
+        {
+            ulong legalMoves = board.GetLegalMoves(player);
+
+            for (var i = 0; i < 64; i++)
+            {
+                if (i % 8 == 0 && i != 0) Console.WriteLine();
+
+                ulong pos = 1UL << i;
+                bool isBlack = (board.Pieces[Black] & pos) != 0;
+                bool isWhite = (board.Pieces[White] & pos) != 0;
+
+                if (isBlack && isWhite) Console.Write("X ");
+                else if (isBlack) Console.Write("b ");
+                else if (isWhite) Console.Write("w ");
+                else if ((legalMoves & pos) != 0) Console.Write("_ ");
+                else Console.Write(". ");
+            }
+            Console.WriteLine();
+        }
+
+        public static void DrawWithLatMoveAndLegalMoves(this BitBoard board, ulong lastBitMove, byte player)
+        {
+            ulong legalMoves = board.GetLegalMoves(player);
+            int moveIndex = lastBitMove.BitScanReverse();
+
+            for (var i = 0; i < 64; i++)
+            {
+                if (i % 8 == 0 && i != 0) Console.WriteLine();
+
+                ulong pos = 1UL << i;
+                bool isBlack = (board.Pieces[Black] & pos) != 0;
+                bool isWhite = (board.Pieces[White] & pos) != 0;
+
+                if (isBlack && isWhite) Console.Write("X ");
+                else if (isBlack) Console.Write(moveIndex == i ? "B " : "b ");
+                else if (isWhite) Console.Write(moveIndex == i ? "W " : "w ");
+                else if ((legalMoves & pos) != 0) Console.Write("_ ");
                 else Console.Write(". ");
             }
             Console.WriteLine();

@@ -153,7 +153,7 @@ namespace Reversi_mcts
 
         public static (byte row, byte col) ToCoordinate(this ulong bits)
         {
-            int index = BitScanReverse(bits);
+            int index = bits.BitScanReverse();
             return (
                 (byte)(index / 8),
                 (byte)(index % 8)
@@ -172,7 +172,7 @@ namespace Reversi_mcts
            25, 39, 14, 33, 19, 30,  9, 24,
            13, 18,  8, 12,  7,  6,  5, 63
         };
-        static int BitScanReverse(ulong bb)
+        public static int BitScanReverse(this ulong bb)
         {
             ulong debruijn64 = 0x03f79d71b4cb0a89;
             // assert(bb != 0);
@@ -197,7 +197,7 @@ namespace Reversi_mcts
             25, 57, 48, 13, 10, 39,  8, 44,
             20, 47, 38, 22, 17, 37, 36, 26
         };
-        static int BitScanForward(ulong bb)
+        public static int BitScanForward(this ulong bb)
         {
             uint folded;
             //assert(bb != 0);
