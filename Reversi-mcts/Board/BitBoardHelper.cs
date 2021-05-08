@@ -91,7 +91,9 @@ namespace Reversi_mcts
             return 0;
         }
 
-        // https://www.gamedev.net/forums/topic/646988-generating-moves-in-reversi/
+        // https://github.com/EivindEE/Reversi/blob/f26556919d1c6041c21079e0a54d12fd761a2b39/src/com/eivind/reversi/game/ReversiBitboard.java#L493
+        private static ulong LEFT_MASK = 0x7F7F7F7F7F7F7F7F; // 01111111 01111111 01111111 01111111 01111111 01111111 01111111 01111111
+        private static ulong RIGHT_MASK = 0xFEFEFEFEFEFEFEFE; // 11111110 11111110 11111110 11111110 11111110 11111110 11111110 11111110
         public static ulong ShiftUp(this ulong bits)
         {
             return bits << 8;
@@ -102,29 +104,27 @@ namespace Reversi_mcts
         }
         public static ulong ShiftLeft(this ulong bits)
         {
-            // RightMask: 11111110 11111110 11111110 11111110 11111110 11111110 11111110 11111110
-            return (bits & 0xFEFEFEFEFEFEFEFE) << 1;
+            return bits << 1 & RIGHT_MASK;
         }
         public static ulong ShiftRight(this ulong bits)
         {
-            // LeftMask: 01111111 01111111 01111111 01111111 01111111 01111111 01111111 01111111
-            return (bits & 0x7F7F7F7F7F7F7F7F) >> 1;
+            return bits >> 1 & LEFT_MASK;
         }
         public static ulong ShiftUpLeft(this ulong bits)
         {
-            return bits.ShiftUp().ShiftLeft();
+            return bits << 9 & RIGHT_MASK;
         }
         public static ulong ShiftUpRight(this ulong bits)
         {
-            return bits.ShiftUp().ShiftRight();
+            return bits << 7 & LEFT_MASK;
         }
         public static ulong ShiftDownLeft(this ulong bits)
         {
-            return bits.ShiftDown().ShiftLeft();
+            return bits >> 7 & RIGHT_MASK;
         }
         public static ulong ShiftDownRight(this ulong bits)
         {
-            return bits.ShiftDown().ShiftRight();
+            return bits >> 9 & LEFT_MASK;
         }
 
         // ------------------------------------ Bit Stuffs ------------------------------------

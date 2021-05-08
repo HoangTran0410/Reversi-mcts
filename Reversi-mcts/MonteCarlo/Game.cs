@@ -6,72 +6,53 @@ namespace Reversi_mcts
 {
     public class Game
     {
-        private State CurrentState;
-
-        public Game(State startState)
+        public Game()
         {
-            CurrentState = startState;
         }
 
-        /**
-		 * Returns true if the game is completed
-		 * @return
-		 */
-        public bool IsGameComplete()
+        /** Generate and return the initial game state. */
+        public State Start()
         {
-            return CurrentState.IsTerminal();
+            return new State(new List<ulong>(), new BitBoard(), Constant.Black);
         }
 
-        public List<State> PossibleMoves()
+        /** Return the current player's legal moves from given state. */
+        public List<ulong> LegalMoves(State state)
         {
-            return CurrentState.GetSuccessors();
+            return state.Board.GetLegalMoves(state.Player).ToListUlong();
         }
 
-        /**
-		 * Changes the current state of the game, to one of the current states successors.
-		 * @param state
-		 */
-        public void PerformeMove(State state)
+        /** Advance the given state and return it. */
+        public State NextState(State state, ulong move)
         {
-            bool stateChanged = false;
-            foreach (State s in CurrentState.GetSuccessors())
-                if (state.Equals(s))
-                {
-                    CurrentState = s;
-                    stateChanged = true;
-                    break;
-                }
-            if (!stateChanged) throw new Exception("That state is not reachable from the current state");
+            // clone list: https://stackoverflow.com/a/222623/11898496
+            List<ulong> newHistory = new List<ulong>(state.MoveHistory); 
+            newHistory.Add(move);
+
+            BitBoard newBoard = move == 0 ? 
+                state.Board.Clone() : // Passing move
+                state.Board.MakeMove(state.Player, move); // Make move
+
+            byte newPlayer = state.Opponent;
+
+            //newBoard.DrawWithLastMoveAndLegalMoves(move, newPlayer); // Log
+
+            return new State(newHistory, newBoard, newPlayer);
         }
 
-        /// <summary>
-        /// Returns a string representation of the game
-        /// </summary>
-        /// <returns></returns>
-        public void Draw()
+        /** Return the winner of the game. */
+        public byte Winner(State state)
         {
-            CurrentState.Draw();
-        }
-
-        /// <summary>
-        /// Should only be called if the game is completed
-        /// Returns 0 if winner is Black
-        /// Returns 1 if winner is White
-        /// Returns -1 if game is Draw
-        /// </summary>
-        /// <returns></returns>
-        public byte Winner()
-        {
-            if (IsGameComplete())
+            if (state.Board.IsGameComplete())
             {
-                int blackScore = CurrentState.GetScore(Constant.Black);
-                int whiteScore = CurrentState.GetScore(Constant.White);
+                int blackScore = state.Board.GetScore(Constant.Black);
+                int whiteScore = state.Board.GetScore(Constant.White);
 
                 if (blackScore > whiteScore) return Constant.Black;
                 if (blackScore < whiteScore) return Constant.White;
                 return Constant.Draw;
             }
-            throw new Exception("Asked for the winner before game was completed");
+            return Constant.GameNotCompleted;
         }
     }
 }

@@ -50,11 +50,6 @@ namespace Reversi_mcts
         }
 
         // ------------------------------------ Move Stuffs ------------------------------------
-        public static BitBoard MakeMove(this BitBoard board, Move move)
-        {
-            return board.MakeMove(move.Player, move.BitMove);
-        }
-
         public static BitBoard MakeMove(this BitBoard board, byte player, byte row, byte col)
         {
             ulong bitToMove = BitBoardHelper.CoordinateToULong(row, col);
@@ -63,21 +58,16 @@ namespace Reversi_mcts
 
         public static BitBoard MakeMove(this BitBoard board, byte player, ulong bitMove)
         {
-            var newBitBoard = board.Clone();
-
+            BitBoard newBitBoard = board.Clone();
             ulong wouldFlips = board.GetWouldFlips(player, bitMove);
-            if (wouldFlips != 0)
-            {
-                newBitBoard.Pieces[player] |= wouldFlips | bitMove;
-                newBitBoard.Pieces[1 ^ player] ^= wouldFlips;
-            }
-
+            newBitBoard.Pieces[player] |= wouldFlips | bitMove;
+            newBitBoard.Pieces[1 ^ player] ^= wouldFlips;
             return newBitBoard;
         }
 
         public static bool IsGameComplete(this BitBoard board)
         {
-            return ~board.GetFilled() == 0 || !board.HasAnyPlayerHasAnyLegalMove();
+            return board.GetEmpties() == 0 || !board.HasAnyPlayerHasAnyLegalMove();
         }
 
         public static bool HasLegalMoves(this BitBoard board, byte player)
@@ -135,7 +125,7 @@ namespace Reversi_mcts
 
                 do
                 {
-                    if ((potentialEndPoint & playerPiece) > 0)
+                    if ((potentialEndPoint & playerPiece) != 0)
                     {
                         wouldFlips |= potentialWouldFlips;
                         break;
@@ -145,7 +135,7 @@ namespace Reversi_mcts
                     potentialWouldFlips |= potentialEndPoint;
                     potentialEndPoint = potentialEndPoint.Shift(dir);
                 }
-                while (potentialEndPoint > 0);
+                while (potentialEndPoint != 0);
             }
 
             return wouldFlips;
@@ -154,11 +144,11 @@ namespace Reversi_mcts
         // ------------------------------------ Display Stuffs ------------------------------------
         public static void Draw(this BitBoard board)
         {
-            for (var i = 0; i < 64; i++)
+            for (int i = 0; i < 64; i++)
             {
                 if (i % 8 == 0 && i != 0) Console.WriteLine();
 
-                var pos = 1UL << i;
+                ulong pos = 1UL << i;
                 bool isBlack = (board.Pieces[Black] & pos) != 0;
                 bool isWhite = (board.Pieces[White] & pos) != 0;
 
@@ -167,18 +157,18 @@ namespace Reversi_mcts
                 else if (isWhite) Console.Write("w ");
                 else Console.Write(". ");
             }
-            Console.WriteLine();
+            Console.WriteLine("\n");
         }
 
         public static void DrawWithLastMove(this BitBoard board, ulong lastBitMove)
         {
             int moveIndex = lastBitMove.BitScanReverse();
 
-            for (var i = 0; i < 64; i++)
+            for (int i = 0; i < 64; i++)
             {
                 if (i % 8 == 0 && i != 0) Console.WriteLine();
 
-                var pos = 1UL << i;
+                ulong pos = 1UL << i;
                 bool isBlack = (board.Pieces[Black] & pos) != 0;
                 bool isWhite = (board.Pieces[White] & pos) != 0;
 
@@ -187,14 +177,14 @@ namespace Reversi_mcts
                 else if (isWhite) Console.Write(moveIndex == i ? "W " : "w ");
                 else Console.Write(". ");
             }
-            Console.WriteLine();
+            Console.WriteLine("\n");
         }
 
         public static void DrawWithLegalMoves(this BitBoard board, byte player)
         {
             ulong legalMoves = board.GetLegalMoves(player);
 
-            for (var i = 0; i < 64; i++)
+            for (int i = 0; i < 64; i++)
             {
                 if (i % 8 == 0 && i != 0) Console.WriteLine();
 
@@ -208,15 +198,15 @@ namespace Reversi_mcts
                 else if ((legalMoves & pos) != 0) Console.Write("_ ");
                 else Console.Write(". ");
             }
-            Console.WriteLine();
+            Console.WriteLine("\n");
         }
 
-        public static void DrawWithLatMoveAndLegalMoves(this BitBoard board, ulong lastBitMove, byte player)
+        public static void DrawWithLastMoveAndLegalMoves(this BitBoard board, ulong lastBitMove, byte player)
         {
             ulong legalMoves = board.GetLegalMoves(player);
             int moveIndex = lastBitMove.BitScanReverse();
 
-            for (var i = 0; i < 64; i++)
+            for (int i = 0; i < 64; i++)
             {
                 if (i % 8 == 0 && i != 0) Console.WriteLine();
 
@@ -230,7 +220,7 @@ namespace Reversi_mcts
                 else if ((legalMoves & pos) != 0) Console.Write("_ ");
                 else Console.Write(". ");
             }
-            Console.WriteLine();
+            Console.WriteLine("\n");
         }
     }
 }

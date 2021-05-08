@@ -7,31 +7,22 @@ namespace Reversi_mcts
     {
         static void Main(string[] args)
         {
-            var board = new BitBoard();
-            board.DrawWithLegalMoves(0);
+            var game = new Game();
+            var mcts = new MCTS(game);
 
-            var nextMove = MonteCarlo.MCTS.FindNextMove(board, Constant.Black);
-            nextMove.Draw();
+            var state = game.Start();
+            var winner = game.Winner(state);
 
-            //ulong legalMoves = board.GetLegalMoves(0);
-            //legalMoves.Draw();
-            //foreach (ulong m in legalMoves.ToListUlong())
-            //{
-            //    m.Draw();
-            //}
+            while (winner == Constant.GameNotCompleted)
+            {
+                mcts.RunSearch(state, 2);
 
-            //ulong l = 1UL;
-            //l.Draw();
+                var move = mcts.BestMove(state, "robust");
+                state = game.NextState(state, move);
+                winner = game.Winner(state);
 
-            //board.MakeMove(0, 2, 3);
-            //board.Draw();
-            //board.MakeMove(1, 4, 2);
-            //board.Draw();
-            //Console.WriteLine(board.GetScore(0));
-
-            //ulong l = BitBoardHelper.CoordinateToULong(5, 3);
-            //l.Draw();
-            //Console.WriteLine(l.ToCoordinate
+                state.Board.Draw();
+            }
         }
     }
 }
