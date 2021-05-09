@@ -77,18 +77,18 @@ namespace Reversi_mcts
         /// <returns>Shifted bits</returns>
         public static ulong Shift(this ulong bits, Direction direction)
         {
-            switch (direction)
+            return direction switch
             {
-                case Direction.Up: return bits.ShiftUp();
-                case Direction.Down: return bits.ShiftDown();
-                case Direction.Left: return bits.ShiftLeft();
-                case Direction.Right: return bits.ShiftRight();
-                case Direction.UpLeft: return bits.ShiftUpLeft();
-                case Direction.UpRight: return bits.ShiftUpRight();
-                case Direction.DownLeft: return bits.ShiftDownLeft();
-                case Direction.DownRight: return bits.ShiftDownRight();
-            }
-            return 0;
+                Direction.Up => bits.ShiftUp(),
+                Direction.Down => bits.ShiftDown(),
+                Direction.Left => bits.ShiftLeft(),
+                Direction.Right => bits.ShiftRight(),
+                Direction.UpLeft => bits.ShiftUpLeft(),
+                Direction.UpRight => bits.ShiftUpRight(),
+                Direction.DownLeft => bits.ShiftDownLeft(),
+                Direction.DownRight => bits.ShiftDownRight(),
+                _ => 0
+            };
         }
 
         // https://github.com/EivindEE/Reversi/blob/f26556919d1c6041c21079e0a54d12fd761a2b39/src/com/eivind/reversi/game/ReversiBitboard.java#L493
@@ -141,12 +141,12 @@ namespace Reversi_mcts
 
         public static List<ulong> ToListUlong(this ulong bits)
         {
-            List<ulong> ret = new List<ulong>();
+            List<ulong> ret = new List<ulong>(bits.PopCount()); // TODO 326MB RAM
             while(bits != 0)
             {
                 ulong m = bits.HighestOneBit();
                 bits ^= m;
-                ret.Add(m);
+                ret.Add(m); // TODO 1535MB RAM
             }
             return ret;
         }
@@ -243,7 +243,7 @@ namespace Reversi_mcts
         }
 
         /// <summary>
-        /// Count the number of bits set to 1 in a bitboard (long)
+        /// Count the number of bits set to 1 in a bitboard (ulong)
         /// </summary>
         /// <param name="bits"></param>
         /// <returns>Count number of bit 1</returns>

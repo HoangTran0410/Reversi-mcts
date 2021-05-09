@@ -11,21 +11,24 @@ namespace Reversi_mcts
         {
             Pieces = new ulong[] { 0x810000000, 0x1008000000 };
         }
+
+        public BitBoard(BitBoard board)
+        {
+            Pieces = new ulong[] { board.Pieces[0], board.Pieces[1] };
+        }
     }
 
     public static class BitboardExtensions
     {
         // -------------------------- Cached - For performance boost --------------------------
-        public static Direction[] DirectionValues = (Direction[])Enum.GetValues(typeof(Direction));
-        public static byte Black = Constant.Black;
-        public static byte White = Constant.White;
+        private static readonly Direction[] DirectionValues = (Direction[])Enum.GetValues(typeof(Direction));
+        private static readonly byte Black = Constant.Black;
+        private static readonly byte White = Constant.White;
 
         // ------------------------------------ Basic Stuffs ------------------------------------
         public static BitBoard Clone(this BitBoard board)
         {
-            BitBoard cloned = new BitBoard();
-            cloned.Pieces = new ulong[] { board.Pieces[0], board.Pieces[1] };
-            return cloned;
+            return new BitBoard(board);;
         }
 
         public static bool Equals(this BitBoard board, BitBoard other)
@@ -44,25 +47,23 @@ namespace Reversi_mcts
             return board.Pieces[Black] | board.Pieces[White];
         }
 
-        public static byte GetScore(this BitBoard board, byte player)
+        public static byte CountPieces(this BitBoard board, byte player)
         {
             return board.Pieces[player].PopCount();
         }
 
         // ------------------------------------ Move Stuffs ------------------------------------
-        public static BitBoard MakeMove(this BitBoard board, byte player, byte row, byte col)
+        public static void MakeMove(this BitBoard board, byte player, byte row, byte col)
         {
             ulong bitToMove = BitBoardHelper.CoordinateToULong(row, col);
-            return board.MakeMove(player, bitToMove);
+            board.MakeMove(player, bitToMove);
         }
 
-        public static BitBoard MakeMove(this BitBoard board, byte player, ulong bitMove)
+        public static void MakeMove(this BitBoard board, byte player, ulong bitMove)
         {
-            BitBoard newBitBoard = board.Clone();
             ulong wouldFlips = board.GetWouldFlips(player, bitMove);
-            newBitBoard.Pieces[player] |= wouldFlips | bitMove;
-            newBitBoard.Pieces[1 ^ player] ^= wouldFlips;
-            return newBitBoard;
+            board.Pieces[player] |= wouldFlips | bitMove;
+            board.Pieces[1 ^ player] ^= wouldFlips;
         }
 
         public static bool IsGameComplete(this BitBoard board)

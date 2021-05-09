@@ -6,15 +6,17 @@ namespace Reversi_mcts
 {
     class Constant
     {
+        public static Random Random = new Random();
+
         // Game status
-        public static byte Black = 0;
-        public static byte White = 1;
-        public static byte Draw = 2;
-        public static byte GameNotCompleted = 3;
+        public const byte Black = 0;
+        public const byte White = 1;
+        public const byte Draw = 2;
+        public const byte GameNotCompleted = 3;
 
         // Node Score
-        public static byte WinScore = 2;
-        public static byte DrawScore = 1;
-        public static byte LoseScore = 0;
+        public const float WinScore = 1;
+        public const float DrawScore = 0.5f;
+        public const float LoseScore = 0;
     }
 }

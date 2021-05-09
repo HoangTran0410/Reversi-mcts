@@ -7,20 +7,19 @@ namespace Reversi_mcts
     {
         static void Main(string[] args)
         {
-            var game = new Game();
-            var mcts = new MCTS(game);
-
-            var state = game.Start();
-            var winner = game.Winner(state);
+            var state = new State(new BitBoard(), Constant.Black);
+            var winner = state.Winner();
 
             while (winner == Constant.GameNotCompleted)
             {
-                mcts.RunSearch(state, 2);
+                var move = MCTS.RunSearch(state, 2000);
 
-                var move = mcts.BestMove(state, "robust");
-                state = game.NextState(state, move);
-                winner = game.Winner(state);
-
+                var coor = move.ToCoordinate();
+                Console.WriteLine("Player " + state.Player + " move at " + coor.row + ", " + coor.col);
+                
+                state = state.NextState(move);
+                winner = state.Winner();
+            
                 state.Board.Draw();
             }
         }
