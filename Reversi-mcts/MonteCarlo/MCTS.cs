@@ -8,6 +8,8 @@ namespace Reversi_mcts
     {
         public static ulong RunSearch(State state, int timeout = 1000)
         {
+            int winCount = 0;
+            int loseCount = 0;
             int playout = 0;
 
             TimeSpan timeLimit = TimeSpan.FromMilliseconds(timeout);
@@ -36,6 +38,9 @@ namespace Reversi_mcts
                 // Phase 3: Simulation
                 var score = node.Simulate(state.Player);
 
+                if (score == 1f) winCount++;
+                if (score == 0) loseCount++; 
+
                 // Phase 4: Backpropagation
                 node.Backpropagate(score);
                 
@@ -43,7 +48,7 @@ namespace Reversi_mcts
                 playout++;
             }
 
-            Console.WriteLine("- Runtime:" + timeout + "ms" + ", Playout:" + playout);
+            Console.WriteLine(" - Runtime: {0}, Playout: {1}, wins/loses: {2}/{3}" , timeout, playout, winCount, loseCount);
             return BestMove(root);
         }
 

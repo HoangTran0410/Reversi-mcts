@@ -12,16 +12,25 @@ namespace Reversi_mcts
 
             while (winner == Constant.GameNotCompleted)
             {
-                var move = MCTS.RunSearch(state, 2000);
+                var move = MCTS.RunSearch(state, 1000);
 
-                var coor = move.ToCoordinate();
-                Console.WriteLine("Player " + state.Player + " move at " + coor.row + ", " + coor.col);
-                
+                if (move == 0)
+                {
+                    Console.WriteLine("Player " + state.Player + " Pass move.");
+                }
+                else
+                {
+                    var coor = move.ToCoordinate();
+                    Console.WriteLine("Player " + state.Player + " move at " + coor.row + ", " + coor.col);   
+                }
+
                 state = state.NextState(move);
                 winner = state.Winner();
             
-                state.Board.Draw();
+                state.Board.DrawWithLastMoveAndLegalMoves(move, state.Player);
             }
+            
+            Console.WriteLine("End game. Winner is player " + winner);
         }
     }
 }
