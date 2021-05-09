@@ -38,17 +38,16 @@ namespace Reversi_mcts
                 // Phase 3: Simulation
                 var score = node.Simulate(state.Player);
 
-                if (score == 1f) winCount++;
-                if (score == 0) loseCount++; 
-
                 // Phase 4: Backpropagation
                 node.Backpropagate(score);
                 
                 // Statistic
                 playout++;
+                if (score == 1f) winCount++;
+                if (score == 0) loseCount++; 
             }
 
-            Console.WriteLine(" - Runtime: {0}, Playout: {1}, wins/loses: {2}/{3}" , timeout, playout, winCount, loseCount);
+            Console.WriteLine("- Runtime: {0}ms, Playout: {1}, wins/loses: {2}/{3}" , timeout, playout, winCount, loseCount);
             return BestMove(root);
         }
 

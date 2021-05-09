@@ -158,7 +158,7 @@ namespace Reversi_mcts
                 else if (isWhite) Console.Write("w ");
                 else Console.Write(". ");
             }
-            Console.WriteLine("\n");
+            Console.WriteLine();
         }
 
         public static void DrawWithLastMove(this BitBoard board, ulong lastBitMove)
@@ -178,7 +178,7 @@ namespace Reversi_mcts
                 else if (isWhite) Console.Write(moveIndex == i ? "W " : "w ");
                 else Console.Write(". ");
             }
-            Console.WriteLine("\n");
+            Console.WriteLine();
         }
 
         public static void DrawWithLegalMoves(this BitBoard board, byte player)
@@ -199,7 +199,7 @@ namespace Reversi_mcts
                 else if ((legalMoves & pos) != 0) Console.Write("_ ");
                 else Console.Write(". ");
             }
-            Console.WriteLine("\n");
+            Console.WriteLine();
         }
 
         public static void DrawWithLastMoveAndLegalMoves(this BitBoard board, ulong lastBitMove, byte player)
@@ -221,7 +221,7 @@ namespace Reversi_mcts
                 else if ((legalMoves & pos) != 0) Console.Write("_ ");
                 else Console.Write(". ");
             }
-            Console.WriteLine("\n");
+            Console.WriteLine();
         }
     }
 }

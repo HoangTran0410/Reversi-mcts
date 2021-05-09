@@ -137,7 +137,7 @@ namespace Reversi_mcts
             return node.IsFullyExpanded() && !node.HasChildNode();
         }
         
-        private static double GetUcb1(this Node node, double biasParam = 1.41)
+        private static double GetUcb1(this Node node, double biasParam = 2)
         {
             return node.Wins / node.Visits + Math.Sqrt(biasParam * Math.Log(node.Parent.Visits) / node.Visits);
         }
