@@ -14,7 +14,7 @@ namespace Reversi_mcts
 
             TimeSpan timeLimit = TimeSpan.FromMilliseconds(timeout);
             DateTime start = DateTime.Now;
-            
+
             // save root node ref, for find best-move later
             Node root = new Node(state, null, 0);
 
@@ -22,7 +22,7 @@ namespace Reversi_mcts
             {
                 // delare inner scope: https://stackoverflow.com/a/13922788/11898496
                 var node = root;
-                
+
                 // Phase 1: Selection
                 while (node.IsFullyExpanded() && node.HasChildNode())
                 {
@@ -40,14 +40,16 @@ namespace Reversi_mcts
 
                 // Phase 4: Backpropagation
                 node.Backpropagate(score);
-                
+
                 // Statistic
                 playout++;
-                if (score == 1f) winCount++;
-                if (score == 0) loseCount++; 
+                if (score == Constant.WinScore) winCount++;
+                if (score == Constant.LoseScore) loseCount++;
             }
 
-            Console.WriteLine("- Runtime: {0}ms, Playout: {1}, wins/loses: {2}/{3}" , timeout, playout, winCount, loseCount);
+            var winPercent = winCount * 100f / playout;
+            Console.WriteLine("- Runtime: {0}ms, Playout: {1}, wins: {2}%", timeout, playout, winPercent);
+
             return BestMove(root);
         }
 
@@ -56,9 +58,9 @@ namespace Reversi_mcts
             // If not all children are expanded, not enough information
             if (node.IsFullyExpanded() == false)
                 throw new Exception("Not enough information!");
-            
+
             var bestMove = 0UL;
-        
+
             // Most visits (robust child)
             if (policy.Equals("robust"))
             {
@@ -72,7 +74,7 @@ namespace Reversi_mcts
                     }
                 }
             }
-        
+
             // Highest winrate (max child)
             else if (policy.Equals("max"))
             {
@@ -87,7 +89,7 @@ namespace Reversi_mcts
                     }
                 }
             }
-        
+
             return bestMove;
         }
     }

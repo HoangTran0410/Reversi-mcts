@@ -18,12 +18,6 @@ namespace Reversi_mcts
     public static class BitBoardHelper
     {
         // ------------------------------------ Morphological Operations ------------------------------------
-        /// <summary>
-        /// Expand the on-bits in all square (diagonal) directions.
-        /// </summary>
-        /// <param name="bits"></param>
-        /// <param name="step">Number of steps to expand</param>
-        /// <returns></returns>
         public static ulong Delation(this ulong bits, byte step = 1)
         {
             ulong ret = bits;
@@ -40,15 +34,10 @@ namespace Reversi_mcts
                     ret.ShiftDownLeft() |
                     ret.ShiftDownRight();
             }
+
             return ret;
         }
 
-        /// <summary>
-        /// Shrinks the on-bits in all square (diagonal) directions. Reverse operation of dilation.
-        /// </summary>
-        /// <param name="bits"></param>
-        /// <param name="step">Number of steps to shrink</param>
-        /// <returns></returns>
         public static ulong Erosion(this ulong bits, byte step = 1)
         {
             ulong ret = bits;
@@ -65,16 +54,11 @@ namespace Reversi_mcts
                     ret.ShiftDownLeft() &
                     ret.ShiftDownRight();
             }
+
             return ret;
         }
 
         // ------------------------------------ Shift Stuffs ------------------------------------
-        /// <summary>
-        /// Shifts the bits in the direction
-        /// </summary>
-        /// <param name="bits"></param>
-        /// <param name="direction">Direction to shift</param>
-        /// <returns>Shifted bits</returns>
         public static ulong Shift(this ulong bits, Direction direction)
         {
             return direction switch
@@ -92,47 +76,53 @@ namespace Reversi_mcts
         }
 
         // https://github.com/EivindEE/Reversi/blob/f26556919d1c6041c21079e0a54d12fd761a2b39/src/com/eivind/reversi/game/ReversiBitboard.java#L493
-        private static ulong LEFT_MASK = 0x7F7F7F7F7F7F7F7F; // 01111111 01111111 01111111 01111111 01111111 01111111 01111111 01111111
-        private static ulong RIGHT_MASK = 0xFEFEFEFEFEFEFEFE; // 11111110 11111110 11111110 11111110 11111110 11111110 11111110 11111110
-        public static ulong ShiftUp(this ulong bits)
+        private const ulong
+            LeftMask = 0x7F7F7F7F7F7F7F7F; // 01111111 01111111 01111111 01111111 01111111 01111111 01111111 01111111
+
+        private const ulong
+            RightMask = 0xFEFEFEFEFEFEFEFE; // 11111110 11111110 11111110 11111110 11111110 11111110 11111110 11111110
+
+        private static ulong ShiftUp(this ulong bits)
         {
             return bits << 8;
         }
-        public static ulong ShiftDown(this ulong bits)
+
+        private static ulong ShiftDown(this ulong bits)
         {
             return bits >> 8;
         }
-        public static ulong ShiftLeft(this ulong bits)
+
+        private static ulong ShiftLeft(this ulong bits)
         {
-            return bits << 1 & RIGHT_MASK;
+            return bits << 1 & RightMask;
         }
-        public static ulong ShiftRight(this ulong bits)
+
+        private static ulong ShiftRight(this ulong bits)
         {
-            return bits >> 1 & LEFT_MASK;
+            return bits >> 1 & LeftMask;
         }
-        public static ulong ShiftUpLeft(this ulong bits)
+
+        private static ulong ShiftUpLeft(this ulong bits)
         {
-            return bits << 9 & RIGHT_MASK;
+            return bits << 9 & RightMask;
         }
-        public static ulong ShiftUpRight(this ulong bits)
+
+        private static ulong ShiftUpRight(this ulong bits)
         {
-            return bits << 7 & LEFT_MASK;
+            return bits << 7 & LeftMask;
         }
-        public static ulong ShiftDownLeft(this ulong bits)
+
+        private static ulong ShiftDownLeft(this ulong bits)
         {
-            return bits >> 7 & RIGHT_MASK;
+            return bits >> 7 & RightMask;
         }
-        public static ulong ShiftDownRight(this ulong bits)
+
+        private static ulong ShiftDownRight(this ulong bits)
         {
-            return bits >> 9 & LEFT_MASK;
+            return bits >> 9 & LeftMask;
         }
 
         // ------------------------------------ Bit Stuffs ------------------------------------
-        /// <summary>
-        /// Convert coordinate (row, col) to binary bits (long)
-        /// </summary>
-        /// <param name="coordinate">Coordinate (row, col) to convert</param>
-        /// <returns>Bits that represent coordinate</returns>
         public static ulong CoordinateToULong(byte row, byte col)
         {
             // TODO faster implementation: use predefine ulong table
@@ -141,37 +131,39 @@ namespace Reversi_mcts
 
         public static List<ulong> ToListUlong(this ulong bits)
         {
-            List<ulong> ret = new List<ulong>(bits.PopCount()); // TODO 326MB RAM
-            while(bits != 0)
+            var ret = new List<ulong>(bits.PopCount());
+            while (bits != 0)
             {
-                ulong m = bits.HighestOneBit();
+                var m = bits.HighestOneBit();
                 bits ^= m;
-                ret.Add(m); // TODO 1535MB RAM
+                ret.Add(m);
             }
+
             return ret;
         }
 
         public static (byte row, byte col) ToCoordinate(this ulong bits)
         {
-            int index = bits.BitScanReverse();
+            var index = bits.BitScanReverse();
             return (
-                (byte)(index / 8),
-                (byte)(index % 8)
+                (byte) (index / 8),
+                (byte) (index % 8)
             );
         }
 
         // https://www.chessprogramming.org/BitScan#De_Bruijn_Multiplication
         static int[] index64_reverse =
         {
-            0, 47,  1, 56, 48, 27,  2, 60,
-           57, 49, 41, 37, 28, 16,  3, 61,
-           54, 58, 35, 52, 50, 42, 21, 44,
-           38, 32, 29, 23, 17, 11,  4, 62,
-           46, 55, 26, 59, 40, 36, 15, 53,
-           34, 51, 20, 43, 31, 22, 10, 45,
-           25, 39, 14, 33, 19, 30,  9, 24,
-           13, 18,  8, 12,  7,  6,  5, 63
+            0, 47, 1, 56, 48, 27, 2, 60,
+            57, 49, 41, 37, 28, 16, 3, 61,
+            54, 58, 35, 52, 50, 42, 21, 44,
+            38, 32, 29, 23, 17, 11, 4, 62,
+            46, 55, 26, 59, 40, 36, 15, 53,
+            34, 51, 20, 43, 31, 22, 10, 45,
+            25, 39, 14, 33, 19, 30, 9, 24,
+            13, 18, 8, 12, 7, 6, 5, 63
         };
+
         public static int BitScanReverse(this ulong bb)
         {
             ulong debruijn64 = 0x03f79d71b4cb0a89;
@@ -188,65 +180,41 @@ namespace Reversi_mcts
         // https://www.chessprogramming.org/BitScan#Matt_Taylor.27s_Folding_trick
         static int[] index64_forward =
         {
-            63, 30,  3, 32, 59, 14, 11, 33,
-            60, 24, 50,  9, 55, 19, 21, 34,
-            61, 29,  2, 53, 51, 23, 41, 18,
-            56, 28,  1, 43, 46, 27,  0, 35,
-            62, 31, 58,  4,  5, 49, 54,  6,
-            15, 52, 12, 40,  7, 42, 45, 16,
-            25, 57, 48, 13, 10, 39,  8, 44,
+            63, 30, 3, 32, 59, 14, 11, 33,
+            60, 24, 50, 9, 55, 19, 21, 34,
+            61, 29, 2, 53, 51, 23, 41, 18,
+            56, 28, 1, 43, 46, 27, 0, 35,
+            62, 31, 58, 4, 5, 49, 54, 6,
+            15, 52, 12, 40, 7, 42, 45, 16,
+            25, 57, 48, 13, 10, 39, 8, 44,
             20, 47, 38, 22, 17, 37, 36, 26
         };
+
         public static int BitScanForward(this ulong bb)
         {
             uint folded;
             //assert(bb != 0);
             bb ^= bb - 1;
-            folded = (uint)bb ^ (uint)(bb >> 32);
+            folded = (uint) bb ^ (uint) (bb >> 32);
             return index64_forward[folded * 0x78291ACF >> 26];
         }
 
-        /// <summary>
-        /// Set bit 1 to position (row,col)
-        /// </summary>
-        /// <param name="bits"></param>
-        /// <param name="row"></param>
-        /// <param name="col"></param>
-        /// <returns></returns>
         public static ulong SetBitAtCoordinate(this ulong bits, byte row, byte col)
         {
             // https://stackoverflow.com/a/24250656/11898496
             return bits | (1UL << Ix(row, col));
         }
 
-        /// <summary>
-        /// Set bit 0 to position (row,col)
-        /// </summary>
-        /// <param name="bits"></param>
-        /// <param name="row"></param>
-        /// <param name="col"></param>
-        /// <returns></returns>
         public static ulong RemoveBitAtCoordinate(this ulong bits, byte row, byte col)
         {
             return bits & ~(1UL << Ix(row, col));
         }
 
-        /// <summary>
-        /// Convert position (row, col) to index (0-64)
-        /// </summary>
-        /// <param name="row"></param>
-        /// <param name="col"></param>
-        /// <returns></returns>
-        public static int Ix(byte row, byte col)
+        private static int Ix(byte row, byte col)
         {
             return row * 8 + col;
         }
 
-        /// <summary>
-        /// Count the number of bits set to 1 in a bitboard (ulong)
-        /// </summary>
-        /// <param name="bits"></param>
-        /// <returns>Count number of bit 1</returns>
         public static byte PopCount(this ulong bits)
         {
             //https://stackoverflow.com/a/51388846/11898496
@@ -290,6 +258,7 @@ namespace Reversi_mcts
                 if (isSetOne) Console.Write("o ");
                 else Console.Write(". ");
             }
+
             Console.WriteLine();
         }
     }

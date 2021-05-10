@@ -9,32 +9,32 @@ namespace Reversi_mcts
 
         public BitBoard()
         {
-            Pieces = new ulong[] { 0x810000000, 0x1008000000 };
+            Pieces = new ulong[] {0x810000000, 0x1008000000};
         }
 
         public BitBoard(BitBoard board)
         {
-            Pieces = new ulong[] { board.Pieces[0], board.Pieces[1] };
+            Pieces = new ulong[] {board.Pieces[0], board.Pieces[1]};
         }
     }
 
     public static class BitboardExtensions
     {
         // -------------------------- Cached - For performance boost --------------------------
-        private static readonly Direction[] DirectionValues = (Direction[])Enum.GetValues(typeof(Direction));
-        private static readonly byte Black = Constant.Black;
-        private static readonly byte White = Constant.White;
+        private static readonly Direction[] DirectionValues = (Direction[]) Enum.GetValues(typeof(Direction));
+        private const byte Black = Constant.Black;
+        private const byte White = Constant.White;
 
         // ------------------------------------ Basic Stuffs ------------------------------------
         public static BitBoard Clone(this BitBoard board)
         {
-            return new BitBoard(board);;
+            return new BitBoard(board);
         }
 
         public static bool Equals(this BitBoard board, BitBoard other)
         {
             return board.Pieces[Black] == other.Pieces[Black] &&
-                board.Pieces[White] == other.Pieces[White];
+                   board.Pieces[White] == other.Pieces[White];
         }
 
         public static ulong GetEmpties(this BitBoard board)
@@ -135,8 +135,7 @@ namespace Reversi_mcts
                     potentialEndPoint &= opponentPiece;
                     potentialWouldFlips |= potentialEndPoint;
                     potentialEndPoint = potentialEndPoint.Shift(dir);
-                }
-                while (potentialEndPoint != 0);
+                } while (potentialEndPoint != 0);
             }
 
             return wouldFlips;
@@ -158,6 +157,7 @@ namespace Reversi_mcts
                 else if (isWhite) Console.Write("w ");
                 else Console.Write(". ");
             }
+
             Console.WriteLine();
         }
 
@@ -178,6 +178,7 @@ namespace Reversi_mcts
                 else if (isWhite) Console.Write(moveIndex == i ? "W " : "w ");
                 else Console.Write(". ");
             }
+
             Console.WriteLine();
         }
 
@@ -199,6 +200,7 @@ namespace Reversi_mcts
                 else if ((legalMoves & pos) != 0) Console.Write("_ ");
                 else Console.Write(". ");
             }
+
             Console.WriteLine();
         }
 
@@ -221,6 +223,7 @@ namespace Reversi_mcts
                 else if ((legalMoves & pos) != 0) Console.Write("_ ");
                 else Console.Write(". ");
             }
+
             Console.WriteLine();
         }
     }

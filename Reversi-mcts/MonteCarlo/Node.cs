@@ -6,13 +6,13 @@ namespace Reversi_mcts
 {
     public class Node
     {
-        public ulong Move { get; set; }
-        public State State { get; set; }
-        public Node Parent { get; set; }
-        
+        public ulong Move { get; }
+        public State State { get; }
+        public Node Parent { get; }
+
         // Why use List<T>: https://stackoverflow.com/a/42753399/11898496
-        public List<Node> ChildNodes { get; set; }
-        public List<ulong> UntriedMoves { get; set; }
+        public List<Node> ChildNodes { get; }
+        public List<ulong> UntriedMoves { get; }
 
         public int Visits { get; set; }
         public float Wins { get; set; }
@@ -40,7 +40,7 @@ namespace Reversi_mcts
         {
             Node bestChild = null;
             var bestUcb1 = Double.MinValue;
-            
+
             foreach (var childNode in node.ChildNodes)
             {
                 // is continue/break bad: https://softwareengineering.stackexchange.com/a/58253
@@ -54,7 +54,7 @@ namespace Reversi_mcts
 
             return bestChild;
         }
-        
+
         // Phase 2: EXPANSION
         public static Node ExpandChild(this Node node)
         {
@@ -71,15 +71,15 @@ namespace Reversi_mcts
 
             return child;
         }
-        
+
         // Phase 3: SIMULATION
         public static float Simulate(this Node node, byte player)
         {
-            State state = new State(node.State);
+            var state = new State(node.State);
 
             while (!state.IsTerminal())
             {
-                ulong move = state.GetRandomMove();
+                var move = state.GetRandomMove();
                 state = state.NextState(move);
             }
 
@@ -89,39 +89,33 @@ namespace Reversi_mcts
         // Phase 3: BACKPROPAGATION
         public static void Backpropagate(this Node node, float result)
         {
-            for (Node tempMode = node; tempMode != null; tempMode = tempMode.Parent)
+            for (var tempMode = node; tempMode != null; tempMode = tempMode.Parent)
             {
                 tempMode.Update(result);
             }
         }
 
-        public static void Update(this Node node, float result)
+        private static void Update(this Node node, float result)
         {
             node.Wins += result;
             node.Visits++;
         }
-        
-        private static float GetScore(State state, byte player)
+
+        private static byte GetScore(State state, byte player)
         {
-            byte blackPieces = state.Board.CountPieces(Constant.Black);
-            byte whitePieces = state.Board.CountPieces(Constant.White);
-            bool isPlayerTurn = state.Player == player;
+            var blackCount = state.Board.CountPieces(Constant.Black);
+            var whiteCount = state.Board.CountPieces(Constant.White);
 
             // Draw
-            if (blackPieces == whitePieces) return Constant.DrawScore;
-            
-            // Black Win
-            if (blackPieces > whitePieces)
-            {
-                if (isPlayerTurn) return player == Constant.Black ? Constant.WinScore : Constant.LoseScore;
-                return player == Constant.Black ? Constant.LoseScore : Constant.WinScore;
-            }
-            
-            // White Win
-            if (isPlayerTurn) return player == Constant.White ? Constant.WinScore : Constant.LoseScore;
-            return player == Constant.White ? Constant.LoseScore : Constant.WinScore;
+            if (blackCount == whiteCount) return Constant.DrawScore;
+
+            // Not Draw
+            var winner = blackCount > whiteCount ? Constant.Black : Constant.White;
+            var score = (player == winner) ? Constant.WinScore : Constant.LoseScore;
+
+            return score;
         }
-        
+
         public static bool IsFullyExpanded(this Node node)
         {
             return node.UntriedMoves.Count == 0;
@@ -131,12 +125,12 @@ namespace Reversi_mcts
         {
             return node.ChildNodes.Count != 0;
         }
-        
+
         public static bool IsLeaf(this Node node)
         {
             return node.IsFullyExpanded() && !node.HasChildNode();
         }
-        
+
         private static double GetUcb1(this Node node, double biasParam = 2)
         {
             return node.Wins / node.Visits + Math.Sqrt(biasParam * Math.Log(node.Parent.Visits) / node.Visits);

@@ -8,7 +8,12 @@ namespace Reversi_mcts
     {
         public BitBoard Board { get; set; }
         public byte Player { get; set; }
-        public byte Opponent { get { return (byte)(1 ^ Player); } }
+
+        public byte Opponent
+        {
+            get { return (byte) (1 ^ Player); }
+        }
+
         public ulong BitLegalMoves { get; set; }
 
         public State(BitBoard board, byte player)
@@ -35,26 +40,26 @@ namespace Reversi_mcts
 
         public static State NextState(this State state, ulong move)
         {
-            BitBoard newBoard = state.Board.Clone();
-            
+            var newBoard = state.Board.Clone();
+
             // move == 0 => passing move
-            if(move != 0) newBoard.MakeMove(state.Player, move);
-            
+            if (move != 0) newBoard.MakeMove(state.Player, move);
+
             // switch player
-            byte newPlayer = state.Opponent;
+            var newPlayer = state.Opponent;
 
             return new State(newBoard, newPlayer);
         }
 
         public static ulong GetRandomMove(this State state)
         {
-            ulong moves = state.BitLegalMoves;
+            var moves = state.BitLegalMoves;
             ulong move = 0;
-            
-            int movesCount = moves.PopCount();
-            int index = Constant.Random.Next(0, movesCount);
 
-            while(index-- >= 0)
+            int movesCount = moves.PopCount();
+            var index = Constant.Random.Next(0, movesCount);
+
+            while (index-- >= 0)
             {
                 move = moves.HighestOneBit();
                 moves ^= move;
@@ -62,19 +67,17 @@ namespace Reversi_mcts
 
             return move;
         }
-        
+
         public static byte Winner(this State state)
         {
-            if (state.Board.IsGameComplete())
-            {
-                int blackScore = state.Board.CountPieces(Constant.Black);
-                int whiteScore = state.Board.CountPieces(Constant.White);
+            if (!state.Board.IsGameComplete()) return Constant.GameNotCompleted;
 
-                if (blackScore > whiteScore) return Constant.Black;
-                if (blackScore < whiteScore) return Constant.White;
-                return Constant.Draw;
-            }
-            return Constant.GameNotCompleted;
+            int blackScore = state.Board.CountPieces(Constant.Black);
+            int whiteScore = state.Board.CountPieces(Constant.White);
+
+            if (blackScore > whiteScore) return Constant.Black;
+            if (blackScore < whiteScore) return Constant.White;
+            return Constant.Draw;
         }
     }
 }

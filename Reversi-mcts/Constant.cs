@@ -15,8 +15,8 @@ namespace Reversi_mcts
         public const byte GameNotCompleted = 3;
 
         // Node Score
-        public const float WinScore = 1;
-        public const float DrawScore = 0.5f;
-        public const float LoseScore = 0;
+        public const byte WinScore = 2;
+        public const byte DrawScore = 1;
+        public const byte LoseScore = 0;
     }
 }
