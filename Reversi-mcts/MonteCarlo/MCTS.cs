@@ -6,8 +6,8 @@ namespace Reversi_mcts.MonteCarlo
     {
         public static ulong RunSearch(State state, int timeout = 1000)
         {
-            var winCount = 0;
-            var playout = 0;
+            // var winCount = 0;
+            // var playout = 0;
 
             var timeLimit = TimeSpan.FromMilliseconds(timeout);
             var start = DateTime.Now;
@@ -39,12 +39,12 @@ namespace Reversi_mcts.MonteCarlo
                 node.Backpropagate(score);
 
                 // Statistic
-                playout++;
-                if (score == Constant.WinScore) winCount++;
+                // playout++;
+                // if (score == Constant.WinScore) winCount++;
             }
 
-            var winPercentage = winCount * 100f / playout;
-            Console.WriteLine("- Runtime: {0}ms, Playout: {1}, wins: {2}%", timeout, playout, winPercentage);
+            //var winPercentage = winCount * 100f / playout;
+            //Console.WriteLine("- Runtime: {0}ms, Playout: {1}, wins: {2}%", timeout, playout, winPercentage);
 
             return BestMove(root);
         }

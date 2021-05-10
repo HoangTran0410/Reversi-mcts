@@ -6,9 +6,6 @@ namespace Reversi_mcts.MonteCarlo
     {
         public BitBoard Board { get; }
         public byte Player { get; }
-
-        public byte Opponent => (byte) (1 ^ Player);
-
         public ulong BitLegalMoves { get; }
 
         public State(BitBoard board, byte player)
@@ -41,7 +38,7 @@ namespace Reversi_mcts.MonteCarlo
             if (move != 0) newBoard.MakeMove(state.Player, move);
 
             // switch player
-            var newPlayer = state.Opponent;
+            var newPlayer = Constant.Opponent(state.Player);
 
             return new State(newBoard, newPlayer);
         }

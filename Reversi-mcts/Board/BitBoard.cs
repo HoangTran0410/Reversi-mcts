@@ -63,7 +63,7 @@ namespace Reversi_mcts.Board
         {
             var wouldFlips = board.GetWouldFlips(player, bitMove);
             board.Pieces[player] |= wouldFlips | bitMove;
-            board.Pieces[1 ^ player] ^= wouldFlips;
+            board.Pieces[Constant.Opponent(player)] ^= wouldFlips;
         }
 
         public static bool IsGameComplete(this BitBoard board)
