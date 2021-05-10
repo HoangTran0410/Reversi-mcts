@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Reversi_mcts
+namespace Reversi_mcts.Board
 {
     public enum Direction : byte
     {
@@ -152,7 +152,7 @@ namespace Reversi_mcts
         }
 
         // https://www.chessprogramming.org/BitScan#De_Bruijn_Multiplication
-        static int[] index64_reverse =
+        private static readonly int[] Index64Reverse =
         {
             0, 47, 1, 56, 48, 27, 2, 60,
             57, 49, 41, 37, 28, 16, 3, 61,
@@ -174,11 +174,11 @@ namespace Reversi_mcts
             bb |= bb >> 8;
             bb |= bb >> 16;
             bb |= bb >> 32;
-            return index64_reverse[(bb * debruijn64) >> 58];
+            return Index64Reverse[(bb * debruijn64) >> 58];
         }
 
         // https://www.chessprogramming.org/BitScan#Matt_Taylor.27s_Folding_trick
-        static int[] index64_forward =
+        private static readonly int[] Index64Forward =
         {
             63, 30, 3, 32, 59, 14, 11, 33,
             60, 24, 50, 9, 55, 19, 21, 34,
@@ -196,7 +196,7 @@ namespace Reversi_mcts
             //assert(bb != 0);
             bb ^= bb - 1;
             folded = (uint) bb ^ (uint) (bb >> 32);
-            return index64_forward[folded * 0x78291ACF >> 26];
+            return Index64Forward[folded * 0x78291ACF >> 26];
         }
 
         public static ulong SetBitAtCoordinate(this ulong bits, byte row, byte col)
@@ -253,10 +253,9 @@ namespace Reversi_mcts
                 if (i % 8 == 0) Console.WriteLine();
 
                 var pos = 1UL << i;
-                bool isSetOne = (bits & pos) > 0;
+                var isSetOne = (bits & pos) > 0;
 
-                if (isSetOne) Console.Write("o ");
-                else Console.Write(". ");
+                Console.Write(isSetOne ? "o " : ". ");
             }
 
             Console.WriteLine();

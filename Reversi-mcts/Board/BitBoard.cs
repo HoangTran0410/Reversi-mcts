@@ -1,11 +1,11 @@
 ﻿using System;
 
-namespace Reversi_mcts
+namespace Reversi_mcts.Board
 {
     public class BitBoard
     {
         // Why use ulong instead of long: https://stackoverflow.com/a/9924991/11898496
-        public ulong[] Pieces { get; set; }
+        public ulong[] Pieces { get; }
 
         public BitBoard()
         {
@@ -14,7 +14,7 @@ namespace Reversi_mcts
 
         public BitBoard(BitBoard board)
         {
-            Pieces = new ulong[] {board.Pieces[0], board.Pieces[1]};
+            Pieces = new[] {board.Pieces[0], board.Pieces[1]};
         }
     }
 
@@ -55,13 +55,13 @@ namespace Reversi_mcts
         // ------------------------------------ Move Stuffs ------------------------------------
         public static void MakeMove(this BitBoard board, byte player, byte row, byte col)
         {
-            ulong bitToMove = BitBoardHelper.CoordinateToULong(row, col);
-            board.MakeMove(player, bitToMove);
+            var bitMove = BitBoardHelper.CoordinateToULong(row, col);
+            board.MakeMove(player, bitMove);
         }
 
         public static void MakeMove(this BitBoard board, byte player, ulong bitMove)
         {
-            ulong wouldFlips = board.GetWouldFlips(player, bitMove);
+            var wouldFlips = board.GetWouldFlips(player, bitMove);
             board.Pieces[player] |= wouldFlips | bitMove;
             board.Pieces[1 ^ player] ^= wouldFlips;
         }
@@ -83,7 +83,7 @@ namespace Reversi_mcts
 
         public static bool IsLegalMove(this BitBoard board, byte player, ulong bitMove)
         {
-            ulong legalMoves = board.GetLegalMoves(player);
+            var legalMoves = board.GetLegalMoves(player);
             return (bitMove & legalMoves) != 0;
         }
 
@@ -91,18 +91,18 @@ namespace Reversi_mcts
         {
             // https://intellitect.com/when-to-use-and-not-use-var-in-c/
             // https://stackoverflow.com/a/41505/11898496
-            ulong moves = 0UL;
-            ulong playerPiece = board.Pieces[player];
-            ulong opponentPiece = board.Pieces[1 ^ player];
-            ulong empties = board.GetEmpties();
+            var moves = 0UL;
+            var playerPiece = board.Pieces[player];
+            var opponentPiece = board.Pieces[1 ^ player];
+            var empties = board.GetEmpties();
 
             // https://stackoverflow.com/a/105402/11898496
-            foreach (Direction dir in DirectionValues)
+            foreach (var dir in DirectionValues)
             {
-                ulong candidates = opponentPiece & playerPiece.Shift(dir);
+                var candidates = opponentPiece & playerPiece.Shift(dir);
                 while (candidates != 0)
                 {
-                    ulong candidatesShifted = candidates.Shift(dir);
+                    var candidatesShifted = candidates.Shift(dir);
                     moves |= empties & candidatesShifted;
                     candidates = opponentPiece & candidatesShifted;
                 }
@@ -115,14 +115,14 @@ namespace Reversi_mcts
         public static ulong GetWouldFlips(this BitBoard board, byte player, ulong bitMove)
         {
             // TODO improve this function, make it faster
-            ulong playerPiece = board.Pieces[player];
-            ulong opponentPiece = board.Pieces[1 ^ player];
-            ulong wouldFlips = 0UL;
+            var playerPiece = board.Pieces[player];
+            var opponentPiece = board.Pieces[1 ^ player];
+            var wouldFlips = 0UL;
 
-            foreach (Direction dir in DirectionValues)
+            foreach (var dir in DirectionValues)
             {
-                ulong potentialEndPoint = bitMove.Shift(dir);
-                ulong potentialWouldFlips = 0;
+                var potentialEndPoint = bitMove.Shift(dir);
+                var potentialWouldFlips = 0UL;
 
                 do
                 {
@@ -144,13 +144,13 @@ namespace Reversi_mcts
         // ------------------------------------ Display Stuffs ------------------------------------
         public static void Draw(this BitBoard board)
         {
-            for (int i = 0; i < 64; i++)
+            for (var i = 0; i < 64; i++)
             {
                 if (i % 8 == 0 && i != 0) Console.WriteLine();
 
-                ulong pos = 1UL << i;
-                bool isBlack = (board.Pieces[Black] & pos) != 0;
-                bool isWhite = (board.Pieces[White] & pos) != 0;
+                var pos = 1UL << i;
+                var isBlack = (board.Pieces[Black] & pos) != 0;
+                var isWhite = (board.Pieces[White] & pos) != 0;
 
                 if (isBlack && isWhite) Console.Write("X ");
                 else if (isBlack) Console.Write("b ");
@@ -163,15 +163,15 @@ namespace Reversi_mcts
 
         public static void DrawWithLastMove(this BitBoard board, ulong lastBitMove)
         {
-            int moveIndex = lastBitMove.BitScanReverse();
+            var moveIndex = lastBitMove.BitScanReverse();
 
-            for (int i = 0; i < 64; i++)
+            for (var i = 0; i < 64; i++)
             {
                 if (i % 8 == 0 && i != 0) Console.WriteLine();
 
-                ulong pos = 1UL << i;
-                bool isBlack = (board.Pieces[Black] & pos) != 0;
-                bool isWhite = (board.Pieces[White] & pos) != 0;
+                var pos = 1UL << i;
+                var isBlack = (board.Pieces[Black] & pos) != 0;
+                var isWhite = (board.Pieces[White] & pos) != 0;
 
                 if (isBlack && isWhite) Console.Write("X ");
                 else if (isBlack) Console.Write(moveIndex == i ? "B " : "b ");
@@ -184,15 +184,15 @@ namespace Reversi_mcts
 
         public static void DrawWithLegalMoves(this BitBoard board, byte player)
         {
-            ulong legalMoves = board.GetLegalMoves(player);
+            var legalMoves = board.GetLegalMoves(player);
 
-            for (int i = 0; i < 64; i++)
+            for (var i = 0; i < 64; i++)
             {
                 if (i % 8 == 0 && i != 0) Console.WriteLine();
 
-                ulong pos = 1UL << i;
-                bool isBlack = (board.Pieces[Black] & pos) != 0;
-                bool isWhite = (board.Pieces[White] & pos) != 0;
+                var pos = 1UL << i;
+                var isBlack = (board.Pieces[Black] & pos) != 0;
+                var isWhite = (board.Pieces[White] & pos) != 0;
 
                 if (isBlack && isWhite) Console.Write("X ");
                 else if (isBlack) Console.Write("b ");
@@ -206,16 +206,16 @@ namespace Reversi_mcts
 
         public static void DrawWithLastMoveAndLegalMoves(this BitBoard board, ulong lastBitMove, byte player)
         {
-            ulong legalMoves = board.GetLegalMoves(player);
-            int moveIndex = lastBitMove.BitScanReverse();
+            var legalMoves = board.GetLegalMoves(player);
+            var moveIndex = lastBitMove.BitScanReverse();
 
-            for (int i = 0; i < 64; i++)
+            for (var i = 0; i < 64; i++)
             {
                 if (i % 8 == 0 && i != 0) Console.WriteLine();
 
-                ulong pos = 1UL << i;
-                bool isBlack = (board.Pieces[Black] & pos) != 0;
-                bool isWhite = (board.Pieces[White] & pos) != 0;
+                var pos = 1UL << i;
+                var isBlack = (board.Pieces[Black] & pos) != 0;
+                var isWhite = (board.Pieces[White] & pos) != 0;
 
                 if (isBlack && isWhite) Console.Write("X ");
                 else if (isBlack) Console.Write(moveIndex == i ? "B " : "b ");

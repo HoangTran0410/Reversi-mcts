@@ -1,26 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Reversi_mcts
+namespace Reversi_mcts.MonteCarlo
 {
     public class MCTS
     {
         public static ulong RunSearch(State state, int timeout = 1000)
         {
-            int winCount = 0;
-            int loseCount = 0;
-            int playout = 0;
+            var winCount = 0;
+            var playout = 0;
 
-            TimeSpan timeLimit = TimeSpan.FromMilliseconds(timeout);
-            DateTime start = DateTime.Now;
+            var timeLimit = TimeSpan.FromMilliseconds(timeout);
+            var start = DateTime.Now;
 
             // save root node ref, for find best-move later
-            Node root = new Node(state, null, 0);
+            var root = new Node(state, null, 0);
 
             while (DateTime.Now - start < timeLimit)
             {
-                // delare inner scope: https://stackoverflow.com/a/13922788/11898496
+                // declare inner scope: https://stackoverflow.com/a/13922788/11898496
                 var node = root;
 
                 // Phase 1: Selection
@@ -44,16 +41,15 @@ namespace Reversi_mcts
                 // Statistic
                 playout++;
                 if (score == Constant.WinScore) winCount++;
-                if (score == Constant.LoseScore) loseCount++;
             }
 
-            var winPercent = winCount * 100f / playout;
-            Console.WriteLine("- Runtime: {0}ms, Playout: {1}, wins: {2}%", timeout, playout, winPercent);
+            var winPercentage = winCount * 100f / playout;
+            Console.WriteLine("- Runtime: {0}ms, Playout: {1}, wins: {2}%", timeout, playout, winPercentage);
 
             return BestMove(root);
         }
 
-        public static ulong BestMove(Node node, string policy = "robust")
+        private static ulong BestMove(Node node, string policy = Constant.RobustChild)
         {
             // If not all children are expanded, not enough information
             if (node.IsFullyExpanded() == false)
@@ -61,11 +57,10 @@ namespace Reversi_mcts
 
             var bestMove = 0UL;
 
-            // Most visits (robust child)
-            if (policy.Equals("robust"))
+            if (policy == Constant.RobustChild)
             {
-                var max = Double.MinValue;
-                foreach (Node childNode in node.ChildNodes)
+                var max = double.MinValue;
+                foreach (var childNode in node.ChildNodes)
                 {
                     if (childNode.Visits > max)
                     {
@@ -74,12 +69,10 @@ namespace Reversi_mcts
                     }
                 }
             }
-
-            // Highest winrate (max child)
-            else if (policy.Equals("max"))
+            else if (policy == Constant.MaxChild)
             {
-                var max = Double.MinValue;
-                foreach (Node childNode in node.ChildNodes)
+                var max = double.MinValue;
+                foreach (var childNode in node.ChildNodes)
                 {
                     double ratio = childNode.Wins / childNode.Visits;
                     if (ratio > max)

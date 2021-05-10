@@ -1,18 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
+using Reversi_mcts.Board;
+using Reversi_mcts.MonteCarlo;
 
 namespace Reversi_mcts
 {
-    class Program
+    internal static class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             var state = new State(new BitBoard(), Constant.Black);
             var winner = Constant.GameNotCompleted;
 
             while (winner == Constant.GameNotCompleted)
             {
-                var move = MCTS.RunSearch(state, 2000);
+                var move = MCTS.RunSearch(state, 500);
 
                 if (move == 0)
                 {
@@ -20,8 +21,8 @@ namespace Reversi_mcts
                 }
                 else
                 {
-                    var coor = move.ToCoordinate();
-                    Console.WriteLine("- Player " + state.Player + " move at " + coor.row + ", " + coor.col);
+                    var (row, col) = move.ToCoordinate();
+                    Console.WriteLine("- Player " + state.Player + " move at " + row + ", " + col);
                 }
 
                 state = state.NextState(move);

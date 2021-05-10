@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Reversi_mcts.Board;
 
-namespace Reversi_mcts
+namespace Reversi_mcts.MonteCarlo
 {
     public class State
     {
-        public BitBoard Board { get; set; }
-        public byte Player { get; set; }
+        public BitBoard Board { get; }
+        public byte Player { get; }
 
-        public byte Opponent
-        {
-            get { return (byte) (1 ^ Player); }
-        }
+        public byte Opponent => (byte) (1 ^ Player);
 
-        public ulong BitLegalMoves { get; set; }
+        public ulong BitLegalMoves { get; }
 
         public State(BitBoard board, byte player)
         {

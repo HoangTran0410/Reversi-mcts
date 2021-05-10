@@ -4,9 +4,9 @@ using System.Text;
 
 namespace Reversi_mcts
 {
-    class Constant
+    internal static class Constant
     {
-        public static Random Random = new Random();
+        public static readonly Random Random = new Random();
 
         // Game status
         public const byte Black = 0;
@@ -18,5 +18,9 @@ namespace Reversi_mcts
         public const byte WinScore = 2;
         public const byte DrawScore = 1;
         public const byte LoseScore = 0;
+
+        // Policy
+        public const string RobustChild = "robust"; // Most visits
+        public const string MaxChild = "max"; // Highest win-rate
     }
 }

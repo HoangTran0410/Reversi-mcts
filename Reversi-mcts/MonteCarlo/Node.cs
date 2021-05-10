@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using Reversi_mcts.Board;
 
-namespace Reversi_mcts
+namespace Reversi_mcts.MonteCarlo
 {
     public class Node
     {
@@ -39,7 +39,7 @@ namespace Reversi_mcts
         public static Node SelectChild(this Node node)
         {
             Node bestChild = null;
-            var bestUcb1 = Double.MinValue;
+            var bestUcb1 = double.MinValue;
 
             foreach (var childNode in node.ChildNodes)
             {
@@ -73,7 +73,7 @@ namespace Reversi_mcts
         }
 
         // Phase 3: SIMULATION
-        public static float Simulate(this Node node, byte player)
+        public static byte Simulate(this Node node, byte player)
         {
             var state = new State(node.State);
 
