@@ -62,20 +62,17 @@ namespace Reversi_mcts.MonteCarlo
             var move = node.UntriedMoves[i];
             node.UntriedMoves.RemoveAt(i); // Untried -> Try
 
-            var child = new Node(
-                node.State.NextState(move), // code cũ NextState(node.Move) => phải dùng tới debug mới phát hiện sai
-                node,
-                move
-            );
+            var newState = node.State.NextState(move);
+            var child = new Node(newState, node, move);
             node.ChildNodes.Add(child);
 
             return child;
         }
 
         // Phase 3: SIMULATION
-        public static byte Simulate(this Node node, byte player)
+        public static byte Simulate(this Node node, byte rootPlayer)
         {
-            var state = new State(node.State);
+            var state = node.State; // TODO old code: state = new State(node.State)
 
             while (!state.IsTerminal())
             {
@@ -83,11 +80,11 @@ namespace Reversi_mcts.MonteCarlo
                 state = state.NextState(move);
             }
 
-            return GetScore(state, player);
+            return GetScore(state, rootPlayer);
         }
 
         // Phase 3: BACKPROPAGATION
-        public static void Backpropagate(this Node node, float result)
+        public static void BackPropagate(this Node node, byte result)
         {
             for (var tempMode = node; tempMode != null; tempMode = tempMode.Parent)
             {
@@ -95,13 +92,13 @@ namespace Reversi_mcts.MonteCarlo
             }
         }
 
-        private static void Update(this Node node, float result)
+        private static void Update(this Node node, byte result)
         {
             node.Wins += result;
             node.Visits++;
         }
 
-        private static byte GetScore(State state, byte player)
+        private static byte GetScore(State state, byte rootPlayer)
         {
             var blackCount = state.Board.CountPieces(Constant.Black);
             var whiteCount = state.Board.CountPieces(Constant.White);
@@ -111,7 +108,7 @@ namespace Reversi_mcts.MonteCarlo
 
             // Not Draw
             var winner = blackCount > whiteCount ? Constant.Black : Constant.White;
-            var score = (player == winner) ? Constant.WinScore : Constant.LoseScore;
+            var score = (rootPlayer == winner) ? Constant.WinScore : Constant.LoseScore;
 
             return score;
         }

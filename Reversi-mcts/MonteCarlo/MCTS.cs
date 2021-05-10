@@ -2,20 +2,19 @@
 
 namespace Reversi_mcts.MonteCarlo
 {
-    public class MCTS
+    public static class Mcts
     {
         public static ulong RunSearch(State state, int timeout = 1000)
         {
-            // var winCount = 0;
-            // var playout = 0;
-
-            var timeLimit = TimeSpan.FromMilliseconds(timeout);
-            var start = DateTime.Now;
+            var winCount = 0;
+            var totalSimulations = 0;
 
             // save root node ref, for find best-move later
             var root = new Node(state, null, 0);
 
-            while (DateTime.Now - start < timeLimit)
+            // https://stackoverflow.com/q/4075525/11898496
+            var doneTick = Environment.TickCount + timeout;
+            while (Environment.TickCount <= doneTick)
             {
                 // declare inner scope: https://stackoverflow.com/a/13922788/11898496
                 var node = root;
@@ -35,21 +34,21 @@ namespace Reversi_mcts.MonteCarlo
                 // Phase 3: Simulation
                 var score = node.Simulate(state.Player);
 
-                // Phase 4: Backpropagation
-                node.Backpropagate(score);
+                // Phase 4: BackPropagation
+                node.BackPropagate(score);
 
                 // Statistic
-                // playout++;
-                // if (score == Constant.WinScore) winCount++;
+                totalSimulations++;
+                if (score == Constant.WinScore) winCount++;
             }
 
-            //var winPercentage = winCount * 100f / playout;
-            //Console.WriteLine("- Runtime: {0}ms, Playout: {1}, wins: {2}%", timeout, playout, winPercentage);
+            var winPercentage = winCount * 100f / totalSimulations;
+            Console.WriteLine("- Runtime: {0}ms, Playout: {1}, wins: {2}%", timeout, totalSimulations, winPercentage);
 
             return BestMove(root);
         }
 
-        private static ulong BestMove(Node node, string policy = Constant.RobustChild)
+        private static ulong BestMove(Node node, byte policy = Constant.RobustChild)
         {
             // If not all children are expanded, not enough information
             if (node.IsFullyExpanded() == false)

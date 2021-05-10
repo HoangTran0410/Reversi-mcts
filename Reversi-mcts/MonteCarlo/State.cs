@@ -14,13 +14,6 @@ namespace Reversi_mcts.MonteCarlo
             Board = board;
             BitLegalMoves = Board.GetLegalMoves(Player);
         }
-
-        public State(State state)
-        {
-            Player = state.Player;
-            Board = state.Board.Clone();
-            BitLegalMoves = state.BitLegalMoves;
-        }
     }
 
     public static class ReversiStateExtensions

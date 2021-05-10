@@ -2,14 +2,18 @@
 
 namespace Reversi_mcts
 {
+    // why use internal static class? => Rider recommend, idk :))
     internal static class Constant
     {
         public static readonly Random Random = new Random();
 
         public static byte Opponent(byte player)
         {
-            // return player == Black ? White : Black; // => slow
-            return (byte)(1 ^ player);
+            // The 3 ways below have the same performance
+
+            return player == Black ? White : Black;
+            // return (byte) (Black + White - player);
+            // return (byte)(1 ^ player);
         }
 
         // Game status
@@ -24,7 +28,7 @@ namespace Reversi_mcts
         public const byte LoseScore = 0;
 
         // Policy
-        public const string RobustChild = "robust"; // Most visits
-        public const string MaxChild = "max"; // Highest win-rate
+        public const byte RobustChild = 0; // Most visits
+        public const byte MaxChild = 1; // Highest win-rate
     }
 }

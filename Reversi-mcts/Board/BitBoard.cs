@@ -93,16 +93,16 @@ namespace Reversi_mcts.Board
             // https://stackoverflow.com/a/41505/11898496
             var moves = 0UL;
             var playerPiece = board.Pieces[player];
-            var opponentPiece = board.Pieces[1 ^ player];
+            var opponentPiece = board.Pieces[Constant.Opponent(player)];
             var empties = board.GetEmpties();
 
             // https://stackoverflow.com/a/105402/11898496
-            foreach (var dir in DirectionValues)
+            foreach (var direction in DirectionValues)
             {
-                var candidates = opponentPiece & playerPiece.Shift(dir);
+                var candidates = opponentPiece & playerPiece.Shift(direction);
                 while (candidates != 0)
                 {
-                    var candidatesShifted = candidates.Shift(dir);
+                    var candidatesShifted = candidates.Shift(direction);
                     moves |= empties & candidatesShifted;
                     candidates = opponentPiece & candidatesShifted;
                 }
@@ -116,12 +116,12 @@ namespace Reversi_mcts.Board
         {
             // TODO improve this function, make it faster
             var playerPiece = board.Pieces[player];
-            var opponentPiece = board.Pieces[1 ^ player];
+            var opponentPiece = board.Pieces[Constant.Opponent(player)];
             var wouldFlips = 0UL;
 
-            foreach (var dir in DirectionValues)
+            foreach (var direction in DirectionValues)
             {
-                var potentialEndPoint = bitMove.Shift(dir);
+                var potentialEndPoint = bitMove.Shift(direction);
                 var potentialWouldFlips = 0UL;
 
                 do
@@ -134,7 +134,7 @@ namespace Reversi_mcts.Board
 
                     potentialEndPoint &= opponentPiece;
                     potentialWouldFlips |= potentialEndPoint;
-                    potentialEndPoint = potentialEndPoint.Shift(dir);
+                    potentialEndPoint = potentialEndPoint.Shift(direction);
                 } while (potentialEndPoint != 0);
             }
 
