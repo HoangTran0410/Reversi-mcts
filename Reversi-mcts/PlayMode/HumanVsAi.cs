@@ -18,13 +18,11 @@ namespace Reversi_mcts.PlayMode
             // begin
             while (winner == Constant.GameNotCompleted)
             {
-                var move = state.Player == humanColor ? 
-                    HumanTurn(state) : 
-                    AiTurn(state, aiTimeout);
+                var move = state.Player == humanColor ? HumanTurn(state) : AiTurn(state, aiTimeout);
 
                 state = state.NextState(move);
                 winner = state.Winner();
-                
+
                 DrawBoard(move, state);
             }
         }
@@ -32,7 +30,7 @@ namespace Reversi_mcts.PlayMode
         private static void DrawBoard(ulong move, State state)
         {
             state.Board.DrawWithLastMoveAndLegalMoves(move, state.Player);
-            
+
             var blackScore = state.Board.CountPieces(Constant.Black);
             var whiteScore = state.Board.CountPieces(Constant.White);
             Console.WriteLine("- Score(b/w): {0}/{1}\n", blackScore, whiteScore);
@@ -41,7 +39,7 @@ namespace Reversi_mcts.PlayMode
         private static ulong AiTurn(State state, int aiTimeout)
         {
             var move = Mcts.RunSearch(state, aiTimeout);
-            
+
             Console.Write("Ai move: " + move.ToNotation());
             Console.WriteLine(" - Runtime: {0}ms, Playout: {1}, wins: {2}%",
                 Mcts.LastRunTime,

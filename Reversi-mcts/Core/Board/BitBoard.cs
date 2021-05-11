@@ -145,7 +145,7 @@ namespace Reversi_mcts.Core.Board
         public static void Draw(this BitBoard board)
         {
             Console.WriteLine("  " + string.Join(" ", NotationHelper.ColumnName.ToArray()));
-            
+
             var row = 0;
             for (var i = 0; i < 64; i++)
             {
@@ -160,10 +160,10 @@ namespace Reversi_mcts.Core.Board
                 var isBlack = (board.Pieces[Black] & pos) != 0;
                 var isWhite = (board.Pieces[White] & pos) != 0;
 
-                if (isBlack && isWhite) Console.Write("X ");
-                else if (isBlack) Console.Write("b ");
-                else if (isWhite) Console.Write("w ");
-                else Console.Write(". ");
+                if (isBlack && isWhite) Console.Write(Constant.WrongMove);
+                else if (isBlack) Console.Write(Constant.BlackPiece);
+                else if (isWhite) Console.Write(Constant.WhitePiece);
+                else Console.Write(Constant.EmptyCell);
             }
 
             Console.WriteLine();
@@ -172,7 +172,7 @@ namespace Reversi_mcts.Core.Board
         public static void DrawWithLastMove(this BitBoard board, ulong lastBitMove)
         {
             Console.WriteLine("  " + string.Join(" ", NotationHelper.ColumnName.ToArray()));
-            
+
             var moveIndex = lastBitMove.BitScanReverse();
             var row = 0;
             for (var i = 0; i < 64; i++)
@@ -188,10 +188,10 @@ namespace Reversi_mcts.Core.Board
                 var isBlack = (board.Pieces[Black] & pos) != 0;
                 var isWhite = (board.Pieces[White] & pos) != 0;
 
-                if (isBlack && isWhite) Console.Write("X ");
-                else if (isBlack) Console.Write(moveIndex == i ? "B " : "b ");
-                else if (isWhite) Console.Write(moveIndex == i ? "W " : "w ");
-                else Console.Write(". ");
+                if (isBlack && isWhite) Console.Write(Constant.WrongMove);
+                else if (isBlack) Console.Write(moveIndex == i ? Constant.LastBlackMove : Constant.BlackPiece);
+                else if (isWhite) Console.Write(moveIndex == i ? Constant.LastWhiteMove : Constant.WhitePiece);
+                else Console.Write(Constant.EmptyCell);
             }
 
             Console.WriteLine();
@@ -200,7 +200,7 @@ namespace Reversi_mcts.Core.Board
         public static void DrawWithLegalMoves(this BitBoard board, byte player)
         {
             Console.WriteLine("  " + string.Join(" ", NotationHelper.ColumnName.ToArray()));
-            
+
             var legalMoves = board.GetLegalMoves(player);
             var row = 0;
             for (var i = 0; i < 64; i++)
@@ -216,11 +216,11 @@ namespace Reversi_mcts.Core.Board
                 var isBlack = (board.Pieces[Black] & pos) != 0;
                 var isWhite = (board.Pieces[White] & pos) != 0;
 
-                if (isBlack && isWhite) Console.Write("X ");
-                else if (isBlack) Console.Write("b ");
-                else if (isWhite) Console.Write("w ");
-                else if ((legalMoves & pos) != 0) Console.Write("_ ");
-                else Console.Write(". ");
+                if (isBlack && isWhite) Console.Write(Constant.WrongMove);
+                else if (isBlack) Console.Write(Constant.BlackPiece);
+                else if (isWhite) Console.Write(Constant.WhitePiece);
+                else if ((legalMoves & pos) != 0) Console.Write(Constant.LegalMove);
+                else Console.Write(Constant.EmptyCell);
             }
 
             Console.WriteLine();
@@ -229,7 +229,7 @@ namespace Reversi_mcts.Core.Board
         public static void DrawWithLastMoveAndLegalMoves(this BitBoard board, ulong lastBitMove, byte player)
         {
             Console.WriteLine("  " + string.Join(" ", NotationHelper.ColumnName.ToArray()));
-            
+
             var legalMoves = board.GetLegalMoves(player);
             var moveIndex = lastBitMove.BitScanReverse();
             var row = 0;
@@ -238,7 +238,7 @@ namespace Reversi_mcts.Core.Board
                 if (i % 8 == 0)
                 {
                     row++;
-                    if(i != 0) Console.WriteLine();
+                    if (i != 0) Console.WriteLine();
                     Console.Write(row + " ");
                 }
 
@@ -246,11 +246,11 @@ namespace Reversi_mcts.Core.Board
                 var isBlack = (board.Pieces[Black] & pos) != 0;
                 var isWhite = (board.Pieces[White] & pos) != 0;
 
-                if (isBlack && isWhite) Console.Write("X ");
-                else if (isBlack) Console.Write(moveIndex == i ? "B " : "b ");
-                else if (isWhite) Console.Write(moveIndex == i ? "W " : "w ");
-                else if ((legalMoves & pos) != 0) Console.Write("_ ");
-                else Console.Write(". ");
+                if (isBlack && isWhite) Console.Write(Constant.WrongMove);
+                else if (isBlack) Console.Write(moveIndex == i ? Constant.LastBlackMove : Constant.BlackPiece);
+                else if (isWhite) Console.Write(moveIndex == i ? Constant.LastWhiteMove : Constant.WhitePiece);
+                else if ((legalMoves & pos) != 0) Console.Write(Constant.LegalMove);
+                else Console.Write(Constant.EmptyCell);
             }
 
             Console.WriteLine();

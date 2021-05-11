@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Reversi_mcts.Core.Board
 {
@@ -36,13 +35,13 @@ namespace Reversi_mcts.Core.Board
         {
             return "" + ColumnName[coordinate.col] + RowName[coordinate.row];
         }
-        
+
         // ------------------------------------ Notation ------------------------------------
         public static ulong ToBitMove(this string notation)
         {
             var (row, col) = notation.ToCoordinate();
             if (row == -1 || col == -1) return 0UL;
-            return 0UL.SetBitAtCoordinate((byte)row, (byte)col);
+            return 0UL.SetBitAtCoordinate((byte) row, (byte) col);
         }
 
         public static (int row, int col) ToCoordinate(this string notation)

@@ -9,6 +9,6 @@ namespace Reversi_mcts
             //SelfPlay.OneRound(100, 1000);
             //SelfPlay.MultiRounds(100, 30, 50);
             HumanVsAi.NewGame();
-        } 
+        }
     }
 }

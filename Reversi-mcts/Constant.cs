@@ -30,5 +30,14 @@ namespace Reversi_mcts
         // Policy
         public const byte RobustChild = 0; // Most visits
         public const byte MaxChild = 1; // Highest win-rate
+
+        // Draw
+        public const string WrongMove = "X ";
+        public const string LastBlackMove = "B ";
+        public const string LastWhiteMove = "W ";
+        public const string LegalMove = "_ ";
+        public const string BlackPiece = "b ";
+        public const string WhitePiece = "w ";
+        public const string EmptyCell = ". ";
     }
 }
