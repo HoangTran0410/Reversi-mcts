@@ -6,4 +6,12 @@
     <RootNamespace>Reversi_mcts</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="SocketIOClient" Version="2.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Core" />
+  </ItemGroup>
+
 </Project>

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Reversi_mcts.Board
+namespace Reversi_mcts.Core.Board
 {
     public enum Direction : byte
     {
@@ -17,47 +17,6 @@ namespace Reversi_mcts.Board
 
     public static class BitBoardHelper
     {
-        // ------------------------------------ Morphological Operations ------------------------------------
-        public static ulong Delation(this ulong bits, byte step = 1)
-        {
-            ulong ret = bits;
-            while (step-- > 0)
-            {
-                ret =
-                    ret |
-                    ret.ShiftUp() |
-                    ret.ShiftDown() |
-                    ret.ShiftLeft() |
-                    ret.ShiftRight() |
-                    ret.ShiftUpLeft() |
-                    ret.ShiftUpRight() |
-                    ret.ShiftDownLeft() |
-                    ret.ShiftDownRight();
-            }
-
-            return ret;
-        }
-
-        public static ulong Erosion(this ulong bits, byte step = 1)
-        {
-            ulong ret = bits;
-            while (step-- > 0)
-            {
-                ret =
-                    ret &
-                    ret.ShiftUp() &
-                    ret.ShiftDown() &
-                    ret.ShiftLeft() &
-                    ret.ShiftRight() &
-                    ret.ShiftUpLeft() &
-                    ret.ShiftUpRight() &
-                    ret.ShiftDownLeft() &
-                    ret.ShiftDownRight();
-            }
-
-            return ret;
-        }
-
         // ------------------------------------ Shift Stuffs ------------------------------------
         public static ulong Shift(this ulong bits, Direction direction)
         {
@@ -123,13 +82,7 @@ namespace Reversi_mcts.Board
         }
 
         // ------------------------------------ Bit Stuffs ------------------------------------
-        public static ulong CoordinateToULong(byte row, byte col)
-        {
-            // TODO faster implementation: use predefine ulong table
-            return 0UL.SetBitAtCoordinate(row, col);
-        }
-
-        public static List<ulong> ToListUlong(this ulong bits)
+        public static List<ulong> ToListBitMove(this ulong bits)
         {
             var ret = new List<ulong>(bits.PopCount());
             while (bits != 0)
@@ -140,15 +93,6 @@ namespace Reversi_mcts.Board
             }
 
             return ret;
-        }
-
-        public static (byte row, byte col) ToCoordinate(this ulong bits)
-        {
-            var index = bits.BitScanReverse();
-            return (
-                (byte) (index / 8),
-                (byte) (index % 8)
-            );
         }
 
         // https://www.chessprogramming.org/BitScan#De_Bruijn_Multiplication

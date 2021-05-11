@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Reversi_mcts.Board
+namespace Reversi_mcts.Core.Board
 {
     public class BitBoard
     {
@@ -55,7 +55,7 @@ namespace Reversi_mcts.Board
         // ------------------------------------ Move Stuffs ------------------------------------
         public static void MakeMove(this BitBoard board, byte player, byte row, byte col)
         {
-            var bitMove = BitBoardHelper.CoordinateToULong(row, col);
+            var bitMove = (row, col).ToBitMove();
             board.MakeMove(player, bitMove);
         }
 
@@ -144,9 +144,17 @@ namespace Reversi_mcts.Board
         // ------------------------------------ Display Stuffs ------------------------------------
         public static void Draw(this BitBoard board)
         {
+            Console.WriteLine("  " + string.Join(" ", NotationHelper.ColumnName.ToArray()));
+            
+            var row = 0;
             for (var i = 0; i < 64; i++)
             {
-                if (i % 8 == 0 && i != 0) Console.WriteLine();
+                if (i % 8 == 0)
+                {
+                    row++;
+                    if (i != 0) Console.WriteLine();
+                    Console.Write(row + " ");
+                }
 
                 var pos = 1UL << i;
                 var isBlack = (board.Pieces[Black] & pos) != 0;
@@ -163,11 +171,18 @@ namespace Reversi_mcts.Board
 
         public static void DrawWithLastMove(this BitBoard board, ulong lastBitMove)
         {
+            Console.WriteLine("  " + string.Join(" ", NotationHelper.ColumnName.ToArray()));
+            
             var moveIndex = lastBitMove.BitScanReverse();
-
+            var row = 0;
             for (var i = 0; i < 64; i++)
             {
-                if (i % 8 == 0 && i != 0) Console.WriteLine();
+                if (i % 8 == 0)
+                {
+                    row++;
+                    if (i != 0) Console.WriteLine();
+                    Console.Write(row + " ");
+                }
 
                 var pos = 1UL << i;
                 var isBlack = (board.Pieces[Black] & pos) != 0;
@@ -184,11 +199,18 @@ namespace Reversi_mcts.Board
 
         public static void DrawWithLegalMoves(this BitBoard board, byte player)
         {
+            Console.WriteLine("  " + string.Join(" ", NotationHelper.ColumnName.ToArray()));
+            
             var legalMoves = board.GetLegalMoves(player);
-
+            var row = 0;
             for (var i = 0; i < 64; i++)
             {
-                if (i % 8 == 0 && i != 0) Console.WriteLine();
+                if (i % 8 == 0)
+                {
+                    row++;
+                    if (i != 0) Console.WriteLine();
+                    Console.Write(row + " ");
+                }
 
                 var pos = 1UL << i;
                 var isBlack = (board.Pieces[Black] & pos) != 0;
@@ -206,12 +228,19 @@ namespace Reversi_mcts.Board
 
         public static void DrawWithLastMoveAndLegalMoves(this BitBoard board, ulong lastBitMove, byte player)
         {
+            Console.WriteLine("  " + string.Join(" ", NotationHelper.ColumnName.ToArray()));
+            
             var legalMoves = board.GetLegalMoves(player);
             var moveIndex = lastBitMove.BitScanReverse();
-
+            var row = 0;
             for (var i = 0; i < 64; i++)
             {
-                if (i % 8 == 0 && i != 0) Console.WriteLine();
+                if (i % 8 == 0)
+                {
+                    row++;
+                    if(i != 0) Console.WriteLine();
+                    Console.Write(row + " ");
+                }
 
                 var pos = 1UL << i;
                 var isBlack = (board.Pieces[Black] & pos) != 0;

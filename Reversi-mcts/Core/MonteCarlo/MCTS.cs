@@ -1,9 +1,13 @@
 ﻿using System;
 
-namespace Reversi_mcts.MonteCarlo
+namespace Reversi_mcts.Core.MonteCarlo
 {
     public static class Mcts
     {
+        public static int LastPlayout { get; private set; }
+        public static float LastWinPercentage { get; private set; }
+        public static int LastRunTime { get; private set; }
+        
         public static ulong RunSearch(State state, int timeout = 1000)
         {
             var winCount = 0;
@@ -39,12 +43,15 @@ namespace Reversi_mcts.MonteCarlo
 
                 // Statistic
                 totalSimulations++;
-                if (score == Constant.WinScore) winCount++;
+                winCount += score == Constant.WinScore ? 1 : 0; // https://stackoverflow.com/a/4192249/11898496
             }
 
-            var winPercentage = winCount * 100f / totalSimulations;
-            Console.WriteLine("- Runtime: {0}ms, Playout: {1}, wins: {2}%", timeout, totalSimulations, winPercentage);
+            // save statistic
+            LastWinPercentage = winCount * 100f / totalSimulations;
+            LastPlayout = totalSimulations;
+            LastRunTime = timeout;
 
+            // calculate best move
             return BestMove(root);
         }
 

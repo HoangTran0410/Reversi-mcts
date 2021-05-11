@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Reversi_mcts.Board;
+using Reversi_mcts.Core.Board;
 
-namespace Reversi_mcts.MonteCarlo
+namespace Reversi_mcts.Core.MonteCarlo
 {
     public class Node
     {
@@ -28,7 +28,7 @@ namespace Reversi_mcts.MonteCarlo
 
             // Tree stuff
             Parent = parent;
-            UntriedMoves = state.BitLegalMoves.ToListUlong();
+            UntriedMoves = state.BitLegalMoves.ToListBitMove();
             ChildNodes = new List<Node>(UntriedMoves.Count);
         }
     }

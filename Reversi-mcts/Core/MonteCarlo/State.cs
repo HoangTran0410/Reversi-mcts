@@ -1,6 +1,6 @@
-﻿using Reversi_mcts.Board;
+﻿using Reversi_mcts.Core.Board;
 
-namespace Reversi_mcts.MonteCarlo
+namespace Reversi_mcts.Core.MonteCarlo
 {
     public class State
     {
@@ -16,7 +16,7 @@ namespace Reversi_mcts.MonteCarlo
         }
     }
 
-    public static class ReversiStateExtensions
+    public static class StateExtensions
     {
         public static bool IsTerminal(this State state)
         {
