@@ -1,4 +1,5 @@
 ﻿using Reversi_mcts.PlayMode;
+using Reversi_mcts.SocketIo;
 
 namespace Reversi_mcts
 {
@@ -6,9 +7,11 @@ namespace Reversi_mcts
     {
         private static void Main()
         {
-            //SelfPlay.OneRound(100, 1000);
-            //SelfPlay.MultiRounds(100, 30, 50);
-            HumanVsAi.NewGame();
+            //SelfPlay.OneRound(300, 15);
+            //SelfPlay.MultiRounds(100, 100, 15);
+            //HumanVsAi.NewGame(Constant.White);
+
+            var socketClient = new SocketClient(500);
         }
     }
 }

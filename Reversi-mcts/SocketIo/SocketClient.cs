@@ -3,20 +3,23 @@ using System.Threading;
 using System.Threading.Tasks;
 using SocketIOClient;
 
-namespace Reversi_mcts.Client
+namespace Reversi_mcts.SocketIo
 {
     public class SocketClient
     {
         private const string ServerIp = "http://localhost:3000/";
-        private const string ClientName = "newbitboard";
+        
+        private readonly GameHandler _game;
+        private readonly SocketIO _client;
+        private readonly ManualResetEvent _manualResetEvent;
 
-        private GameHandler _game;
-        private SocketIO _client;
-        private ManualResetEvent _manualResetEvent;
+        private string ClientName = "reversi-mcts";
 
-        public SocketClient()
+        public SocketClient(int timeout = 100)
         {
-            _game = new GameHandler();
+            ClientName += (timeout*1.0/1000) + "s";
+            
+            _game = new GameHandler(timeout);
             _client = new SocketIO(ServerIp, new SocketIOOptions {EIO = 4});
 
             _client.OnConnected += OnConnected;
@@ -42,7 +45,7 @@ namespace Reversi_mcts.Client
         {
             var colorStr = response.GetValue<string>();
             _game.SetColor(colorStr.ToLower().Equals("black") ? Constant.Black : Constant.White);
-            
+
             Console.WriteLine("You are " + colorStr.ToUpper());
 
             await _client.EmitAsync("clientSendReady", ClientName);

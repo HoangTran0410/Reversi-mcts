@@ -1,7 +1,7 @@
 ﻿using Reversi_mcts.Core.Board;
 using Reversi_mcts.Core.MonteCarlo;
 
-namespace Reversi_mcts.Client
+namespace Reversi_mcts.SocketIo
 {
     public class GameHandler
     {
@@ -40,7 +40,7 @@ namespace Reversi_mcts.Client
 
         public void MakeMove(int row, int col)
         {
-            State = State.NextState(((byte)row, (byte)col).ToBitMove());
+            State = State.NextState(((byte) row, (byte) col).ToBitMove());
         }
 
         public int GetLastPlayout()

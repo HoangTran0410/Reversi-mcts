@@ -62,7 +62,7 @@ namespace Reversi_mcts.PlayMode
             else
             {
                 var (row, col) = move.ToCoordinate();
-                Console.WriteLine("- Player " + playerMakeMove + " move at " + row + ", " + col);
+                Console.WriteLine("- Player " + playerMakeMove + " move at " + (row, col).ToNotation());
             }
             
             state.Board.DrawWithLastMoveAndLegalMoves(move, playerMakeMove);
