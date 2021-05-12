@@ -28,7 +28,7 @@ namespace Reversi_mcts.PlayMode
 
         public static byte OneRound(int blackTimeout = 500, int whiteTimeout = 500, bool showLog = true)
         {
-            var state = new State(new BitBoard(), Constant.Black);
+            var state = new State();
             var winner = Constant.GameNotCompleted;
 
             while (winner == Constant.GameNotCompleted)

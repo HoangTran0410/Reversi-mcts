@@ -9,7 +9,7 @@ namespace Reversi_mcts.PlayMode
     {
         public static void NewGame(byte humanColor = Constant.Black, int aiTimeout = 1000)
         {
-            var state = new State(new BitBoard(), Constant.Black);
+            var state = new State();
             var winner = Constant.GameNotCompleted;
 
             // show initial board

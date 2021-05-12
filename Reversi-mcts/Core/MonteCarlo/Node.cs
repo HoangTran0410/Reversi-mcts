@@ -55,6 +55,11 @@ namespace Reversi_mcts.Core.MonteCarlo
             return bestChild;
         }
 
+        private static double GetUcb1(this Node node)
+        {
+            return node.Wins / node.Visits + Math.Sqrt(2 * Math.Log(node.Parent.Visits) / node.Visits);
+        }
+
         // Phase 2: EXPANSION
         public static Node ExpandChild(this Node node)
         {
@@ -70,7 +75,7 @@ namespace Reversi_mcts.Core.MonteCarlo
         }
 
         // Phase 3: SIMULATION
-        public static byte Simulate(this Node node, byte rootPlayer)
+        public static float Simulate(this Node node, byte rootPlayer)
         {
             var state = node.State; // TODO old code: state = new State(node.State)
 
@@ -83,22 +88,7 @@ namespace Reversi_mcts.Core.MonteCarlo
             return GetScore(state, rootPlayer);
         }
 
-        // Phase 3: BACKPROPAGATION
-        public static void BackPropagate(this Node node, byte result)
-        {
-            for (var tempMode = node; tempMode != null; tempMode = tempMode.Parent)
-            {
-                tempMode.Update(result);
-            }
-        }
-
-        private static void Update(this Node node, byte result)
-        {
-            node.Wins += result;
-            node.Visits++;
-        }
-
-        private static byte GetScore(State state, byte rootPlayer)
+        private static float GetScore(State state, byte rootPlayer)
         {
             var blackCount = state.Board.CountPieces(Constant.Black);
             var whiteCount = state.Board.CountPieces(Constant.White);
@@ -108,9 +98,19 @@ namespace Reversi_mcts.Core.MonteCarlo
 
             // Not Draw
             var winner = blackCount > whiteCount ? Constant.Black : Constant.White;
-            var score = (rootPlayer == winner) ? Constant.WinScore : Constant.LoseScore;
+            var score = rootPlayer == winner ? Constant.WinScore : Constant.LoseScore;
 
             return score;
+        }
+
+        // Phase 4: BACKPROPAGATION
+        public static void BackPropagate(this Node node, float result)
+        {
+            for (var tempMode = node; tempMode != null; tempMode = tempMode.Parent)
+            {
+                tempMode.Wins += result;
+                tempMode.Visits++;
+            }
         }
 
         public static bool IsFullyExpanded(this Node node)
@@ -126,11 +126,6 @@ namespace Reversi_mcts.Core.MonteCarlo
         public static bool IsLeaf(this Node node)
         {
             return node.IsFullyExpanded() && !node.HasChildNode();
-        }
-
-        private static double GetUcb1(this Node node, double biasParam = 2)
-        {
-            return node.Wins / node.Visits + Math.Sqrt(biasParam * Math.Log(node.Parent.Visits) / node.Visits);
         }
     }
 }

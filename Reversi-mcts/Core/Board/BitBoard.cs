@@ -53,7 +53,7 @@ namespace Reversi_mcts.Core.Board
         }
 
         // ------------------------------------ Move Stuffs ------------------------------------
-        public static void MakeMove(this BitBoard board, byte player, byte row, byte col)
+        public static void MakeMove(this BitBoard board, byte player, int row, int col)
         {
             var bitMove = (row, col).ToBitMove();
             board.MakeMove(player, bitMove);

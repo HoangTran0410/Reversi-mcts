@@ -23,9 +23,9 @@ namespace Reversi_mcts
         public const byte GameNotCompleted = 3;
 
         // Node Score
-        public const byte WinScore = 2;
-        public const byte DrawScore = 1;
-        public const byte LoseScore = 0;
+        public const float WinScore = 1;
+        public const float DrawScore = 0.5f;
+        public const float LoseScore = 0;
 
         // Policy
         public const byte RobustChild = 0; // Most visits

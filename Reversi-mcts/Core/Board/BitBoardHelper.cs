@@ -143,18 +143,18 @@ namespace Reversi_mcts.Core.Board
             return Index64Forward[folded * 0x78291ACF >> 26];
         }
 
-        public static ulong SetBitAtCoordinate(this ulong bits, byte row, byte col)
+        public static ulong SetBitAtCoordinate(this ulong bits, int row, int col)
         {
             // https://stackoverflow.com/a/24250656/11898496
             return bits | (1UL << Ix(row, col));
         }
 
-        public static ulong RemoveBitAtCoordinate(this ulong bits, byte row, byte col)
+        public static ulong RemoveBitAtCoordinate(this ulong bits, int row, int col)
         {
             return bits & ~(1UL << Ix(row, col));
         }
 
-        private static int Ix(byte row, byte col)
+        private static int Ix(int row, int col)
         {
             return row * 8 + col;
         }

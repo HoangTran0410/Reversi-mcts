@@ -7,6 +7,8 @@ namespace Reversi_mcts.Core.MonteCarlo
         public BitBoard Board { get; }
         public byte Player { get; }
         public ulong BitLegalMoves { get; }
+        
+        public State() : this(new BitBoard(), Constant.Black) {}
 
         public State(BitBoard board, byte player)
         {
@@ -14,13 +16,33 @@ namespace Reversi_mcts.Core.MonteCarlo
             Board = board;
             BitLegalMoves = Board.GetLegalMoves(Player);
         }
+
+        public static State FromRecordText(string recordText)
+        {
+            var state = new State();
+
+            for (var i = 0; i < recordText.Length; i += 2)
+            {
+                var notation = recordText.Substring(i, 2);
+                state = state.NextState(notation.ToBitMove());
+
+                // PASSING MOVE
+                if (!state.Board.HasLegalMoves(state.Player))
+                {
+                    state = state.NextState(0);
+                }
+            }
+
+            return state;
+        }
     }
 
     public static class StateExtensions
     {
         public static bool IsTerminal(this State state)
         {
-            return state.Board.IsGameComplete();
+            return state.BitLegalMoves == 0;
+            // return state.Board.IsGameComplete();
         }
 
         public static State NextState(this State state, ulong move)

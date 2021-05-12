@@ -10,9 +10,6 @@ namespace Reversi_mcts.Core.MonteCarlo
         
         public static ulong RunSearch(State state, int timeout = 1000)
         {
-            var winCount = 0;
-            var totalSimulations = 0;
-
             // save root node ref, for find best-move later
             var root = new Node(state, null, 0);
 
@@ -40,15 +37,11 @@ namespace Reversi_mcts.Core.MonteCarlo
 
                 // Phase 4: BackPropagation
                 node.BackPropagate(score);
-
-                // Statistic
-                totalSimulations++;
-                winCount += score == Constant.WinScore ? 1 : 0; // https://stackoverflow.com/a/4192249/11898496
             }
 
             // save statistic
-            LastWinPercentage = winCount * 100f / totalSimulations;
-            LastPlayout = totalSimulations;
+            LastWinPercentage = (int)(root.Wins * 100f / root.Visits);
+            LastPlayout = root.Visits;
             LastRunTime = timeout;
 
             // calculate best move

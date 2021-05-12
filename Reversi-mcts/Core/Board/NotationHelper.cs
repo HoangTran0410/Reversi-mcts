@@ -11,13 +11,11 @@ namespace Reversi_mcts.Core.Board
             {'1', '2', '3', '4', '5', '6', '7', '8'};
 
         // ------------------------------------ BitMove ------------------------------------
-        public static (byte row, byte col) ToCoordinate(this ulong bitMove)
+        public static (int row, int col) ToCoordinate(this ulong bitMove)
         {
+            if (bitMove == 0) return (-1, -1);
             var index = bitMove.BitScanReverse();
-            return (
-                (byte) (index / 8),
-                (byte) (index % 8)
-            );
+            return ( index / 8,  index % 8 );
         }
 
         public static string ToNotation(this ulong bitMove)
@@ -26,13 +24,14 @@ namespace Reversi_mcts.Core.Board
         }
 
         // ------------------------------------ Coordinate ------------------------------------
-        public static ulong ToBitMove(this (byte row, byte col) coordinate)
+        public static ulong ToBitMove(this (int row, int col) coordinate)
         {
             return 0UL.SetBitAtCoordinate(coordinate.row, coordinate.col);
         }
 
-        public static string ToNotation(this (byte row, byte col) coordinate)
+        public static string ToNotation(this (int row, int col) coordinate)
         {
+            if (coordinate.row == -1 || coordinate.col == -1) return "PASSED";
             return "" + ColumnName[coordinate.col] + RowName[coordinate.row];
         }
 
@@ -41,7 +40,7 @@ namespace Reversi_mcts.Core.Board
         {
             var (row, col) = notation.ToCoordinate();
             if (row == -1 || col == -1) return 0UL;
-            return 0UL.SetBitAtCoordinate((byte) row, (byte) col);
+            return 0UL.SetBitAtCoordinate(row, col);
         }
 
         public static (int row, int col) ToCoordinate(this string notation)
