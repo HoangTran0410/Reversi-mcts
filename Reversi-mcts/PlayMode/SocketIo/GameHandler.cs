@@ -6,34 +6,34 @@ namespace Reversi_mcts.PlayMode.SocketIo
 {
     public class GameHandler
     {
-        private State State { get; set; }
-        private int TimeOut { get; }
-        private string KifuText;
+        private State _state;
+        private readonly int _timeOut;
+        private string _recordText;
 
         public GameHandler(int timeOut = 1000)
         {
-            TimeOut = timeOut;
-            State = new State();
-            KifuText = "";
+            _timeOut = timeOut;
+            _state = new State();
+            _recordText = "";
         }
 
         public void Restart()
         {
-            State = new State();
-            KifuText = "";
+            _state = new State();
+            _recordText = "";
         }
 
         public (int row, int col) PerformAiMove()
         {
-            var move = Mcts.RunSearch(State, TimeOut);
-            State = State.NextState(move);
+            var move = Mcts.RunSearch(_state, _timeOut);
+            _state = _state.NextState(move);
 
             var notation = move.ToNotation();
-            if(move != 0) KifuText += notation;
-            Console.WriteLine("{0} - Me: {1} - Win {2}% - Playout {3}", 
-                KifuText.Length / 2, 
-                notation, 
-                Mcts.LastWinPercentage, 
+            if (move != 0) _recordText += notation;
+            Console.WriteLine("{0} - Me: {1} - Win {2}% - Playout {3}",
+                _recordText.Length / 2,
+                notation,
+                Mcts.LastWinPercentage,
                 Mcts.LastPlayout);
 
             return move == 0 ? (-1, -1) : move.ToCoordinate();
@@ -41,12 +41,14 @@ namespace Reversi_mcts.PlayMode.SocketIo
 
         public void MakeMove(int row, int col)
         {
-            var coordinate = (row, col);
-            State = State.NextState(coordinate.ToBitMove());
+            var bitMove = (row, col).ToBitMove();
+            _state = _state.NextState(bitMove);
 
-            var notation = coordinate.ToNotation();
-            if(row != -1 && col != -1) KifuText += notation;
-            Console.WriteLine("{0} - Op: {1}", KifuText.Length / 2, notation);
+            var notation = (row, col).ToNotation();
+            if (row != -1 && col != -1) _recordText += notation;
+            Console.WriteLine("{0} - Op: {1}", _recordText.Length / 2, notation);
+
+            _state.Board.DisplayWithLastMoveAndLegalMoves(bitMove, Constant.Opponent(_state.Player));
         }
 
         public int GetLastPlayout()

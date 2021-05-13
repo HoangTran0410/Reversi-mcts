@@ -190,7 +190,7 @@ namespace Reversi_mcts.Core.Board
         }
 
         // ------------------------------------ Display Stuffs ------------------------------------
-        public static void Draw(this ulong bits)
+        public static void Display(this ulong bits)
         {
             for (var i = 0; i < 64; i++)
             {

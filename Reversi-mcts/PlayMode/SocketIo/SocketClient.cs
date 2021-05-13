@@ -8,7 +8,7 @@ namespace Reversi_mcts.PlayMode.SocketIo
     public class SocketClient
     {
         private const string ServerIp = "http://localhost:3000/";
-        
+
         private readonly GameHandler _game;
         private readonly SocketIO _client;
         private readonly ManualResetEvent _manualResetEvent;
@@ -17,8 +17,8 @@ namespace Reversi_mcts.PlayMode.SocketIo
 
         public SocketClient(int timeout = 100)
         {
-            _clientName += (timeout*1.0/1000) + "s";
-            
+            _clientName += timeout + "ms";
+
             _game = new GameHandler(timeout);
             _client = new SocketIO(ServerIp, new SocketIOOptions {EIO = 4});
 
@@ -45,7 +45,7 @@ namespace Reversi_mcts.PlayMode.SocketIo
         {
             var colorStr = response.GetValue<string>();
             Console.WriteLine("You are " + colorStr.ToUpper());
-            
+
             //_game.SetColor(colorStr.ToLower().Equals("black") ? Constant.Black : Constant.White); // we dont need this
 
             await _client.EmitAsync("clientSendReady", _clientName);
@@ -64,7 +64,7 @@ namespace Reversi_mcts.PlayMode.SocketIo
             var requireNextMove = response.GetValue().GetProperty("requireNextMove").GetBoolean();
 
             // default value
-            var row = -1; 
+            var row = -1;
             var col = -1;
 
             if (!isPassed)

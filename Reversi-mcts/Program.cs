@@ -10,11 +10,11 @@ namespace Reversi_mcts
     {
         private static void Main()
         {
-            //SelfPlay.OneRound(1000, 1000);
+            // SelfPlay.OneRound(1000, 1000);
             //SelfPlay.MultiRounds(200, 50, 50);
             //HumanVsAi.NewGame(Constant.White);
 
-            var socketClient = new SocketClient(200);
+            var socketClient = new SocketClient(500);
         }
     }
 }

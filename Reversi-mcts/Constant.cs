@@ -16,11 +16,12 @@ namespace Reversi_mcts
             // return (byte)(1 ^ player);
         }
 
+        public static readonly double C = Math.Sqrt(2); // exploration constant
+
         // Game status
         public const byte Black = 0;
         public const byte White = 1;
         public const byte Draw = 2;
-        public const byte GameNotCompleted = 3;
 
         // Node Score
         public const float WinScore = 1;
@@ -31,7 +32,7 @@ namespace Reversi_mcts
         public const byte RobustChild = 0; // Most visits
         public const byte MaxChild = 1; // Highest win-rate
 
-        // Draw
+        // Display
         public const string WrongMove = "X ";
         public const string LastBlackMove = "B ";
         public const string LastWhiteMove = "W ";

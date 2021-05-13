@@ -1,21 +1,16 @@
-﻿using System.Collections.Generic;
-
-namespace Reversi_mcts.Core.Board
+﻿namespace Reversi_mcts.Core.Board
 {
     public static class NotationHelper
     {
-        public static readonly List<char> ColumnName = new List<char>()
-            {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
-
-        public static readonly List<char> RowName = new List<char>()
-            {'1', '2', '3', '4', '5', '6', '7', '8'};
+        private const string ColumnName = "abcdefgh";
+        private const string RowName = "12345678";
 
         // ------------------------------------ BitMove ------------------------------------
         public static (int row, int col) ToCoordinate(this ulong bitMove)
         {
             if (bitMove == 0) return (-1, -1);
             var index = bitMove.BitScanReverse();
-            return ( index / 8,  index % 8 );
+            return (index / 8, index % 8);
         }
 
         public static string ToNotation(this ulong bitMove)

@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using Reversi_mcts.Core.Board;
 
 namespace Reversi_mcts.Core.MonteCarlo
 {
     public class Node
     {
-        public ulong Move { get; }
         public State State { get; }
-        public Node Parent { get; }
+        public ulong ParentMove { get; }
+        public Node ParentNode { get; }
 
         // Why use List<T>: https://stackoverflow.com/a/42753399/11898496
         public List<Node> ChildNodes { get; }
@@ -17,18 +16,18 @@ namespace Reversi_mcts.Core.MonteCarlo
         public int Visits { get; set; }
         public float Wins { get; set; }
 
-        public Node(State state, Node parent, ulong move)
+        public Node(State state, Node parentNode, ulong parentMove)
         {
-            Move = move;
             State = state;
+            ParentMove = parentMove;
 
             // Monte Carlo stuff
             Visits = 0;
             Wins = 0;
 
             // Tree stuff
-            Parent = parent;
-            UntriedMoves = state.BitLegalMoves.ToListBitMove();
+            ParentNode = parentNode;
+            UntriedMoves = state.GetListLegalMoves();
             ChildNodes = new List<Node>(UntriedMoves.Count);
         }
     }
@@ -36,28 +35,29 @@ namespace Reversi_mcts.Core.MonteCarlo
     public static class NodeExtensions
     {
         // Phase 1: SELECTION
-        public static Node SelectChild(this Node node)
+        public static Node SelectChild(this Node node, byte rootPlayer)
         {
-            Node bestChild = null;
-            var bestUcb1 = double.MinValue;
+            var isRootPlayer = node.State.Player == rootPlayer;
 
+            Node bestChild = null;
+            var maxUcb1 = double.MinValue;
             foreach (var childNode in node.ChildNodes)
             {
-                // is continue/break bad: https://softwareengineering.stackexchange.com/a/58253
-                var childUcb1 = childNode.GetUcb1();
-                if (childUcb1 > bestUcb1)
+                var childUcb1 = childNode.GetUcb1(isRootPlayer);
+                if (childUcb1 > maxUcb1)
                 {
                     bestChild = childNode;
-                    bestUcb1 = childUcb1;
+                    maxUcb1 = childUcb1;
                 }
             }
 
             return bestChild;
         }
 
-        private static double GetUcb1(this Node node)
+        private static double GetUcb1(this Node node, bool isRootPlayer)
         {
-            return node.Wins / node.Visits + Math.Sqrt(2 * Math.Log(node.Parent.Visits) / node.Visits);
+            var wins = isRootPlayer ? node.Wins : node.Visits - node.Wins;
+            return wins / node.Visits + Constant.C * Math.Sqrt(Math.Log(node.ParentNode.Visits) / node.Visits);
         }
 
         // Phase 2: EXPANSION
@@ -85,31 +85,20 @@ namespace Reversi_mcts.Core.MonteCarlo
                 state = state.NextState(move);
             }
 
-            return GetScore(state, rootPlayer);
-        }
-
-        private static float GetScore(State state, byte rootPlayer)
-        {
-            var blackCount = state.Board.CountPieces(Constant.Black);
-            var whiteCount = state.Board.CountPieces(Constant.White);
-
-            // Draw
-            if (blackCount == whiteCount) return Constant.DrawScore;
-
-            // Not Draw
-            var winner = blackCount > whiteCount ? Constant.Black : Constant.White;
-            var score = rootPlayer == winner ? Constant.WinScore : Constant.LoseScore;
-
-            return score;
+            var winner = state.Winner();
+            if (winner == Constant.Draw) return Constant.DrawScore;
+            return winner == rootPlayer ? Constant.WinScore : Constant.LoseScore;
         }
 
         // Phase 4: BACKPROPAGATION
-        public static void BackPropagate(this Node node, float result)
+        public static void BackPropagate(this Node node, float reward)
         {
-            for (var tempMode = node; tempMode != null; tempMode = tempMode.Parent)
+            while (node != null)
             {
-                tempMode.Wins += result;
-                tempMode.Visits++;
+                node.Wins += reward;
+                node.Visits++;
+
+                node = node.ParentNode;
             }
         }
 

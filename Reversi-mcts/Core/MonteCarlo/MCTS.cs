@@ -7,7 +7,7 @@ namespace Reversi_mcts.Core.MonteCarlo
         public static int LastPlayout { get; private set; }
         public static float LastWinPercentage { get; private set; }
         public static int LastRunTime { get; private set; }
-        
+
         public static ulong RunSearch(State state, int timeout = 1000)
         {
             // save root node ref, for find best-move later
@@ -23,7 +23,7 @@ namespace Reversi_mcts.Core.MonteCarlo
                 // Phase 1: Selection
                 while (node.IsFullyExpanded() && node.HasChildNode())
                 {
-                    node = node.SelectChild();
+                    node = node.SelectChild(root.State.Player);
                 }
 
                 // Phase 2: Expansion
@@ -33,14 +33,14 @@ namespace Reversi_mcts.Core.MonteCarlo
                 }
 
                 // Phase 3: Simulation
-                var score = node.Simulate(state.Player);
+                var reward = node.Simulate(root.State.Player);
 
                 // Phase 4: BackPropagation
-                node.BackPropagate(score);
+                node.BackPropagate(reward);
             }
 
             // save statistic
-            LastWinPercentage = (int)(root.Wins * 100f / root.Visits);
+            LastWinPercentage = (int) (root.Wins * 100f / root.Visits);
             LastPlayout = root.Visits;
             LastRunTime = timeout;
 
@@ -63,7 +63,7 @@ namespace Reversi_mcts.Core.MonteCarlo
                 {
                     if (childNode.Visits > max)
                     {
-                        bestMove = childNode.Move;
+                        bestMove = childNode.ParentMove;
                         max = childNode.Visits;
                     }
                 }
@@ -76,7 +76,7 @@ namespace Reversi_mcts.Core.MonteCarlo
                     double ratio = childNode.Wins / childNode.Visits;
                     if (ratio > max)
                     {
-                        bestMove = childNode.Move;
+                        bestMove = childNode.ParentMove;
                         max = childNode.Visits;
                     }
                 }

@@ -53,12 +53,6 @@ namespace Reversi_mcts.Core.Board
         }
 
         // ------------------------------------ Move Stuffs ------------------------------------
-        public static void MakeMove(this BitBoard board, byte player, int row, int col)
-        {
-            var bitMove = (row, col).ToBitMove();
-            board.MakeMove(player, bitMove);
-        }
-
         public static void MakeMove(this BitBoard board, byte player, ulong bitMove)
         {
             var wouldFlips = board.GetWouldFlips(player, bitMove);
@@ -142,9 +136,9 @@ namespace Reversi_mcts.Core.Board
         }
 
         // ------------------------------------ Display Stuffs ------------------------------------
-        public static void Draw(this BitBoard board)
+        public static void Display(this BitBoard board)
         {
-            Console.WriteLine("  " + string.Join(" ", NotationHelper.ColumnName.ToArray()));
+            Console.WriteLine("  a b c d e f g h");
 
             var row = 0;
             for (var i = 0; i < 64; i++)
@@ -169,9 +163,9 @@ namespace Reversi_mcts.Core.Board
             Console.WriteLine();
         }
 
-        public static void DrawWithLastMove(this BitBoard board, ulong lastBitMove)
+        public static void DisplayWithLastMove(this BitBoard board, ulong lastBitMove)
         {
-            Console.WriteLine("  " + string.Join(" ", NotationHelper.ColumnName.ToArray()));
+            Console.WriteLine("  a b c d e f g h");
 
             var moveIndex = lastBitMove.BitScanReverse();
             var row = 0;
@@ -197,9 +191,9 @@ namespace Reversi_mcts.Core.Board
             Console.WriteLine();
         }
 
-        public static void DrawWithLegalMoves(this BitBoard board, byte player)
+        public static void DisplayWithLegalMoves(this BitBoard board, byte player)
         {
-            Console.WriteLine("  " + string.Join(" ", NotationHelper.ColumnName.ToArray()));
+            Console.WriteLine("  a b c d e f g h");
 
             var legalMoves = board.GetLegalMoves(player);
             var row = 0;
@@ -226,9 +220,9 @@ namespace Reversi_mcts.Core.Board
             Console.WriteLine();
         }
 
-        public static void DrawWithLastMoveAndLegalMoves(this BitBoard board, ulong lastBitMove, byte player)
+        public static void DisplayWithLastMoveAndLegalMoves(this BitBoard board, ulong lastBitMove, byte player)
         {
-            Console.WriteLine("  " + string.Join(" ", NotationHelper.ColumnName.ToArray()));
+            Console.WriteLine("  a b c d e f g h");
 
             var legalMoves = board.GetLegalMoves(player);
             var moveIndex = lastBitMove.BitScanReverse();

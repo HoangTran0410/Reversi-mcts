@@ -1,4 +1,5 @@
-﻿using Reversi_mcts.Core.Board;
+﻿using System.Collections.Generic;
+using Reversi_mcts.Core.Board;
 
 namespace Reversi_mcts.Core.MonteCarlo
 {
@@ -7,14 +8,16 @@ namespace Reversi_mcts.Core.MonteCarlo
         public BitBoard Board { get; }
         public byte Player { get; }
         public ulong BitLegalMoves { get; }
-        
-        public State() : this(new BitBoard(), Constant.Black) {}
+
+        public State() : this(new BitBoard(), Constant.Black)
+        {
+        }
 
         public State(BitBoard board, byte player)
         {
             Player = player;
             Board = board;
-            BitLegalMoves = Board.GetLegalMoves(Player);
+            BitLegalMoves = board.GetLegalMoves(player);
         }
 
         public static State FromRecordText(string recordText)
@@ -41,8 +44,7 @@ namespace Reversi_mcts.Core.MonteCarlo
     {
         public static bool IsTerminal(this State state)
         {
-            return state.BitLegalMoves == 0;
-            // return state.Board.IsGameComplete();
+            return state.Board.IsGameComplete();
         }
 
         public static State NextState(this State state, ulong move)
@@ -56,6 +58,11 @@ namespace Reversi_mcts.Core.MonteCarlo
             var newPlayer = Constant.Opponent(state.Player);
 
             return new State(newBoard, newPlayer);
+        }
+
+        public static List<ulong> GetListLegalMoves(this State state)
+        {
+            return state.BitLegalMoves.ToListBitMove();
         }
 
         public static ulong GetRandomMove(this State state)
@@ -77,8 +84,6 @@ namespace Reversi_mcts.Core.MonteCarlo
 
         public static byte Winner(this State state)
         {
-            if (!state.Board.IsGameComplete()) return Constant.GameNotCompleted;
-
             int blackScore = state.Board.CountPieces(Constant.Black);
             int whiteScore = state.Board.CountPieces(Constant.White);
 

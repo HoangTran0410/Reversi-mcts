@@ -29,9 +29,9 @@ namespace Reversi_mcts.PlayMode
         public static byte OneRound(int blackTimeout = 500, int whiteTimeout = 500, bool showLog = true)
         {
             var state = new State();
-            var winner = Constant.GameNotCompleted;
+            var winner = Constant.Draw;
 
-            while (winner == Constant.GameNotCompleted)
+            while (!state.IsTerminal())
             {
                 var timeout = state.Player == Constant.Black ? blackTimeout : whiteTimeout;
                 var move = Mcts.RunSearch(state, timeout);
@@ -41,7 +41,7 @@ namespace Reversi_mcts.PlayMode
 
                 if (showLog) ShowLog(move, state);
             }
-            
+
             return winner;
         }
 
@@ -64,8 +64,8 @@ namespace Reversi_mcts.PlayMode
                 var (row, col) = move.ToCoordinate();
                 Console.WriteLine("- Player " + playerMakeMove + " move at " + (row, col).ToNotation());
             }
-            
-            state.Board.DrawWithLastMoveAndLegalMoves(move, playerMakeMove);
+
+            state.Board.DisplayWithLastMoveAndLegalMoves(move, playerMakeMove);
             var blackScore = state.Board.CountPieces(Constant.Black);
             var whiteScore = state.Board.CountPieces(Constant.White);
             Console.WriteLine("- Score(b/w): {0}/{1}\n", blackScore, whiteScore);

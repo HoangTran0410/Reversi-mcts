@@ -10,13 +10,13 @@ namespace Reversi_mcts.PlayMode
         public static void NewGame(byte humanColor = Constant.Black, int aiTimeout = 1000)
         {
             var state = new State();
-            var winner = Constant.GameNotCompleted;
+            var winner = Constant.Draw;
 
             // show initial board
-            state.Board.DrawWithLegalMoves(Constant.Black);
+            state.Board.DisplayWithLegalMoves(Constant.Black);
 
             // begin
-            while (winner == Constant.GameNotCompleted)
+            while (!state.IsTerminal())
             {
                 var move = state.Player == humanColor ? HumanTurn(state) : AiTurn(state, aiTimeout);
 
@@ -25,11 +25,14 @@ namespace Reversi_mcts.PlayMode
 
                 DrawBoard(move, state);
             }
+
+            if (winner == Constant.Draw) Console.WriteLine("Draw");
+            else Console.WriteLine((winner == humanColor ? "YOU" : "AI") + " won!");
         }
 
         private static void DrawBoard(ulong move, State state)
         {
-            state.Board.DrawWithLastMoveAndLegalMoves(move, state.Player);
+            state.Board.DisplayWithLastMoveAndLegalMoves(move, state.Player);
 
             var blackScore = state.Board.CountPieces(Constant.Black);
             var whiteScore = state.Board.CountPieces(Constant.White);
@@ -52,7 +55,7 @@ namespace Reversi_mcts.PlayMode
         private static ulong HumanTurn(State state)
         {
             // show valid moves
-            var validMoves = state.BitLegalMoves.ToListBitMove();
+            var validMoves = state.GetListLegalMoves();
             var validNotations = new List<string>(validMoves.Count);
             Console.Write("Valid moves: ");
             foreach (var validMove in validMoves)
