@@ -6,44 +6,59 @@
         private const string RowName = "12345678";
 
         // ------------------------------------ BitMove ------------------------------------
+        public static bool IsValid(this ulong bitMove)
+        {
+            return bitMove != 0UL;
+        }
+
         public static (int row, int col) ToCoordinate(this ulong bitMove)
         {
-            if (bitMove == 0) return (-1, -1);
+            if (!bitMove.IsValid()) return (-1, -1);
             var index = bitMove.BitScanReverse();
             return (index / 8, index % 8);
         }
 
         public static string ToNotation(this ulong bitMove)
         {
-            return bitMove.ToCoordinate().ToNotation();
+            return bitMove.IsValid() ? bitMove.ToCoordinate().ToNotation() : "PASSED";
         }
 
         // ------------------------------------ Coordinate ------------------------------------
+        public static bool IsValid(this (int row, int col) coordinate)
+        {
+            return !(coordinate.row == -1 || coordinate.col == -1);
+        }
+
         public static ulong ToBitMove(this (int row, int col) coordinate)
         {
-            return 0UL.SetBitAtCoordinate(coordinate.row, coordinate.col);
+            return coordinate.IsValid() ? 0UL.SetBitAtCoordinate(coordinate.row, coordinate.col) : 0UL;
         }
 
         public static string ToNotation(this (int row, int col) coordinate)
         {
-            if (coordinate.row == -1 || coordinate.col == -1) return "PASSED";
-            return "" + ColumnName[coordinate.col] + RowName[coordinate.row];
+            return coordinate.IsValid() ? "" + ColumnName[coordinate.col] + RowName[coordinate.row] : "PASSED";
         }
 
         // ------------------------------------ Notation ------------------------------------
+        public static bool IsValid(this string notation)
+        {
+            return !(
+                notation.Length != 2 ||
+                ColumnName.IndexOf(notation[0]) == -1 ||
+                RowName.IndexOf(notation[1]) == -1
+            );
+        }
+
         public static ulong ToBitMove(this string notation)
         {
-            var (row, col) = notation.ToCoordinate();
-            if (row == -1 || col == -1) return 0UL;
-            return 0UL.SetBitAtCoordinate(row, col);
+            return notation.IsValid() ? notation.ToCoordinate().ToBitMove() : 0UL;
         }
 
         public static (int row, int col) ToCoordinate(this string notation)
         {
-            var notationChar = notation.ToLower().ToCharArray();
-            var col = ColumnName.IndexOf(notationChar[0]);
-            var row = RowName.IndexOf(notationChar[1]);
-
+            if (!notation.IsValid()) return (-1, -1);
+            var col = ColumnName.IndexOf(notation[0]);
+            var row = RowName.IndexOf(notation[1]);
             return (row, col);
         }
     }
