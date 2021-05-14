@@ -48,7 +48,7 @@ namespace Reversi_mcts.PlayMode.SocketIo
             if (row != -1 && col != -1) _recordText += notation;
             Console.WriteLine("{0} - Op: {1}", _recordText.Length / 2, notation);
 
-            _state.Board.DisplayWithLastMoveAndLegalMoves(bitMove, Constant.Opponent(_state.Player));
+            //_state.Board.DisplayWithLastMoveAndLegalMoves(bitMove, Constant.Opponent(_state.Player));
         }
 
         public int GetLastPlayout()
