@@ -26,7 +26,7 @@ namespace Reversi_mcts.Core.MonteCarlo
 
             for (var i = 0; i < recordText.Length; i += 2)
             {
-                var notation = recordText.Substring(i, 2);
+                var notation = recordText.Substring(i, 2).ToLower();
                 state = state.NextState(notation.ToBitMove());
 
                 // PASSING MOVE
