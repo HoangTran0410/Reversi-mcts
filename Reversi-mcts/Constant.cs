@@ -16,7 +16,7 @@ namespace Reversi_mcts
             // return (byte)(1 ^ player);
         }
 
-        public static readonly double C = Math.Sqrt(2); // exploration constant
+        public const double C = 0.85; // exploration constant
 
         // Game status
         public const byte Black = 0;
