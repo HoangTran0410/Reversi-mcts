@@ -23,7 +23,7 @@ namespace Reversi_mcts.Core.MonteCarlo
                 // Phase 1: Selection
                 while (node.IsFullyExpanded() && node.HasChildNode())
                 {
-                    node = node.SelectChild(root.State.Player);
+                    node = node.SelectChild();
                 }
 
                 // Phase 2: Expansion
@@ -33,14 +33,14 @@ namespace Reversi_mcts.Core.MonteCarlo
                 }
 
                 // Phase 3: Simulation
-                var reward = node.Simulate(root.State.Player);
+                var reward = node.Simulate();
 
                 // Phase 4: BackPropagation
                 node.BackPropagate(reward);
             }
 
             // save statistic
-            LastWinPercentage = (int) (root.Wins * 100f / root.Visits);
+            LastWinPercentage = (int) (root.Wins[root.State.Player] * 100f / root.Visits);
             LastPlayout = root.Visits;
             LastRunTime = timeout;
 
@@ -73,7 +73,7 @@ namespace Reversi_mcts.Core.MonteCarlo
                 var max = double.MinValue;
                 foreach (var childNode in node.ChildNodes)
                 {
-                    double ratio = childNode.Wins / childNode.Visits;
+                    double ratio = childNode.Wins[node.State.Player] / childNode.Visits;
                     if (ratio > max)
                     {
                         bestMove = childNode.ParentMove;

@@ -14,7 +14,7 @@ namespace Reversi_mcts.Core.MonteCarlo
         public List<ulong> UntriedMoves { get; }
 
         public int Visits { get; set; }
-        public float Wins { get; set; }
+        public float[] Wins { get; set; }
 
         public Node(State state, Node parentNode, ulong parentMove)
         {
@@ -23,7 +23,7 @@ namespace Reversi_mcts.Core.MonteCarlo
 
             // Monte Carlo stuff
             Visits = 0;
-            Wins = 0;
+            Wins = new[] {0f, 0f};
 
             // Tree stuff
             ParentNode = parentNode;
@@ -35,15 +35,13 @@ namespace Reversi_mcts.Core.MonteCarlo
     public static class NodeExtensions
     {
         // Phase 1: SELECTION
-        public static Node SelectChild(this Node node, byte rootPlayer)
+        public static Node SelectChild(this Node node)
         {
-            var isRootPlayer = node.State.Player == rootPlayer;
-
             Node bestChild = null;
             var maxUcb1 = double.MinValue;
             foreach (var childNode in node.ChildNodes)
             {
-                var childUcb1 = childNode.GetUcb1(isRootPlayer);
+                var childUcb1 = childNode.GetUcb1();
                 if (childUcb1 > maxUcb1)
                 {
                     bestChild = childNode;
@@ -54,10 +52,13 @@ namespace Reversi_mcts.Core.MonteCarlo
             return bestChild;
         }
 
-        private static double GetUcb1(this Node node, bool isRootPlayer)
+        private static double GetUcb1(this Node node)
         {
-            var wins = isRootPlayer ? node.Wins : node.Visits - node.Wins;
-            return wins / node.Visits + Constant.C * Math.Sqrt(Math.Log(node.ParentNode.Visits) / node.Visits);
+            var wins = node.Wins[node.ParentNode.State.Player];
+            var visits = node.Visits;
+            var parentVisits = node.ParentNode.Visits;
+            
+            return wins / visits  + Constant.C * Math.Sqrt(Math.Log(parentVisits) / visits);
         }
 
         // Phase 2: EXPANSION
@@ -75,7 +76,11 @@ namespace Reversi_mcts.Core.MonteCarlo
         }
 
         // Phase 3: SIMULATION
-        public static float Simulate(this Node node, byte rootPlayer)
+        // Returns a score vector.
+        // * (1.0, 0.0) indicates a win for player black.
+        // * (0.0, 1.0) indicates a win for player white.
+        // * (0.5, 0.5) indicates a draw
+        public static (float blackReward, float whiteReward) Simulate(this Node node)
         {
             var state = node.State; // TODO old code: state = new State(node.State)
 
@@ -86,18 +91,22 @@ namespace Reversi_mcts.Core.MonteCarlo
             }
 
             var winner = state.Winner();
-            if (winner == Constant.Draw) return Constant.DrawScore;
-            return winner == rootPlayer ? Constant.WinScore : Constant.LoseScore;
+            return winner switch
+            {
+                Constant.Black => (Constant.WinScore, Constant.LoseScore),
+                Constant.White => (Constant.LoseScore, Constant.WinScore),
+                _ => (Constant.DrawScore, Constant.DrawScore)
+            };
         }
 
         // Phase 4: BACKPROPAGATION
-        public static void BackPropagate(this Node node, float reward)
+        public static void BackPropagate(this Node node, (float blackReward, float whiteReward) reward)
         {
             while (node != null)
             {
-                node.Wins += reward;
                 node.Visits++;
-
+                node.Wins[Constant.Black] += reward.blackReward;
+                node.Wins[Constant.White] += reward.whiteReward;
                 node = node.ParentNode;
             }
         }
