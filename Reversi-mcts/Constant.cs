@@ -5,6 +5,7 @@ namespace Reversi_mcts
     // why use internal static class? => Rider recommend, idk :))
     internal static class Constant
     {
+        // https://stackoverflow.com/a/768001/11898496
         public static readonly Random Random = new Random();
 
         public static byte Opponent(byte player)
