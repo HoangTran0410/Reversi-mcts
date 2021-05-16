@@ -3,6 +3,7 @@ using Reversi_mcts.Core.Board;
 using Reversi_mcts.Core.MonteCarlo;
 using Reversi_mcts.PlayMode;
 using Reversi_mcts.PlayMode.SocketIo;
+using Reversi_mcts.Tools;
 
 namespace Reversi_mcts
 {
@@ -15,7 +16,10 @@ namespace Reversi_mcts
             // HumanVsAi.NewGame(Constant.White);
             // ContinueFromRecord.NewGame("d3c3b3c5f6f5g6f3b6b5b4a5f4f7g4e3c4a3f8b7c6d6a8g7d2f2f1h4c2c1a6g3d7e1d1g1h3h2e6e7h8d8g8e2c8h5b2a4e8b8a2g5g2b1a1h1c7a7h6");
 
-            var socketClient = new SocketClient(100);
+            // var socketClient = new SocketClient(100);
+
+            GameRecordConverter.ToGameRecord64(
+                "0|38|F5F6E6");
         }
     }
 }
