@@ -23,19 +23,20 @@ namespace Reversi_mcts.Core.MonteCarlo
         public static State FromRecordText(string recordText)
         {
             var state = new State();
-
             for (var i = 0; i < recordText.Length; i += 2)
             {
-                var notation = recordText.Substring(i, 2).ToLower();
-                state = state.NextState(notation.ToBitMove());
-
-                // PASSING MOVE
-                if (!state.Board.HasLegalMoves(state.Player))
+                ulong bitMove;
+                if (state.Board.HasLegalMoves(state.Player))
                 {
-                    state = state.NextState(0);
+                    var notation = recordText.Substring(i, 2).ToLower();
+                    bitMove = notation.ToBitMove();
                 }
+                else
+                {
+                    bitMove = 0UL; // PASSING MOVE
+                }
+                state = state.NextState(bitMove);
             }
-
             return state;
         }
     }
