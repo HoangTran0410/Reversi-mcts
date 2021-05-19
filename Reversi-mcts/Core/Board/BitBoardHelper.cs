@@ -80,6 +80,78 @@ namespace Reversi_mcts.Core.Board
         {
             return bits >> 9 & LeftMask;
         }
+        
+        // ------------------------------------ Flip Rotate ------------------------------------
+        // https://www.chessprogramming.org/Flipping_Mirroring_and_Rotating
+        public static ulong Rotate180(this ulong b)
+        {
+            return b.FlipVertical().MirrorHorizontal();
+        }
+
+        public static ulong Rotate90Clockwise(this ulong b)
+        {
+            return b.FlipDiagA1H8().FlipVertical();
+        }
+
+        public static ulong Rotate90AntiClockwise(this ulong b)
+        {
+            return b.FlipVertical().FlipDiagA1H8();
+        }
+        
+        public static ulong FlipVertical(this ulong b)
+        {
+            return ((b << 56)) |
+                   ((b << 40) & 0x00ff000000000000) |
+                   ((b << 24) & 0x0000ff0000000000) |
+                   ((b << 8) & 0x000000ff00000000) |
+                   ((b >> 8) & 0x00000000ff000000) |
+                   ((b >> 24) & 0x0000000000ff0000) |
+                   ((b >> 40) & 0x000000000000ff00) |
+                   ((b >> 56));
+        }
+
+        public static ulong MirrorHorizontal(this ulong b)
+        {
+            const ulong k1 = 0x5555555555555555;
+            const ulong k2 = 0x3333333333333333;
+            const ulong k4 = 0x0f0f0f0f0f0f0f0f;
+            b = ((b >> 1) & k1) + 2 * (b & k1);
+            b = ((b >> 2) & k2) + 4 * (b & k2);
+            b = ((b >> 4) & k4) + 16 * (b & k4);
+            return b;
+        }
+
+        // do bitboard của mình ngược so với người ta
+        // mình: index 0 ở A1
+        // người ta: index 0 ở H8
+        // => Nên hàm FlipDiag A8H1 và A1H8 sẽ đổi code với nhau
+        public static ulong FlipDiagA8H1(this ulong b)
+        {
+            const ulong k1 = 0x5500550055005500;
+            const ulong k2 = 0x3333000033330000;
+            const ulong k4 = 0x0f0f0f0f00000000;
+            var t = k4 & (b ^ (b << 28));
+            b ^= t ^ (t >> 28);
+            t = k2 & (b ^ (b << 14));
+            b ^= t ^ (t >> 14);
+            t = k1 & (b ^ (b << 7));
+            b ^= t ^ (t >> 7);
+            return b;
+        }
+
+        public static ulong FlipDiagA1H8(this ulong b)
+        {
+            const ulong k1 = 0xaa00aa00aa00aa00;
+            const ulong k2 = 0xcccc0000cccc0000;
+            const ulong k4 = 0xf0f0f0f00f0f0f0f;
+            var t = b ^ (b << 36);
+            b ^= k4 & (t ^ (b >> 36));
+            t = k2 & (b ^ (b << 18));
+            b ^= t ^ (t >> 18);
+            t = k1 & (b ^ (b << 9));
+            b ^= t ^ (t >> 9);
+            return b;
+        }
 
         // ------------------------------------ Bit Stuffs ------------------------------------
         public static List<ulong> ToListBitMove(this ulong bits)
@@ -194,7 +266,7 @@ namespace Reversi_mcts.Core.Board
         {
             for (var i = 0; i < 64; i++)
             {
-                if (i % 8 == 0) Console.WriteLine();
+                if (i % 8 == 0 && i != 0) Console.WriteLine();
 
                 var pos = 1UL << i;
                 var isSetOne = (bits & pos) > 0;

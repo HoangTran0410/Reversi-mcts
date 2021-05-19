@@ -135,6 +135,63 @@ namespace Reversi_mcts.Core.Board
             return wouldFlips;
         }
 
+        // ------------------------------------ Flip Rotate ------------------------------------
+        public static BitBoard Rotate180(this BitBoard board)
+        {
+            var clone = board.Clone();
+            clone.Pieces[Black] = clone.Pieces[Black].Rotate180();
+            clone.Pieces[White] = clone.Pieces[White].Rotate180();
+            return clone;
+        }
+
+        public static BitBoard Rotate90Clockwise(this BitBoard board)
+        {
+            var clone = board.Clone();
+            clone.Pieces[Black] = clone.Pieces[Black].Rotate90Clockwise();
+            clone.Pieces[White] = clone.Pieces[White].Rotate90Clockwise();
+            return clone;
+        }
+
+        public static BitBoard Rotate90AntiClockwise(this BitBoard board)
+        {
+            var clone = board.Clone();
+            clone.Pieces[Black] = clone.Pieces[Black].Rotate90AntiClockwise();
+            clone.Pieces[White] = clone.Pieces[White].Rotate90AntiClockwise();
+            return clone;
+        }
+        
+        public static BitBoard FlipVertical(this BitBoard board)
+        {
+            var clone = board.Clone();
+            clone.Pieces[Black] = clone.Pieces[Black].FlipVertical();
+            clone.Pieces[White] = clone.Pieces[White].FlipVertical();
+            return clone;
+        }
+
+        public static BitBoard MirrorHorizontal(this BitBoard board)
+        {
+            var clone = board.Clone();
+            clone.Pieces[Black] = clone.Pieces[Black].MirrorHorizontal();
+            clone.Pieces[White] = clone.Pieces[White].MirrorHorizontal();
+            return clone;
+        }
+
+        public static BitBoard FlipDiagA8H1(this BitBoard board)
+        {
+            var clone = board.Clone();
+            clone.Pieces[Black] = clone.Pieces[Black].FlipDiagA8H1();
+            clone.Pieces[White] = clone.Pieces[White].FlipDiagA8H1();
+            return clone;
+        }
+
+        public static BitBoard FlipDiagA1H8(this BitBoard board)
+        {
+            var clone = board.Clone();
+            clone.Pieces[Black] = clone.Pieces[Black].FlipDiagA1H8();
+            clone.Pieces[White] = clone.Pieces[White].FlipDiagA1H8();
+            return clone;
+        }
+        
         // ------------------------------------ Display Stuffs ------------------------------------
         public static void Display(this BitBoard board)
         {
