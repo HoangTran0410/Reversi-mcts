@@ -14,12 +14,12 @@ namespace Reversi_mcts.GameDatabase
         public int GameCount = 0;
         public int GameMiss = 0;
 
-        public List<List<ulong>> ParsedGamesMoves = new List<List<ulong>>();
-        public List<List<List<ulong>>> ParsedGamesLegalMoves = new List<List<List<ulong>>>();
+        public readonly List<List<ulong>> ParsedGamesMoves = new List<List<ulong>>();
+        public readonly List<List<List<ulong>>> ParsedGamesLegalMoves = new List<List<List<ulong>>>();
 
         public void Parse(string fileName)
         {
-            Console.WriteLine("Parse GameRecord from '{0}':", fileName);
+            Console.WriteLine("Parsing GameRecord from '{0}':", fileName);
 
             var lineIndex = 0;
             var lines = File.ReadLines(fileName);

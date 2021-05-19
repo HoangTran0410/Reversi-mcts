@@ -9,7 +9,7 @@ namespace Reversi_mcts.Utils
     /// </summary>
     public class ProgressBar : IDisposable, IProgress<double>
     {
-        private const int BlockCount = 10;
+        private const int BlockCount = 20;
         private readonly TimeSpan _animationInterval = TimeSpan.FromSeconds(1.0 / 8);
         private const string Animation = @"|/-\";
 

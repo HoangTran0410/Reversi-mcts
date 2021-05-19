@@ -51,14 +51,16 @@
 
         public static ulong ToBitMove(this string notation)
         {
-            return notation.IsValid() ? notation.ToCoordinate().ToBitMove() : 0UL;
+            var lower = notation.ToLower();
+            return lower.IsValid() ? lower.ToCoordinate().ToBitMove() : 0UL;
         }
 
         public static (int row, int col) ToCoordinate(this string notation)
         {
-            if (!notation.IsValid()) return (-1, -1);
-            var col = ColumnName.IndexOf(notation[0]);
-            var row = RowName.IndexOf(notation[1]);
+            var lower = notation.ToLower();
+            if (!lower.IsValid()) return (-1, -1);
+            var col = ColumnName.IndexOf(lower[0]);
+            var row = RowName.IndexOf(lower[1]);
             return (row, col);
         }
     }

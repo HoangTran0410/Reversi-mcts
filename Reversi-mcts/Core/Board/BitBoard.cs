@@ -52,6 +52,24 @@ namespace Reversi_mcts.Core.Board
             return board.Pieces[player].PopCount();
         }
 
+        public static byte GetPieceAt(this BitBoard board, ulong position)
+        {
+            if ((board.Pieces[Black] & position) != 0) return Constant.BlackCell;
+            if ((board.Pieces[White] & position) != 0) return Constant.WhiteCell;
+            return Constant.EmptyCell;
+        }
+
+        public static void SetPieceAt(this BitBoard board, ulong position, byte color)
+        {
+            board.Pieces[color] |= position;
+        }
+
+        public static void Clear(this BitBoard board)
+        {
+            board.Pieces[Black] = 0;
+            board.Pieces[White] = 0;
+        }
+
         // ------------------------------------ Move Stuffs ------------------------------------
         public static void MakeMove(this BitBoard board, byte player, ulong bitMove)
         {
@@ -211,10 +229,10 @@ namespace Reversi_mcts.Core.Board
                 var isBlack = (board.Pieces[Black] & pos) != 0;
                 var isWhite = (board.Pieces[White] & pos) != 0;
 
-                if (isBlack && isWhite) Console.Write(Constant.WrongMove);
-                else if (isBlack) Console.Write(Constant.BlackPiece);
-                else if (isWhite) Console.Write(Constant.WhitePiece);
-                else Console.Write(Constant.EmptyCell);
+                if (isBlack && isWhite) Console.Write(Constant.WrongCellStr);
+                else if (isBlack) Console.Write(Constant.BlackPieceStr);
+                else if (isWhite) Console.Write(Constant.WhitePieceStr);
+                else Console.Write(Constant.EmptyCellStr);
             }
 
             Console.WriteLine();
@@ -239,10 +257,10 @@ namespace Reversi_mcts.Core.Board
                 var isBlack = (board.Pieces[Black] & pos) != 0;
                 var isWhite = (board.Pieces[White] & pos) != 0;
 
-                if (isBlack && isWhite) Console.Write(Constant.WrongMove);
-                else if (isBlack) Console.Write(moveIndex == i ? Constant.LastBlackMove : Constant.BlackPiece);
-                else if (isWhite) Console.Write(moveIndex == i ? Constant.LastWhiteMove : Constant.WhitePiece);
-                else Console.Write(Constant.EmptyCell);
+                if (isBlack && isWhite) Console.Write(Constant.WrongCellStr);
+                else if (isBlack) Console.Write(moveIndex == i ? Constant.LastBlackMoveStr : Constant.BlackPieceStr);
+                else if (isWhite) Console.Write(moveIndex == i ? Constant.LastWhiteMoveStr : Constant.WhitePieceStr);
+                else Console.Write(Constant.EmptyCellStr);
             }
 
             Console.WriteLine();
@@ -267,11 +285,11 @@ namespace Reversi_mcts.Core.Board
                 var isBlack = (board.Pieces[Black] & pos) != 0;
                 var isWhite = (board.Pieces[White] & pos) != 0;
 
-                if (isBlack && isWhite) Console.Write(Constant.WrongMove);
-                else if (isBlack) Console.Write(Constant.BlackPiece);
-                else if (isWhite) Console.Write(Constant.WhitePiece);
-                else if ((legalMoves & pos) != 0) Console.Write(Constant.LegalMove);
-                else Console.Write(Constant.EmptyCell);
+                if (isBlack && isWhite) Console.Write(Constant.WrongCellStr);
+                else if (isBlack) Console.Write(Constant.BlackPieceStr);
+                else if (isWhite) Console.Write(Constant.WhitePieceStr);
+                else if ((legalMoves & pos) != 0) Console.Write(Constant.LegalMoveStr);
+                else Console.Write(Constant.EmptyCellStr);
             }
 
             Console.WriteLine();
@@ -297,11 +315,11 @@ namespace Reversi_mcts.Core.Board
                 var isBlack = (board.Pieces[Black] & pos) != 0;
                 var isWhite = (board.Pieces[White] & pos) != 0;
 
-                if (isBlack && isWhite) Console.Write(Constant.WrongMove);
-                else if (isBlack) Console.Write(moveIndex == i ? Constant.LastBlackMove : Constant.BlackPiece);
-                else if (isWhite) Console.Write(moveIndex == i ? Constant.LastWhiteMove : Constant.WhitePiece);
-                else if ((legalMoves & pos) != 0) Console.Write(Constant.LegalMove);
-                else Console.Write(Constant.EmptyCell);
+                if (isBlack && isWhite) Console.Write(Constant.WrongCellStr);
+                else if (isBlack) Console.Write(moveIndex == i ? Constant.LastBlackMoveStr : Constant.BlackPieceStr);
+                else if (isWhite) Console.Write(moveIndex == i ? Constant.LastWhiteMoveStr : Constant.WhitePieceStr);
+                else if ((legalMoves & pos) != 0) Console.Write(Constant.LegalMoveStr);
+                else Console.Write(Constant.EmptyCellStr);
             }
 
             Console.WriteLine();
