@@ -80,7 +80,7 @@ namespace Reversi_mcts.Core.Board
         {
             return bits >> 9 & LeftMask;
         }
-        
+
         // ------------------------------------ Flip Rotate ------------------------------------
         // https://www.chessprogramming.org/Flipping_Mirroring_and_Rotating
         public static ulong Rotate180(this ulong b)
@@ -97,7 +97,7 @@ namespace Reversi_mcts.Core.Board
         {
             return b.FlipVertical().FlipDiagA1H8();
         }
-        
+
         public static ulong FlipVertical(this ulong b)
         {
             return ((b << 56)) |
@@ -167,6 +167,21 @@ namespace Reversi_mcts.Core.Board
             return ret;
         }
 
+        public static ulong[] ToArrayBitMove(this ulong bits)
+        {
+            var result = new ulong[bits.PopCount()];
+            var index = 0;
+            while (bits != 0)
+            {
+                var m = bits.HighestOneBit();
+                bits ^= m;
+                result[index] = m;
+                index++;
+            }
+
+            return result;
+        }
+
         // https://www.chessprogramming.org/BitScan#De_Bruijn_Multiplication
         private static readonly int[] Index64Reverse =
         {
@@ -217,13 +232,23 @@ namespace Reversi_mcts.Core.Board
 
         public static ulong SetBitAtCoordinate(this ulong bits, int row, int col)
         {
-            // https://stackoverflow.com/a/24250656/11898496
-            return bits | (1UL << Ix(row, col));
+            return bits.SetBitAdIndex(Ix(row, col));
         }
 
         public static ulong RemoveBitAtCoordinate(this ulong bits, int row, int col)
         {
-            return bits & ~(1UL << Ix(row, col));
+            return bits.RemoveBitAtIndex(Ix(row, col));
+        }
+
+        public static ulong SetBitAdIndex(this ulong bits, int index)
+        {
+            // https://stackoverflow.com/a/24250656/11898496
+            return bits | (1UL << index);
+        }
+
+        public static ulong RemoveBitAtIndex(this ulong bits, int index)
+        {
+            return bits & ~(1UL << index);
         }
 
         private static int Ix(int row, int col)

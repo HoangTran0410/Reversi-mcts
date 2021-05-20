@@ -17,7 +17,7 @@ namespace Reversi_mcts
             // SelfPlay.OneRound(1000, 1000);
             // SelfPlay.MultiRounds(200, 50, 50);
             // HumanVsAi.NewGame(Constant.White);
-            // ContinueFromRecord.NewGame("d3c3b3c5f6f5g6f3b6b5b4a5f4f7g4e3c4a3f8b7c6d6a8g7d2f2f1h4c2c1a6g3d7e1d1g1h3h2e6e7h8d8g8e2c8h5b2a4e8b8a2g5g2b1a1h1c7a7h6");
+            // ContinueFromRecord.NewGame("f5f4c3f6f3d6e6c5c4d3e3d2c7c6c2c8d1b1e2f2b3a3e1f1b4c1b5a4g5h5g2h1");
 
             // var socketClient = new SocketClient(4000);
 

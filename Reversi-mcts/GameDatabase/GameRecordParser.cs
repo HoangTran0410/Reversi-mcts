@@ -19,14 +19,12 @@ namespace Reversi_mcts.GameDatabase
 
         public void Parse(string fileName)
         {
-            Console.WriteLine("Parsing GameRecord from '{0}':", fileName);
-
             var lineIndex = 0;
             var lines = File.ReadLines(fileName);
             var totalLines = lines.Count();
             var progress = new ProgressBar();
-            
-            Console.WriteLine("- {0} game records.", totalLines);
+
+            Console.WriteLine("- Found {0} game records.", totalLines);
 
             // đọc từng dòng trong file
             foreach (var rawLine in lines)
@@ -35,11 +33,11 @@ namespace Reversi_mcts.GameDatabase
                 var line = rawLine.Trim();
 
                 // parse game line, if there are any error, ignore
-                List<ulong> tempParsedMoves;
+                List<ulong> tempMoves;
                 List<List<ulong>> tempLegalMoves;
                 try
                 {
-                    ParseGame(line, out tempParsedMoves, out tempLegalMoves);
+                    ParseGame(line, out tempMoves, out tempLegalMoves);
                 }
                 catch (Exception e)
                 {
@@ -49,7 +47,7 @@ namespace Reversi_mcts.GameDatabase
                 }
 
                 // Lưu lại parsed-move và parsed-legal-moves vào
-                ParsedGamesMoves.Add(tempParsedMoves);
+                ParsedGamesMoves.Add(tempMoves);
                 ParsedGamesLegalMoves.Add(tempLegalMoves);
                 GameCount++;
 
@@ -57,14 +55,14 @@ namespace Reversi_mcts.GameDatabase
                 progress.Report((double) lineIndex / totalLines);
             }
 
-            // sleep để thấy loading bar lên 100% :))
-            Thread.Sleep(100);
+            // sleep để chờ progress bar lên 100% :))
+            Thread.Sleep(500);
+            progress.Dispose();
         }
 
-        private static void ParseGame(string strGame, out List<ulong> tempParsedMoves,
-            out List<List<ulong>> tempLegalMoves)
+        private static void ParseGame(string strGame, out List<ulong> tempMoves, out List<List<ulong>> tempLegalMoves)
         {
-            tempParsedMoves = new List<ulong>();
+            tempMoves = new List<ulong>();
             tempLegalMoves = new List<List<ulong>>();
 
             // Tách lấy record text (kifu text)
@@ -75,25 +73,27 @@ namespace Reversi_mcts.GameDatabase
             var state = new State();
             for (var i = 0; i < recordText.Length; i += 2)
             {
-                ulong move;
-                var listLegalMoves = state.GetListLegalMoves();
+                // Kiểm tra xem có phải passing move hay không
+                if (!state.Board.HasLegalMoves(state.Player))
+                {
+                    // lưu lại Passing move
+                    tempLegalMoves.Add(new List<ulong>());
+                    tempMoves.Add(0UL);
 
-                if (listLegalMoves.Count == 0)
-                {
-                    move = 0UL; // passing move
+                    // Đổi lượt
+                    state.Player = Constant.Opponent(state.Player);
                 }
-                else
-                {
-                    var notation = recordText.Substring(i, 2).ToLower();
-                    move = notation.ToBitMove();
-                }
+
+                var notation = recordText.Substring(i, 2).ToLower();
+                var bitMove = notation.ToBitMove();
+                var listLegalMoves = state.GetListLegalMoves();
 
                 // lưu lại move và legal moves của state này
                 tempLegalMoves.Add(listLegalMoves);
-                tempParsedMoves.Add(move);
+                tempMoves.Add(bitMove);
 
                 // tới trạng thái tiếp theo của bàn cờ
-                state = state.NextState(move);
+                state = state.NextState(bitMove);
             }
         }
     }

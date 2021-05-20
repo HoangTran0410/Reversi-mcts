@@ -177,7 +177,7 @@ namespace Reversi_mcts.Core.Board
             clone.Pieces[White] = clone.Pieces[White].Rotate90AntiClockwise();
             return clone;
         }
-        
+
         public static BitBoard FlipVertical(this BitBoard board)
         {
             var clone = board.Clone();
@@ -209,7 +209,7 @@ namespace Reversi_mcts.Core.Board
             clone.Pieces[White] = clone.Pieces[White].FlipDiagA1H8();
             return clone;
         }
-        
+
         // ------------------------------------ Display Stuffs ------------------------------------
         public static void Display(this BitBoard board)
         {

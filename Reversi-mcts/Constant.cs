@@ -17,8 +17,10 @@ namespace Reversi_mcts
             // return (byte)(1 ^ player);
         }
 
+        public const string GameRecordFilePath = "E:\\game-record.txt";
+
         public const double C = 0.85; // exploration constant
-        
+
         // Cell value
         public const byte EmptyCell = 0;
         public const byte BlackCell = 1;

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Reversi_mcts.Core.Board;
 
 namespace Reversi_mcts.Core.MonteCarlo
@@ -6,7 +7,7 @@ namespace Reversi_mcts.Core.MonteCarlo
     public class State
     {
         public BitBoard Board { get; }
-        public byte Player { get; }
+        public byte Player { get; set; }
         public ulong BitLegalMoves { get; }
 
         public State() : this(new BitBoard(), Constant.Black)
@@ -25,17 +26,15 @@ namespace Reversi_mcts.Core.MonteCarlo
             var state = new State();
             for (var i = 0; i < recordText.Length; i += 2)
             {
-                ulong bitMove;
-                if (state.Board.HasLegalMoves(state.Player))
+                // Check passing move
+                if (!state.Board.HasLegalMoves(state.Player))
                 {
-                    var notation = recordText.Substring(i, 2).ToLower();
-                    bitMove = notation.ToBitMove();
+                    // swap player
+                    state.Player = Constant.Opponent(state.Player);
                 }
-                else
-                {
-                    bitMove = 0UL; // PASSING MOVE
-                }
-                state = state.NextState(bitMove);
+                
+                var notation = recordText.Substring(i, 2).ToLower();
+                state = state.NextState(notation.ToBitMove());
             }
             return state;
         }
@@ -64,6 +63,11 @@ namespace Reversi_mcts.Core.MonteCarlo
         public static List<ulong> GetListLegalMoves(this State state)
         {
             return state.BitLegalMoves.ToListBitMove();
+        }
+
+        public static ulong[] GetArrayLegalMoves(this State state)
+        {
+            return state.BitLegalMoves.ToArrayBitMove();
         }
 
         public static ulong GetRandomMove(this State state)

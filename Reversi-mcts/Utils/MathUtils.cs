@@ -2,6 +2,7 @@
 {
     public static class MathUtils
     {
+        // tính nhanh 3^exp
         public static int Power3(int exp)
         {
             return exp switch
@@ -24,6 +25,13 @@
                 16 => 43046721,
                 _ => 1
             };
+        }
+
+        public static float LimitToRange(this float value, float min, float max)
+        {
+            if (value < min) return min;
+            if (value > max) return max;
+            return value;
         }
     }
 }
