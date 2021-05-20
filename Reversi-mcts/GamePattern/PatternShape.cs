@@ -6,6 +6,7 @@ using Reversi_mcts.Utils;
 
 namespace Reversi_mcts.GamePattern
 {
+    [Serializable]
     public class PatternShape
     {
         public ulong[] BitCellsArray; // những ô đen + đỏ (trong paper của nqhuy) - dưới dạng bit

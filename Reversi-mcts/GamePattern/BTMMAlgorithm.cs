@@ -25,6 +25,25 @@ namespace Reversi_mcts.GamePattern
             LoadGameDatabase();
             InitPatternMinings();
             Train(20);
+
+            SaveTrainingData();
+            //LoadTrainingData();
+        }
+
+        private static void LoadTrainingData()
+        {
+            // PatternMinings: List
+            //      - PatternMining: Instant of Class
+            //          - Gamma: [,,] - mảng 3 chiều
+
+            Console.WriteLine("Loading trained data...");
+            PatternMinings = FileUtils.ReadFromBinaryFile<List<PatternMining>>(Constant.TrainedDataFilePath);
+        }
+
+        private static void SaveTrainingData()
+        {
+            Console.WriteLine("Saving trained data...");
+            FileUtils.WriteToBinaryFile(Constant.TrainedDataFilePath, PatternMinings);
         }
 
         // Load game-record từ file
@@ -33,7 +52,6 @@ namespace Reversi_mcts.GamePattern
         private static void LoadGameDatabase()
         {
             const string filePath = Constant.GameRecordFilePath;
-            // const string filePath = "E:\\game-record1k.txt";
             Console.WriteLine("\nParsing game-records from {0}...", filePath);
 
             GameMiningDatabase.Load(filePath);
