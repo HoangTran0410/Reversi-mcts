@@ -1,7 +1,7 @@
 ﻿using System;
 using Reversi_mcts.Board;
 
-namespace Reversi_mcts.MonteCarlo
+namespace Reversi_mcts.MonteCarlo1
 {
     public static class Mcts
     {
