@@ -9,12 +9,12 @@ namespace Reversi_mcts.MachineLearning
     [Serializable]
     public class PatternShape
     {
-        public ulong[] BitCellsArray; // những ô đen + đỏ (trong paper của nqhuy) - dưới dạng bit
+        public ulong[] ArrayBitCells; // những ô đen + đỏ (trong paper của nqhuy) - dưới dạng bit
         public ulong TargetBitCell; // ô đỏ (target cell) - dưới dạng bit
 
-        public PatternShape(ulong[] bitCellsArray, ulong targetBitCell)
+        public PatternShape(ulong[] arrayBitCells, ulong targetBitCell)
         {
-            BitCellsArray = bitCellsArray;
+            ArrayBitCells = arrayBitCells;
             TargetBitCell = targetBitCell;
         }
 
@@ -25,14 +25,14 @@ namespace Reversi_mcts.MachineLearning
             var targetBitCell = targetCellNotation.ToBitMove();
 
             // parse bit cells array
-            var split = strNotations.Split(',');
-            var bitCellsArray = new ulong[split.Length];
-            for (var i = 0; i < split.Length; i++)
+            var notations = strNotations.Split(',');
+            var arrayBitCells = new ulong[notations.Length];
+            for (var i = 0; i < notations.Length; i++)
             {
-                bitCellsArray[i] = split[i].ToBitMove();
+                arrayBitCells[i] = notations[i].ToBitMove();
             }
 
-            return new PatternShape(bitCellsArray, targetBitCell);
+            return new PatternShape(arrayBitCells, targetBitCell);
         }
     }
 
@@ -53,13 +53,11 @@ namespace Reversi_mcts.MachineLearning
 
             // ---------- Version của nhóm - Cho kết quả giống thầy ---------- 
             var result = 0;
-            var len = ps.BitCellsArray.Length;
-            var idx = len - 1;
-            foreach (var bitCell in ps.BitCellsArray)
+            var len = ps.ArrayBitCells.Length;
+            for (var i = 0; i < len; i++)
             {
-                var cellValue = bitBoard.GetPieceAt(bitCell);
-                result += cellValue * MathUtils.Power3(idx);
-                idx--;
+                var cellValue = bitBoard.GetPieceAt(ps.ArrayBitCells[i]);
+                result += cellValue * MathUtils.Power3(len - i - 1);
             }
 
             // Console.WriteLine(ps.HumanReadablePatternCode(result));
@@ -69,8 +67,8 @@ namespace Reversi_mcts.MachineLearning
 
         public static string HumanReadablePatternCode(this PatternShape ps, int patternCode)
         {
-            var str = new StringBuilder(ps.BitCellsArray.Length);
-            for (var i = 0; i < ps.BitCellsArray.Length; i++)
+            var str = new StringBuilder(ps.ArrayBitCells.Length);
+            for (var i = 0; i < ps.ArrayBitCells.Length; i++)
             {
                 str.Insert(0, patternCode % 3);
                 patternCode /= 3;
@@ -82,7 +80,7 @@ namespace Reversi_mcts.MachineLearning
         // Trả về index của bitCell trong BitCellsArray
         public static int IndexOfBitCell(this PatternShape ps, ulong bitCell)
         {
-            return Array.IndexOf(ps.BitCellsArray, bitCell);
+            return Array.IndexOf(ps.ArrayBitCells, bitCell);
         }
 
         // Tạo ra các pattern được flip/mirror/rotate, rồi bỏ tất cả vào 1 List, trả về List
@@ -92,15 +90,14 @@ namespace Reversi_mcts.MachineLearning
 
             // gộp mảng BitCellsArray vào 1 ulong, để tiện cho việc flip/rotate/mirror
             var bitCellsUlong = 0UL;
-            foreach (var position in ps.BitCellsArray)
+            foreach (var position in ps.ArrayBitCells)
             {
                 bitCellsUlong |= position;
             }
 
+            // 1. Normal
             var tempBitCellsArray = bitCellsUlong.ToArrayBitMove();
             var tempTargetCell = ps.TargetBitCell;
-
-            // 1. Normal
             result.Add(new PatternShape(tempBitCellsArray, tempTargetCell));
 
             // 2. FlipVertical
@@ -147,8 +144,8 @@ namespace Reversi_mcts.MachineLearning
             if (ps.TargetBitCell != other.TargetBitCell)
                 return false;
 
-            foreach (var pos in other.BitCellsArray)
-                if (Array.IndexOf(ps.BitCellsArray, pos) < 0)
+            foreach (var pos in other.ArrayBitCells)
+                if (Array.IndexOf(ps.ArrayBitCells, pos) < 0)
                     return false;
 
             return true;

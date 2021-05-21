@@ -5,15 +5,6 @@ namespace Reversi_mcts
     // why use internal static class? => Rider recommend, idk :))
     internal static class Constant
     {
-        // --------------------------------------------------------------
-        // ----------------------- Machine Learning ---------------------
-        // --------------------------------------------------------------
-        public const string GameRecordFilePath = @"E:\game-record1k.txt";
-        public const string TrainedDataFilePath = @"E:\trained.txt";
-
-        // --------------------------------------------------------------
-        // ------------------- Monte carlo tree search ------------------
-        // --------------------------------------------------------------
         public static readonly Random Random = new Random(); // https://stackoverflow.com/a/768001/118984969
 
         public static byte Opponent(byte player)

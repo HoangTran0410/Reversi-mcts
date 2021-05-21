@@ -33,7 +33,7 @@ namespace Reversi_mcts.MonteCarlo
 
             for (var i = 0; i < moveCount; i++)
             {
-                // tại sao phải nhân 1000? CHƯA BIẾT !!
+                // StrongOfAction nằm trong khoảng [0.01, 100], nên nhân 1000 để cast int chính xác hơn
                 var temp = (int) (1000 * BTMMAlgorithm.StrongOfAction(state, listLegalMoves[i]));
                 maxWheel += temp;
                 wheel[i] = maxWheel;

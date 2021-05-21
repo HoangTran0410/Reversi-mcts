@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using Reversi_mcts.Board;
 using Reversi_mcts.Utils;
 
@@ -24,7 +23,7 @@ namespace Reversi_mcts.MachineLearning
             var totalLines = rawLines.Count();
             var progress = new ProgressBar();
 
-            Console.WriteLine("- Found {0} game records.", totalLines);
+            Console.WriteLine($"- Found {totalLines} game records.");
 
             // đọc từng dòng trong file
             foreach (var rawLine in rawLines)
@@ -41,7 +40,7 @@ namespace Reversi_mcts.MachineLearning
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Format error at line: {0}. {1}", lineIndex, e.Message);
+                    Console.WriteLine($"Format error at line: {lineIndex}. {e.Message}");
                     GameMiss++;
                     continue;
                 }
@@ -55,8 +54,6 @@ namespace Reversi_mcts.MachineLearning
                 progress.Report((double) lineIndex / totalLines);
             }
 
-            // sleep để chờ progress bar lên 100% :))
-            Thread.Sleep(500);
             progress.Dispose();
         }
 
