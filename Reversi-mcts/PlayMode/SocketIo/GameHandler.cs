@@ -26,7 +26,7 @@ namespace Reversi_mcts.PlayMode.SocketIo
         public (int row, int col) PerformAiMove()
         {
             var move = Mcts.RunSearch(_state, _timeOut);
-            _state = _state.NextState(move);
+            _state.NextState(move);
 
             var notation = move.ToNotation();
             if (move != 0) _recordText += notation;
@@ -42,7 +42,7 @@ namespace Reversi_mcts.PlayMode.SocketIo
         public void MakeMove(int row, int col)
         {
             var bitMove = (row, col).ToBitMove();
-            _state = _state.NextState(bitMove);
+            _state.NextState(bitMove);
 
             var notation = (row, col).ToNotation();
             if (row != -1 && col != -1) _recordText += notation;

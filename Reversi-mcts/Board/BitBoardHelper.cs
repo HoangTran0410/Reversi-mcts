@@ -167,6 +167,7 @@ namespace Reversi_mcts.Board
             return ret;
         }
 
+        // Định dạng ulong[] ít tốn Ram hơn List<ulong>
         public static ulong[] ToArrayBitMove(this ulong bits)
         {
             var result = new ulong[bits.PopCount()];

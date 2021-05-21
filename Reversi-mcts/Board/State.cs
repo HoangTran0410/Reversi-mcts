@@ -2,12 +2,14 @@
 
 namespace Reversi_mcts.Board
 {
+    // Class lưu trạng thái bàn cờ
     public class State
     {
-        public BitBoard Board { get; }
-        public byte Player { get; set; }
-        public ulong BitLegalMoves { get; }
+        public BitBoard Board { get; } // Bàn cờ hiện tại
+        public byte Player { get; set; } // Lươt chơi hiện tại. Người tiếp theo sẽ được đánh cờ.
+        public ulong BitLegalMoves { get; set; } // Lưu mọi legalmoves dưới dạng bit bằng 1 biến ulong
 
+        // Mặc định người chơi Black sẽ đánh trước
         public State() : this(new BitBoard(), Constant.Black)
         {
         }
@@ -19,6 +21,14 @@ namespace Reversi_mcts.Board
             BitLegalMoves = board.GetLegalMoves(player);
         }
 
+        public State(BitBoard board, byte player, ulong bitLegalMoves)
+        {
+            Player = player;
+            Board = board;
+            BitLegalMoves = bitLegalMoves;
+        }
+
+        // Tự đánh cờ theo game record, và trả về trạng thái bàn cờ cuối cùng trong ván game đó.
         public static State FromRecordText(string recordText)
         {
             var state = new State();
@@ -30,32 +40,40 @@ namespace Reversi_mcts.Board
                     // swap player
                     state.Player = Constant.Opponent(state.Player);
                 }
-                
+
                 var notation = recordText.Substring(i, 2).ToLower();
-                state = state.NextState(notation.ToBitMove());
+                state.NextState(notation.ToBitMove());
             }
+
             return state;
         }
     }
 
     public static class StateExtensions
     {
+        public static State Clone(this State state)
+        {
+            return new State(state.Board.Clone(), state.Player, state.BitLegalMoves);
+        }
+
         public static bool IsTerminal(this State state)
         {
             return state.Board.IsGameComplete();
         }
 
+        // Đánh cờ tại vị trí move. Đánh trực tiếp vào bàn cờ, ko tạo State mới.
         public static State NextState(this State state, ulong move)
         {
-            var newBoard = state.Board.Clone();
-
             // move == 0 => passing move
-            if (move != 0) newBoard.MakeMove(state.Player, move);
+            if (move != 0) state.Board.MakeMove(state.Player, move);
 
             // switch player
-            var newPlayer = Constant.Opponent(state.Player);
+            state.Player = Constant.Opponent(state.Player);
 
-            return new State(newBoard, newPlayer);
+            // reCalculate legalmoves
+            state.BitLegalMoves = state.Board.GetLegalMoves(state.Player);
+
+            return state;
         }
 
         public static List<ulong> GetListLegalMoves(this State state)
@@ -63,11 +81,14 @@ namespace Reversi_mcts.Board
             return state.BitLegalMoves.ToListBitMove();
         }
 
+        // Định dạng ulong[] ít tốn Ram hơn List<ulong>
         public static ulong[] GetArrayLegalMoves(this State state)
         {
             return state.BitLegalMoves.ToArrayBitMove();
         }
 
+        // Optimized, Working with bit. FASTER THAN get random element from List<ulong> bitMoves.
+        // Use for mcts Simulation Phase
         public static ulong GetRandomMove(this State state)
         {
             var moves = state.BitLegalMoves;

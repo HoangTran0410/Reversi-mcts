@@ -249,7 +249,7 @@ namespace Reversi_mcts.MachineLearning
                     }
 
                     // Next State tới move tiếp theo
-                    state = state.NextState(bitMove);
+                    state.NextState(bitMove);
                 }
 
                 progressBar.Report((double) (iGame - begin) / totalGame);
@@ -286,7 +286,7 @@ namespace Reversi_mcts.MachineLearning
                         count++;
                     }
 
-                    state = state.NextState(move);
+                    state.NextState(move);
                 }
 
                 progress.Report((double) (iGame - begin) / (end - begin));
@@ -406,7 +406,7 @@ namespace Reversi_mcts.MachineLearning
                         prob += val;
                     } // end if
 
-                    state = state.NextState(bitMove);
+                    state.NextState(bitMove);
                 }
 
                 progress.Report((double) (iGame - begin) / (end - begin));
@@ -433,7 +433,7 @@ namespace Reversi_mcts.MachineLearning
         }
 
         // Trả về sức mạnh của 1 move trong 1 state
-        private static float StrongOfAction(State state, ulong bitMove)
+        public static float StrongOfAction(State state, ulong bitMove)
         {
             var relatedPatterns = IdentifyPattern(bitMove);
             var turn = state.Player;

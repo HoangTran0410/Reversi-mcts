@@ -68,7 +68,7 @@ namespace Reversi_mcts.MonteCarlo
             var move = node.UntriedMoves[i];
             node.UntriedMoves.RemoveAt(i); // Untried -> Try
 
-            var newState = node.State.NextState(move);
+            var newState = node.State.Clone().NextState(move);
             var child = new Node(newState, node, move);
             node.ChildNodes.Add(child);
 
@@ -78,12 +78,12 @@ namespace Reversi_mcts.MonteCarlo
         // Phase 3: SIMULATION
         public static float Simulate(this Node node, byte rootPlayer)
         {
-            var state = node.State; // TODO old code: state = new State(node.State)
+            var state = node.State.Clone();
 
             while (!state.IsTerminal())
             {
                 var move = state.GetRandomMove();
-                state = state.NextState(move);
+                state.NextState(move);
             }
 
             var winner = state.Winner();

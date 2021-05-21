@@ -36,7 +36,7 @@ namespace Reversi_mcts.PlayMode
                 var timeout = state.Player == Constant.Black ? blackTimeout : whiteTimeout;
                 var move = Mcts.RunSearch(state, timeout);
 
-                state = state.NextState(move);
+                state.NextState(move);
                 winner = state.Winner();
 
                 if (showLog) ShowLog(move, state);
@@ -45,7 +45,7 @@ namespace Reversi_mcts.PlayMode
             return winner;
         }
 
-        private static void ShowLog(ulong move, State state)
+        public static void ShowLog(ulong move, State state)
         {
             Console.WriteLine("- Runtime: {0}ms, Playout: {1}, wins: {2}%",
                 Mcts.LastRunTime,

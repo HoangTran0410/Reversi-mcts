@@ -8,14 +8,13 @@ namespace Reversi_mcts
         // --------------------------------------------------------------
         // ----------------------- Machine Learning ---------------------
         // --------------------------------------------------------------
-        public const string GameRecordFilePath = @"E:\game-record100.txt";
+        public const string GameRecordFilePath = @"E:\game-record1k.txt";
         public const string TrainedDataFilePath = @"E:\trained.txt";
 
         // --------------------------------------------------------------
         // ------------------- Monte carlo tree search ------------------
         // --------------------------------------------------------------
-        // https://stackoverflow.com/a/768001/11898496
-        public static readonly Random Random = new Random();
+        public static readonly Random Random = new Random(); // https://stackoverflow.com/a/768001/118984969
 
         public static byte Opponent(byte player)
         {

@@ -93,7 +93,7 @@ namespace Reversi_mcts.MachineLearning
                 tempMoves.Add(bitMove);
 
                 // tới trạng thái tiếp theo của bàn cờ
-                state = state.NextState(bitMove);
+                state.NextState(bitMove);
             }
         }
     }

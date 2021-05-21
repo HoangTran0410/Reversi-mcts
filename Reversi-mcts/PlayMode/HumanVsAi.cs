@@ -20,7 +20,7 @@ namespace Reversi_mcts.PlayMode
             {
                 var move = state.Player == humanColor ? HumanTurn(state) : AiTurn(state, aiTimeout);
 
-                state = state.NextState(move);
+                state.NextState(move);
                 winner = state.Winner();
 
                 DrawBoard(move, state);
