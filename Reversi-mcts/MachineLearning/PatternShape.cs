@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Reversi_mcts.Core.Board;
+using Reversi_mcts.Board;
 using Reversi_mcts.Utils;
 
-namespace Reversi_mcts.GamePattern
+namespace Reversi_mcts.MachineLearning
 {
     [Serializable]
     public class PatternShape
@@ -39,7 +39,7 @@ namespace Reversi_mcts.GamePattern
     public static class PatternShapeExt
     {
         // trả về unique id của pattern (pattern = patternShape & gameBoard)
-        public static int CalculatePatternId(this PatternShape ps, BitBoard bitBoard)
+        public static int CalculatePatternCode(this PatternShape ps, BitBoard bitBoard)
         {
             // ---------- Version của thầy ---------- 
             // var len = ps.BitCellsArray.Length;

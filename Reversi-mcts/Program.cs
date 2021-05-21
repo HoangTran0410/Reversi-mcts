@@ -1,5 +1,5 @@
 ﻿using System;
-using Reversi_mcts.GamePattern;
+using Reversi_mcts.MachineLearning;
 using Reversi_mcts.PlayMode;
 using Reversi_mcts.PlayMode.SocketIo;
 using Reversi_mcts.Utils;

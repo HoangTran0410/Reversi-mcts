@@ -1,7 +1,7 @@
 ﻿using System;
 using Reversi_mcts.Utils;
 
-namespace Reversi_mcts.GamePattern
+namespace Reversi_mcts.MachineLearning
 {
     // Class này dùng để chứa thông tin thống kê của tập các pattern
     [Serializable]
@@ -23,9 +23,9 @@ namespace Reversi_mcts.GamePattern
 
         /* NOTE:
          * Cả 4 mảng 3 chiều trên có định dạng: [pattern-id-index, bit-cell-index, player]
-         * 
-         * bit-cell-index:     index của bitCell trong pattern (PatternShape.IndexOfBitCell)
+         *
          * pattern-id-index:   index của unique id của 1 pattern (PatternShape.CalculatePatternCode)
+         * bit-cell-index:     index của bitCell trong pattern (PatternShape.IndexOfBitCell)
          * player:             0 hoặc 1. màu của người chơi
          */
 

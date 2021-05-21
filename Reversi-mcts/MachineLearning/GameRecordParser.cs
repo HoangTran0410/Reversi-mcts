@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using Reversi_mcts.Core.Board;
-using Reversi_mcts.Core.MonteCarlo;
+using Reversi_mcts.Board;
 using Reversi_mcts.Utils;
 
-namespace Reversi_mcts.GameDatabase
+namespace Reversi_mcts.MachineLearning
 {
     public class GameRecordParser
     {
@@ -21,13 +20,14 @@ namespace Reversi_mcts.GameDatabase
         {
             var lineIndex = 0;
             var lines = File.ReadLines(fileName);
-            var totalLines = lines.Count();
+            var rawLines = lines as string[] ?? lines.ToArray();
+            var totalLines = rawLines.Count();
             var progress = new ProgressBar();
 
             Console.WriteLine("- Found {0} game records.", totalLines);
 
             // đọc từng dòng trong file
-            foreach (var rawLine in lines)
+            foreach (var rawLine in rawLines)
             {
                 lineIndex++;
                 var line = rawLine.Trim();

@@ -1,24 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using Reversi_mcts.Core.Board;
-using Reversi_mcts.Core.MonteCarlo;
-using Reversi_mcts.GameDatabase;
+using System.Diagnostics;
+using Reversi_mcts.Board;
 using Reversi_mcts.Utils;
 
-namespace Reversi_mcts.GamePattern
+namespace Reversi_mcts.MachineLearning
 {
     public static class BTMMAlgorithm
     {
-        public static List<PatternMining> PatternMinings = new List<PatternMining>();
-        public static int GameCount = 0;
-        public static int Count = 0;
+        public static List<PatternMining> ListPatternMining = new List<PatternMining>();
+        private static int _gameCount = 0;
+        private static int _gameMiss = 0;
+        private static int _count = 0;
 
         // https://stackoverflow.com/a/3906931/11898496
         // Contain list of game records
-        public static List<List<ulong>> ParsedGamesMoves = new List<List<ulong>>();
+        private static List<List<ulong>> _parsedGamesMoves = new List<List<ulong>>();
 
         // legalMoves corresponding to each of ParsedGamesMoves
-        public static List<List<List<ulong>>> ParsedGamesLegalMoves = new List<List<List<ulong>>>();
+        private static List<List<List<ulong>>> _parsedGamesLegalMoves = new List<List<List<ulong>>>();
 
         public static void Run()
         {
@@ -26,7 +26,7 @@ namespace Reversi_mcts.GamePattern
             InitPatternMinings();
             Train(20);
 
-            SaveTrainingData();
+            //SaveTrainingData();
             //LoadTrainingData();
         }
 
@@ -37,13 +37,13 @@ namespace Reversi_mcts.GamePattern
             //          - Gamma: [,,] - mảng 3 chiều
 
             Console.WriteLine("Loading trained data...");
-            PatternMinings = FileUtils.ReadFromBinaryFile<List<PatternMining>>(Constant.TrainedDataFilePath);
+            ListPatternMining = FileUtils.ReadFromBinaryFile<List<PatternMining>>(Constant.TrainedDataFilePath);
         }
 
         private static void SaveTrainingData()
         {
             Console.WriteLine("Saving trained data...");
-            FileUtils.WriteToBinaryFile(Constant.TrainedDataFilePath, PatternMinings);
+            FileUtils.WriteToBinaryFile(Constant.TrainedDataFilePath, ListPatternMining);
         }
 
         // Load game-record từ file
@@ -54,14 +54,22 @@ namespace Reversi_mcts.GamePattern
             const string filePath = Constant.GameRecordFilePath;
             Console.WriteLine("\nParsing game-records from {0}...", filePath);
 
-            GameMiningDatabase.Load(filePath);
-            GameCount = GameMiningDatabase.GameCount;
-            ParsedGamesMoves = GameMiningDatabase.ParsedGamesMoves;
-            ParsedGamesLegalMoves = GameMiningDatabase.ParsedGamesLegalMoves;
+            try
+            {
+                var parser = new GameRecordParser();
+                parser.Parse(filePath);
+                _parsedGamesMoves = parser.ParsedGamesMoves;
+                _parsedGamesLegalMoves = parser.ParsedGamesLegalMoves;
+                _gameCount = parser.GameCount;
+                _gameMiss = parser.GameMiss;
+            }
+            catch (Exception caught)
+            {
+                Console.WriteLine("Error: {0}", caught);
+                Process.GetCurrentProcess().Kill();
+            }
 
-            Console.WriteLine("> Parsed {0} games. Miss {1} games.",
-                GameMiningDatabase.GameCount,
-                GameMiningDatabase.GameMiss);
+            Console.WriteLine("> Parsed {0} games. Miss {1} games.", _gameCount, _gameMiss);
         }
 
         // PatternMinings là danh sách tất cả patternShape sau khi được Flip/Rotate/Mirror
@@ -151,11 +159,11 @@ namespace Reversi_mcts.GamePattern
             for (var i = 0; i < patternShapes.Count; i++)
             {
                 progressBar.Report((double) i / patternShapes.Count);
-                PatternMinings.Add(PatternMining.CreatePatternMining(patternShapes[i]));
+                ListPatternMining.Add(PatternMining.CreatePatternMining(patternShapes[i]));
             }
 
             progressBar.Dispose();
-            Console.WriteLine("> Created {0} pattern minings.", PatternMinings.Count);
+            Console.WriteLine("> Created {0} pattern minings.", ListPatternMining.Count);
         }
 
         private static void Train(int epoch = 20)
@@ -163,14 +171,14 @@ namespace Reversi_mcts.GamePattern
             // ---------- split test/train ----------
             Console.WriteLine("\nSplitting train/test...");
             const double testPercentage = 5; // 5% test
-            var testSize = (int) (testPercentage / 100 * GameCount);
-            var trainSize = GameCount - testSize;
+            var testSize = (int) (testPercentage / 100 * _gameCount);
+            var trainSize = _gameCount - testSize;
             Console.WriteLine("> Train size: {0} ({1}%)\n> Test size: {2} ({3}%)",
                 trainSize, 100 - testPercentage,
                 testSize, testPercentage);
 
             // ---------- calculate Wi ----------
-            WinGamma(testSize, GameCount);
+            WinGamma(testSize, _gameCount);
 
             // ---------- train ----------
             Console.WriteLine("\nStarting train {0} epochs ...", epoch);
@@ -181,7 +189,7 @@ namespace Reversi_mcts.GamePattern
                 Console.WriteLine("---------------------------------");
 
                 CalculateGammaTest(0, testSize);
-                CalculateGamma(testSize, GameCount);
+                CalculateGamma(testSize, _gameCount);
             }
 
             Console.WriteLine("\n> Done training.");
@@ -198,20 +206,20 @@ namespace Reversi_mcts.GamePattern
             for (var iGame = begin; iGame < end; iGame++)
             {
                 var state = new State();
-                var listBitMove = ParsedGamesMoves[iGame]; // lấy ra list-move của game thứ iGame từ ParsedGameMoves
+                var listBitMove = _parsedGamesMoves[iGame]; // lấy ra list-move của game thứ iGame từ ParsedGameMoves
 
                 for (var iMove = 0; iMove < listBitMove.Count; iMove++) // Với từng move (nước đi) trong game đang xét
                 {
                     var bitMove = listBitMove[iMove];
-                    var legalMoves = ParsedGamesLegalMoves[iGame][iMove]; // Lấy ra legalmoves
-                    var turn = state.Player; // lượt chơi hiện tại
+                    var legalMoves = _parsedGamesLegalMoves[iGame][iMove]; // Lấy ra legalmoves
+                    var player = state.Player; // lượt chơi hiện tại
 
                     // Nếu có từ 2 legalMove trở lên MỚI CẦN TÍNH
                     // Nếu chỉ có 1 legalMove thì đánh nó luôn cần gì tính
                     // Nếu không có legalMove thì pass cần gì tính
                     if (legalMoves.Count > 1)
                     {
-                        Count++;
+                        _count++;
 
                         // Với từng legalMove
                         foreach (var legalMove in legalMoves)
@@ -222,20 +230,20 @@ namespace Reversi_mcts.GamePattern
                             // Với từng patternShape tìm được từ legalMove đang xét
                             foreach (var iPatternMining in patternIndexes)
                             {
-                                var pm = PatternMinings[iPatternMining];
+                                var pm = ListPatternMining[iPatternMining];
 
                                 // Lấy ra index của legalMove trong patterShape đó
                                 var legalMoveIndex = pm.PatternShape.IndexOfBitCell(legalMove);
 
                                 // Và tính patternId (unique id của pattern)
-                                var pid = pm.PatternShape.CalculatePatternId(state.Board);
+                                var pCode = pm.PatternShape.CalculatePatternCode(state.Board);
 
                                 // Nếu legalmove này được chọn làm move tiếp theo thì tăng win
                                 if (legalMove == bitMove)
-                                    pm.Win[pid, legalMoveIndex, turn]++;
+                                    pm.Win[pCode, legalMoveIndex, player]++;
 
                                 // Tăng canditate (số lần xuất hiện) cho pattern
-                                pm.Candidate[pid, legalMoveIndex, turn]++;
+                                pm.Candidate[pCode, legalMoveIndex, player]++;
                             }
                         }
                     }
@@ -264,11 +272,11 @@ namespace Reversi_mcts.GamePattern
             for (var iGame = begin; iGame < end; iGame++)
             {
                 var state = new State();
-                var listBitMove = ParsedGamesMoves[iGame];
-                for (var iMove = 0; iMove < ParsedGamesMoves[iGame].Count; iMove++)
+                var listBitMove = _parsedGamesMoves[iGame];
+                for (var iMove = 0; iMove < _parsedGamesMoves[iGame].Count; iMove++)
                 {
                     var move = listBitMove[iMove];
-                    var legalMoves = ParsedGamesLegalMoves[iGame][iMove];
+                    var legalMoves = _parsedGamesLegalMoves[iGame][iMove];
 
                     if (legalMoves.Count > 1)
                     {
@@ -302,9 +310,9 @@ namespace Reversi_mcts.GamePattern
             // Calculate gamma after accumulating Cij/Ej for each feature
             Console.WriteLine("\nCalculate Gamma ...");
             var progress = new ProgressBar();
-            for (var i = 0; i < PatternMinings.Count; i++)
+            for (var i = 0; i < ListPatternMining.Count; i++)
             {
-                var pm = PatternMinings[i];
+                var pm = ListPatternMining[i];
                 var len = pm.PatternCommonLength;
                 var iCard = MathUtils.Power3(len);
 
@@ -331,7 +339,7 @@ namespace Reversi_mcts.GamePattern
                     }
                 }
 
-                progress.Report((double) i / PatternMinings.Count);
+                progress.Report((double) i / ListPatternMining.Count);
             }
 
             progress.Dispose();
@@ -349,13 +357,13 @@ namespace Reversi_mcts.GamePattern
             for (var iGame = begin; iGame < end; iGame++)
             {
                 var state = new State();
-                var listBitMove = ParsedGamesMoves[iGame];
+                var listBitMove = _parsedGamesMoves[iGame];
 
                 // loop through all move in current game
                 for (var moveIdx = 0; moveIdx < listBitMove.Count; moveIdx++)
                 {
                     var bitMove = listBitMove[moveIdx];
-                    var legalMoves = ParsedGamesLegalMoves[iGame][moveIdx];
+                    var legalMoves = _parsedGamesLegalMoves[iGame][moveIdx];
                     var turn = state.Player;
                     var n = legalMoves.Count;
 
@@ -381,15 +389,15 @@ namespace Reversi_mcts.GamePattern
                             var patternsIndexes = IdentifyPattern(legalMoves[k]);
                             foreach (var t in patternsIndexes)
                             {
-                                var pattern = PatternMinings[t];
+                                var pattern = ListPatternMining[t];
 
                                 var pos = pattern.PatternShape.IndexOfBitCell(legalMoves[k]);
-                                var patternCode = pattern.PatternShape.CalculatePatternId(state.Board);
+                                var patternCode = pattern.PatternShape.CalculatePatternCode(state.Board);
                                 var candidate = pattern.Candidate[patternCode, pos, turn];
                                 if (candidate > 10)
                                 {
                                     var cij = CalculateCij(strongLegalMoves[k], t, patternCode, pos, turn);
-                                    PatternMinings[t].GammaDenominator[patternCode, pos, turn] += cij / e;
+                                    ListPatternMining[t].GammaDenominator[patternCode, pos, turn] += cij / e;
                                 }
                             }
                         } // end loop k
@@ -405,13 +413,13 @@ namespace Reversi_mcts.GamePattern
             }
 
             progress.Dispose();
-            Console.WriteLine("> Likelihood = {0:0.0000000000000000000000000}", likelihood / Count);
+            Console.WriteLine("> Likelihood = {0:0.0000000000000000000000000}", likelihood / _count);
             Console.WriteLine("> Time spent = {0:0,000} ms", (DateTime.Now - beginTime).TotalMilliseconds);
         }
 
         private static float CalculateCij(float strong, int patternCode, int id, int index, int turn)
         {
-            var gamma = PatternMinings[patternCode].Gamma[id, index, turn];
+            var gamma = ListPatternMining[patternCode].Gamma[id, index, turn];
             return strong / gamma;
         }
 
@@ -432,9 +440,9 @@ namespace Reversi_mcts.GamePattern
             var strong = 1f;
             foreach (var t in relatedPatterns)
             {
-                var pos = PatternMinings[t].PatternShape.IndexOfBitCell(bitMove);
-                var patternCode = PatternMinings[t].PatternShape.CalculatePatternId(state.Board);
-                var gamma = PatternMinings[t].Gamma[patternCode, pos, turn];
+                var pos = ListPatternMining[t].PatternShape.IndexOfBitCell(bitMove);
+                var patternCode = ListPatternMining[t].PatternShape.CalculatePatternCode(state.Board);
+                var gamma = ListPatternMining[t].Gamma[patternCode, pos, turn];
                 strong *= gamma;
             }
 
@@ -467,9 +475,9 @@ namespace Reversi_mcts.GamePattern
                 var bitCell = 0UL.SetBitAdIndex(iCell);
 
                 // loop qua từng patternShapes
-                for (var iPattern = 0; iPattern < PatternMinings.Count; iPattern++)
+                for (var iPattern = 0; iPattern < ListPatternMining.Count; iPattern++)
                 {
-                    var patternShape = PatternMinings[iPattern].PatternShape;
+                    var patternShape = ListPatternMining[iPattern].PatternShape;
 
                     // Nếu ô đang xét là targetCell của pattern đang xét => Add index vào patternIndexes
                     if (patternShape.TargetBitCell == bitCell)
