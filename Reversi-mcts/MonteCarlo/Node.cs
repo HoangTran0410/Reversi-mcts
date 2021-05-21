@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Reversi_mcts.Core.MonteCarlo
+namespace Reversi_mcts.MonteCarlo
 {
     public class Node
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Reversi_mcts.Core.MonteCarlo
+namespace Reversi_mcts.MonteCarlo
 {
     public static class Mcts
     {

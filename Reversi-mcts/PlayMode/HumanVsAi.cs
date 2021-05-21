@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Reversi_mcts.Core.Board;
-using Reversi_mcts.Core.MonteCarlo;
+using Reversi_mcts.Board;
+using Reversi_mcts.MonteCarlo;
 
 namespace Reversi_mcts.PlayMode
 {

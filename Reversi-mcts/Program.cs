@@ -1,6 +1,4 @@
 ﻿using System;
-using Reversi_mcts.Core.Board;
-using Reversi_mcts.Core.MonteCarlo;
 using Reversi_mcts.GamePattern;
 using Reversi_mcts.PlayMode;
 using Reversi_mcts.PlayMode.SocketIo;

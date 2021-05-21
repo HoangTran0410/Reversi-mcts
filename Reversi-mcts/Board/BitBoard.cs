@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Reversi_mcts.Core.Board
+namespace Reversi_mcts.Board
 {
     public class BitBoard
     {

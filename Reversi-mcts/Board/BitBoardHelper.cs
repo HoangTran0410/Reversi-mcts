@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Reversi_mcts.Core.Board
+namespace Reversi_mcts.Board
 {
     public enum Direction : byte
     {

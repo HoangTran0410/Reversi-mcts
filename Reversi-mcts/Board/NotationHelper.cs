@@ -1,4 +1,4 @@
-﻿namespace Reversi_mcts.Core.Board
+﻿namespace Reversi_mcts.Board
 {
     public static class NotationHelper
     {
