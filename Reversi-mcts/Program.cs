@@ -10,17 +10,21 @@ namespace Reversi_mcts
     {
         private static void Main()
         {
-            BTMMAlgorithm.TrainGameRecord(@"E:\game-record.txt", @"E:\trained.txt");
-            BTMMAlgorithm.LoadTrainedData(@"E:\trained.txt");
+            // BTMMAlgorithm.TrainGameRecord(@"E:\z-Reversi\game-records\game-record.txt", @"E:\z-Reversi\trained.bin");
+            BTMMAlgorithm.LoadTrainedData(@"E:\z-Reversi\trained.bin");
             // SelfPlayBTMM.OneRound(50, 50);
-            // SelfPlayBTMM.MultiRounds(20, 200, 200);
-            
+            // SelfPlayBTMM.MultiRounds(500, 200, 200);
+
             // SelfPlay.OneRound(1000, 1000);
             // SelfPlay.MultiRounds(200, 500, 500);
             // HumanVsAi.NewGame(Constant.White);
             // ContinueFromRecord.NewGame("f5f4c3f6f3d6e6c5c4d3e3d2c7c6c2c8d1b1e2f2b3a3e1f1b4c1b5a4g5h5g2h1");
 
-            // var socketClient = new SocketClient(4000);
+            new SocketClient(
+                "http://localhost:3000/",
+                "reversi-mcts-4s",
+                Constant.Algorithm.Mcts1,
+                4000);
         }
     }
 }

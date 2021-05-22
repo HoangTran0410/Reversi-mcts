@@ -3,7 +3,7 @@
 namespace Reversi_mcts.Utils
 {
     // source: https://stackoverflow.com/a/22417240/11898496
-    public class FileUtils
+    public static class FileUtils
     {
         // -------------------------------------------
         // ------------------ BINARY -----------------

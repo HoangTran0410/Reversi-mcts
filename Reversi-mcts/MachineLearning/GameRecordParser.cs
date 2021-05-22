@@ -93,5 +93,10 @@ namespace Reversi_mcts.MachineLearning
                 state.NextState(bitMove);
             }
         }
+
+        private static void ParseGGFGame()
+        {
+            
+        }
     }
 }

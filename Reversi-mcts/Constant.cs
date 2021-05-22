@@ -3,8 +3,15 @@
 namespace Reversi_mcts
 {
     // why use internal static class? => Rider recommend, idk :))
-    internal static class Constant
+    public static class Constant
     {
+        public enum Algorithm
+        {
+            Mcts, // monte carlo tree search + bitboard
+            Mcts1, // Mcts + btmm in simulation phase
+            Mcts2 // Mcts1 + btmm in selection phase
+        }
+        
         public static readonly Random Random = new Random(); // https://stackoverflow.com/a/768001/118984969
 
         public static byte Opponent(byte player)

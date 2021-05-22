@@ -7,20 +7,19 @@ namespace Reversi_mcts.PlayMode.SocketIo
 {
     public class SocketClient
     {
-        private const string ServerIp = "http://localhost:3000/";
-
         private readonly GameHandler _game;
         private readonly SocketIO _client;
         private readonly ManualResetEvent _manualResetEvent;
+        private readonly string _clientName;
 
-        private readonly string _clientName = "reversi-mcts";
+        private Constant.Algorithm _algorithm;
 
-        public SocketClient(int timeout = 100)
+        public SocketClient(string serverIp, string clientName, Constant.Algorithm algorithm, int timeout)
         {
-            _clientName += timeout + "ms";
-
+            _algorithm = algorithm;
+            _clientName = clientName;
             _game = new GameHandler(timeout);
-            _client = new SocketIO(ServerIp, new SocketIOOptions {EIO = 4});
+            _client = new SocketIO(serverIp, new SocketIOOptions {EIO = 4});
 
             _client.OnConnected += OnConnected;
             _client.On("serverSendColor", OnServerSendColor);
@@ -36,7 +35,7 @@ namespace Reversi_mcts.PlayMode.SocketIo
             _manualResetEvent.WaitOne();
         }
 
-        private void OnConnected(object sender, EventArgs e)
+        private static void OnConnected(object sender, EventArgs e)
         {
             Console.WriteLine("Connected");
         }
@@ -71,7 +70,6 @@ namespace Reversi_mcts.PlayMode.SocketIo
             {
                 row = response.GetValue().GetProperty("row").GetInt32();
                 col = response.GetValue().GetProperty("col").GetInt32();
-                //Console.WriteLine("Opponent move " + row + "," + col);
             }
 
             _game.MakeMove(row, col);
@@ -98,21 +96,15 @@ namespace Reversi_mcts.PlayMode.SocketIo
 
         private async Task PerformAiMove()
         {
-            // Console.WriteLine(" ~ Thinking...");
             var isPassed = false;
 
             var startTime = DateTime.Now;
-            var (row, col) = _game.PerformAiMove();
+            var (row, col) = _game.PerformAiMove(_algorithm);
             var endTime = DateTime.Now;
 
             if (row == -1 || col == -1)
             {
                 isPassed = true;
-                // Console.WriteLine("Me PASSED.");
-            }
-            else
-            {
-                // Console.WriteLine("Me move at " + row + "," + col);
             }
 
             await _client.EmitAsync("clientSendMove", new
@@ -121,10 +113,8 @@ namespace Reversi_mcts.PlayMode.SocketIo
                 row,
                 thinkingTime = (float) Math.Round((endTime - startTime).TotalSeconds, 3),
                 isPassed,
-                playoutCount = _game.GetLastPlayout()
+                playoutCount = GameHandler.GetLastPlayout()
             });
-
-            // Console.WriteLine(" ~ Waiting for opponent move...");
         }
     }
 }

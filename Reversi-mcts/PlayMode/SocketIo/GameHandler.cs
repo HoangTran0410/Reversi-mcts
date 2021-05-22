@@ -23,9 +23,15 @@ namespace Reversi_mcts.PlayMode.SocketIo
             _recordText = "";
         }
 
-        public (int row, int col) PerformAiMove()
+        public (int row, int col) PerformAiMove(Constant.Algorithm algorithm)
         {
-            var move = Mcts.RunSearch(_state, _timeOut);
+            var move = algorithm switch
+            {
+                Constant.Algorithm.Mcts => Mcts.RunSearch(_state, _timeOut),
+                Constant.Algorithm.Mcts1 => Mcts.RunSearch1(_state, _timeOut),
+                _ => 0UL
+            };
+
             _state.NextState(move);
 
             var notation = move.ToNotation();
@@ -51,7 +57,7 @@ namespace Reversi_mcts.PlayMode.SocketIo
             //_state.Board.DisplayWithLastMoveAndLegalMoves(bitMove, Constant.Opponent(_state.Player));
         }
 
-        public int GetLastPlayout()
+        public static int GetLastPlayout()
         {
             return Mcts.LastPlayout;
         }
