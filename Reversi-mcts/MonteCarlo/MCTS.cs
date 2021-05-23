@@ -1,5 +1,7 @@
 ﻿using System;
 using Reversi_mcts.Board;
+using Reversi_mcts.MachineLearning;
+using Reversi_mcts.Utils;
 
 namespace Reversi_mcts.MonteCarlo
 {
@@ -8,6 +10,19 @@ namespace Reversi_mcts.MonteCarlo
         public static int LastPlayout { get; private set; }
         public static float LastWinPercentage { get; private set; }
         public static int LastRunTime { get; private set; }
+
+        public static ulong RunSearch(Algorithm algoName, State state, int timeout)
+        {
+            var move = algoName switch
+            {
+                Algorithm.Mcts => RunSearch(state, timeout),
+                Algorithm.Mcts1 => RunSearch1(state, timeout),
+                Algorithm.Mcts2 => throw new NotImplementedException(),
+                _ => 0UL
+            };
+
+            return move;
+        }
 
         // Search bằng MCTS thông thường
         public static ulong RunSearch(State state, int timeout = 1000)
@@ -78,8 +93,8 @@ namespace Reversi_mcts.MonteCarlo
         private static ulong BestMove(Node node, byte policy = Constant.RobustChild)
         {
             // If not all children are expanded, not enough information
-            if (node.IsFullyExpanded() == false)
-                throw new Exception("Not enough information!");
+            // if (node.IsFullyExpanded() == false)
+            //     throw new Exception("Not enough information!");
 
             var bestMove = 0UL;
 

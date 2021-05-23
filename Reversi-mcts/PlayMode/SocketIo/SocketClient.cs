@@ -7,16 +7,18 @@ namespace Reversi_mcts.PlayMode.SocketIo
 {
     public class SocketClient
     {
+        private readonly string _serverIp;
         private readonly GameHandler _game;
         private readonly SocketIO _client;
-        private readonly ManualResetEvent _manualResetEvent;
         private readonly string _clientName;
+        private readonly Algorithm _algorithm;
 
-        private Constant.Algorithm _algorithm;
+        private ManualResetEvent _manualResetEvent;
 
-        public SocketClient(string serverIp, string clientName, Constant.Algorithm algorithm, int timeout)
+        public SocketClient(string serverIp, string clientName, Algorithm algorithm, int timeout)
         {
             _algorithm = algorithm;
+            _serverIp = serverIp;
             _clientName = clientName;
             _game = new GameHandler(timeout);
             _client = new SocketIO(serverIp, new SocketIOOptions {EIO = 4});
@@ -27,8 +29,11 @@ namespace Reversi_mcts.PlayMode.SocketIo
             _client.On("serverSendOpponentMove", OnServerSendOpponentMove);
             _client.On("serverSendResult", OnServerSendResult);
             _client.On("serverSendEndGame", OnServerSendEndGame);
+        }
 
-            Console.WriteLine("connecting...");
+        public void Connect()
+        {
+            Console.WriteLine($"Connecting to server '{_serverIp}'...");
             _client.ConnectAsync();
 
             _manualResetEvent = new ManualResetEvent(false);

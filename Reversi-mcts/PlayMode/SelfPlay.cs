@@ -1,40 +1,55 @@
 ﻿using System;
 using Reversi_mcts.Board;
 using Reversi_mcts.MonteCarlo;
+using Reversi_mcts.Utils;
 
 namespace Reversi_mcts.PlayMode
 {
     public static class SelfPlay
     {
-        public static void MultiRounds(int totalRound = 10, int blackTimeout = 500, int whiteTimeout = 500)
+        public static void MultiRounds(
+            int totalRounds = 10,
+            int blackTimeout = 500,
+            Algorithm blackAlgorithm = Algorithm.Mcts,
+            int whiteTimeout = 500,
+            Algorithm whiteAlgorithm = Algorithm.Mcts)
         {
             var blackWin = 0;
             var whiteWin = 0;
 
             var round = 0;
-            while (round++ < totalRound)
+            while (round++ < totalRounds)
             {
-                Console.Write("Round {0}: ", round);
+                Console.Write($"Round {round}: Playing...");
 
-                var winner = OneRound(blackTimeout, whiteTimeout, false);
+                var winner = OneRound(blackTimeout, blackAlgorithm, whiteTimeout, whiteAlgorithm, false);
                 if (winner == Constant.Black) blackWin++;
                 if (winner == Constant.White) whiteWin++;
 
-                Console.WriteLine("{0}/{1}", blackWin, whiteWin);
+                ConsoleUtil.ClearCurrentConsoleLine();
+                Console.WriteLine($"Round {round}: {blackWin}/{whiteWin}");
             }
 
             Console.WriteLine("END. Black win: {0}, White win {1}", blackWin, whiteWin);
         }
 
-        public static byte OneRound(int blackTimeout = 500, int whiteTimeout = 500, bool showLog = true)
+        public static byte OneRound(
+            int blackTimeout = 500,
+            Algorithm blackAlgorithm = Algorithm.Mcts,
+            int whiteTimeout = 500,
+            Algorithm whiteAlgorithm = Algorithm.Mcts,
+            bool showLog = true)
         {
             var state = new State();
             var winner = Constant.Draw;
 
             while (!state.IsTerminal())
             {
-                var timeout = state.Player == Constant.Black ? blackTimeout : whiteTimeout;
-                var move = Mcts.RunSearch(state, timeout);
+                var isBlack = state.Player == Constant.Black;
+                var timeout = isBlack ? blackTimeout : whiteTimeout;
+                var algoName = isBlack ? blackAlgorithm : whiteAlgorithm;
+
+                var move = Mcts.RunSearch(algoName, state, timeout);
 
                 state.NextState(move);
                 winner = state.Winner();

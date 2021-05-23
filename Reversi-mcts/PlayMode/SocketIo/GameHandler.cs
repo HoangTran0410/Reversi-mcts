@@ -23,12 +23,12 @@ namespace Reversi_mcts.PlayMode.SocketIo
             _recordText = "";
         }
 
-        public (int row, int col) PerformAiMove(Constant.Algorithm algorithm)
+        public (int row, int col) PerformAiMove(Algorithm algorithm)
         {
             var move = algorithm switch
             {
-                Constant.Algorithm.Mcts => Mcts.RunSearch(_state, _timeOut),
-                Constant.Algorithm.Mcts1 => Mcts.RunSearch1(_state, _timeOut),
+                Algorithm.Mcts => Mcts.RunSearch(_state, _timeOut),
+                Algorithm.Mcts1 => Mcts.RunSearch1(_state, _timeOut),
                 _ => 0UL
             };
 

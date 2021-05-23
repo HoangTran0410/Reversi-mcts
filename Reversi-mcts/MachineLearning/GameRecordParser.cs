@@ -96,7 +96,6 @@ namespace Reversi_mcts.MachineLearning
 
         private static void ParseGGFGame()
         {
-            
         }
     }
 }

@@ -11,14 +11,12 @@ namespace Reversi_mcts.MachineLearning
         // why use int as dictionary key: https://stackoverflow.com/a/5743520/11898496
         public readonly Dictionary<int, float> Gamma; // min: 0.01, max: 100
 
-        [NonSerialized]
-        public readonly Dictionary<int, ushort> Win; // tử số: Wi
+        [NonSerialized] public readonly Dictionary<int, ushort> Win; // tử số: Wi
 
         [NonSerialized]
         public readonly Dictionary<int, ushort> Candidate; // số lần xuất hiện của 1 pattern trong game record
 
-        [NonSerialized]
-        public readonly Dictionary<int, float> GammaDenominator; // Mẫu số: SUM(Cij/E)
+        [NonSerialized] public readonly Dictionary<int, float> GammaDenominator; // Mẫu số: SUM(Cij/E)
 
         public PatternMining(PatternShape patternShape)
         {
@@ -101,7 +99,8 @@ namespace Reversi_mcts.MachineLearning
             float value)
         {
             var key = Key(patternCode, cellIndex, player);
-            if (!p.GammaDenominator.ContainsKey(key)) p.GammaDenominator[key] = 0; // default value of Game Denominator is 0
+            if (!p.GammaDenominator.ContainsKey(key))
+                p.GammaDenominator[key] = 0; // default value of Game Denominator is 0
             p.GammaDenominator[key] += value;
         }
     }

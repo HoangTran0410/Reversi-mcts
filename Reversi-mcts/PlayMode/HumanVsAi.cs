@@ -7,7 +7,10 @@ namespace Reversi_mcts.PlayMode
 {
     public static class HumanVsAi
     {
-        public static void NewGame(byte humanColor = Constant.Black, int aiTimeout = 1000)
+        public static void NewGame(
+            byte humanColor = Constant.Black,
+            int aiTimeout = 1000,
+            Algorithm aiAlgorithm = Algorithm.Mcts)
         {
             var state = new State();
             var winner = Constant.Draw;
@@ -18,7 +21,7 @@ namespace Reversi_mcts.PlayMode
             // begin
             while (!state.IsTerminal())
             {
-                var move = state.Player == humanColor ? HumanTurn(state) : AiTurn(state, aiTimeout);
+                var move = state.Player == humanColor ? HumanTurn(state) : AiTurn(state, aiTimeout, aiAlgorithm);
 
                 state.NextState(move);
                 winner = state.Winner();
@@ -39,9 +42,9 @@ namespace Reversi_mcts.PlayMode
             Console.WriteLine("- Score(b/w): {0}/{1}\n", blackScore, whiteScore);
         }
 
-        private static ulong AiTurn(State state, int aiTimeout)
+        private static ulong AiTurn(State state, int aiTimeout, Algorithm aiAlgorithm)
         {
-            var move = Mcts.RunSearch(state, aiTimeout);
+            var move = Mcts.RunSearch(aiAlgorithm, state, aiTimeout);
 
             Console.Write("Ai move: " + move.ToNotation());
             Console.WriteLine(" - Runtime: {0}ms, Playout: {1}, wins: {2}%",

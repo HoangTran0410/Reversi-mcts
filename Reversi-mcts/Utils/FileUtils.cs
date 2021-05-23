@@ -8,7 +8,7 @@ namespace Reversi_mcts.Utils
         // -------------------------------------------
         // ------------------ BINARY -----------------
         // -------------------------------------------
-        
+
         /// <summary>
         /// Writes the given object instance to a binary file.
         /// <para>Object type (and all child types) must be decorated with the [Serializable] attribute.</para>
