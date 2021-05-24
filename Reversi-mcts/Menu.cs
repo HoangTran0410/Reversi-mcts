@@ -10,7 +10,10 @@ namespace Reversi_mcts
     {
         // Những biến được dùng ở nhiều sub-menu sẽ được để global ở đây
         private static string _gameRecordFilePath = @"E:\\game-record.txt";
-        private static string _saveTrainedFilePath = @"E:\\trained.bin";
+        private static string _saveTrainedFilePath = @"E:\\trained";
+
+        private static string _ggfFilePath = @"E:\\game-record.ggf";
+        private static string _saveConvertedFilePath = @"E:\\game-record-converted.txt";
 
         public static void MainMenu()
         {
@@ -24,6 +27,7 @@ namespace Reversi_mcts
                         "AI vs AI",
                         "Human vs AI",
                         "Socket io",
+                        "Tools",
                         "Quit"
                     }, userChoice);
 
@@ -31,7 +35,8 @@ namespace Reversi_mcts
                 else if (userChoice == 1) AiVsAiMenu();
                 else if (userChoice == 2) HumanVsAiMenu();
                 else if (userChoice == 3) SocketIoMenu();
-                else if (userChoice == 4)
+                else if (userChoice == 4) ToolsMenu();
+                else if (userChoice == 5)
                 {
                     ConsoleUtil.WriteAndWaitKey("Good bye! I will miss you <3");
                     return;
@@ -50,13 +55,15 @@ namespace Reversi_mcts
                         "<- Back",
                         BTMMAlgorithm.IsModelReady() ? "* Status: READY" : "* Status: NOT READY!!",
                         "Train",
-                        $"Load"
+                        "Load",
+                        "Read Log"
                     }, userChoice);
 
                 if (userChoice == 0) return;
                 if (userChoice == 1) CheckModelReady();
                 else if (userChoice == 2) TrainMenu();
-                else LoadMenu();
+                else if (userChoice == 3) LoadMenu();
+                else ConsoleUtil.WriteAndWaitKey(GameLogger.ReadLog());
             }
         }
 
@@ -88,7 +95,7 @@ namespace Reversi_mcts
                     }
                     catch (Exception e)
                     {
-                        ConsoleUtil.WriteAndWaitKey($"[!] ERROR: {e.Message}");
+                        ConsoleUtil.WriteAndWaitKey($"[!] ERROR: {e}");
                     }
                 }
             }
@@ -119,7 +126,7 @@ namespace Reversi_mcts
                     }
                     catch (Exception e)
                     {
-                        ConsoleUtil.WriteAndWaitKey($"[!] ERROR: {e.Message}");
+                        ConsoleUtil.WriteAndWaitKey($"[!] ERROR: {e}");
                     }
                 }
             }
@@ -289,6 +296,60 @@ namespace Reversi_mcts
                 {
                     new SocketClient(serverIp, clientName, algorithm, timeout).Connect();
                     ConsoleUtil.WriteAndWaitKey("> Fight through Socket IO End.");
+                }
+            }
+        }
+
+        private static void ToolsMenu()
+        {
+            var userChoice = 0;
+            while (true)
+            {
+                userChoice = GetUserChoice(
+                    "Tools Menu", new[]
+                    {
+                        "<- Back",
+                        "Convert GGF to GameRecord",
+                    }, userChoice);
+
+                if (userChoice == 0) return;
+                if (userChoice == 1) ConvertGgfMenu();
+            }
+        }
+
+        private static void ConvertGgfMenu()
+        {
+            var userChoice = 0;
+            while (true)
+            {
+                userChoice = GetUserChoice(
+                    "Convert GGF Menu", new[]
+                    {
+                        "<- Back",
+                        $"GGF file: {_ggfFilePath}",
+                        $"Save to : {_saveConvertedFilePath}",
+                        "Convert Now!"
+                    }, userChoice);
+
+                if (userChoice == 0) return;
+                if (userChoice == 1)
+                    _ggfFilePath = (string) ConsoleUtil.Prompt("GGF file", _ggfFilePath);
+                else if (userChoice == 2)
+                    _saveConvertedFilePath = (string) ConsoleUtil.Prompt("Save to", _saveConvertedFilePath);
+                else
+                {
+                    try
+                    {
+                        var parser = new GameRecordParser();
+                        parser.Parse(_ggfFilePath, true);
+                        parser.SaveParsedGame(_saveConvertedFilePath);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine($"[!] ERROR: {e}");
+                    }
+
+                    ConsoleUtil.WriteAndWaitKey("> Convert GGF End.");
                 }
             }
         }

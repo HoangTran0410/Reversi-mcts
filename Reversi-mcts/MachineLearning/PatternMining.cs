@@ -6,17 +6,13 @@ namespace Reversi_mcts.MachineLearning
     [Serializable]
     public class PatternMining
     {
-        public readonly PatternShape PatternShape;
+        public PatternShape PatternShape;
 
         // why use int as dictionary key: https://stackoverflow.com/a/5743520/11898496
-        public readonly Dictionary<int, float> Gamma; // min: 0.01, max: 100
-
-        [NonSerialized] public readonly Dictionary<int, ushort> Win; // tử số: Wi
-
-        [NonSerialized]
-        public readonly Dictionary<int, ushort> Candidate; // số lần xuất hiện của 1 pattern trong game record
-
-        [NonSerialized] public readonly Dictionary<int, float> GammaDenominator; // Mẫu số: SUM(Cij/E)
+        public Dictionary<int, float> Gamma; // min: 0.01, max: 100
+        [NonSerialized] public Dictionary<int, ushort> Win; // tử số: Wi
+        [NonSerialized] public Dictionary<int, ushort> Candidate; // số lần xuất hiện của 1 pattern trong game record
+        [NonSerialized] public Dictionary<int, float> GammaDenominator; // Mẫu số: SUM(Cij/E)
 
         public PatternMining(PatternShape patternShape)
         {

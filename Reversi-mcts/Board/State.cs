@@ -36,10 +36,7 @@ namespace Reversi_mcts.Board
             {
                 // Check passing move
                 if (!state.Board.HasLegalMoves(state.Player))
-                {
-                    // swap player
-                    state.Player = Constant.Opponent(state.Player);
-                }
+                    state.SwapPlayer();
 
                 var notation = recordText.Substring(i, 2).ToLower();
                 state.NextState(notation.ToBitMove());
@@ -51,6 +48,11 @@ namespace Reversi_mcts.Board
 
     public static class StateExtensions
     {
+        public static bool IsEquals(this State state, State other)
+        {
+            return state.Player == other.Player && state.Board.IsEquals(other.Board);
+        }
+        
         public static State Clone(this State state)
         {
             return new State(state.Board.Clone(), state.Player, state.BitLegalMoves);
@@ -61,18 +63,31 @@ namespace Reversi_mcts.Board
             return state.Board.IsGameComplete();
         }
 
+        public static void ReCalculateLegalMoves(this State state)
+        {
+            state.BitLegalMoves = state.Board.GetLegalMoves(state.Player);
+        }
+
+        public static void SetPlayer(this State state, byte player)
+        {
+            if (player != state.Player)
+            {
+                state.Player = player;
+                state.ReCalculateLegalMoves();
+            }
+        }
+
+        public static void SwapPlayer(this State state)
+        {
+            state.SetPlayer(Constant.Opponent(state.Player));
+        }
+
         // Đánh cờ tại vị trí move. Đánh trực tiếp vào bàn cờ, ko tạo State mới.
         public static State NextState(this State state, ulong move)
         {
             // move == 0 => passing move
             if (move != 0) state.Board.MakeMove(state.Player, move);
-
-            // switch player
-            state.Player = Constant.Opponent(state.Player);
-
-            // reCalculate legalmoves
-            state.BitLegalMoves = state.Board.GetLegalMoves(state.Player);
-
+            state.SwapPlayer();
             return state;
         }
 

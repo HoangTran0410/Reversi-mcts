@@ -25,13 +25,7 @@ namespace Reversi_mcts.PlayMode.SocketIo
 
         public (int row, int col) PerformAiMove(Algorithm algorithm)
         {
-            var move = algorithm switch
-            {
-                Algorithm.Mcts => Mcts.RunSearch(_state, _timeOut),
-                Algorithm.Mcts1 => Mcts.RunSearch1(_state, _timeOut),
-                _ => 0UL
-            };
-
+            var move = Mcts.RunSearch(algorithm, _state, _timeOut);
             _state.NextState(move);
 
             var notation = move.ToNotation();

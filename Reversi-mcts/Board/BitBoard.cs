@@ -12,6 +12,11 @@ namespace Reversi_mcts.Board
             Pieces = new ulong[] {0x810000000, 0x1008000000};
         }
 
+        public BitBoard(ulong blackPiece, ulong whitePiece)
+        {
+            Pieces = new ulong[] {blackPiece, whitePiece};
+        }
+
         public BitBoard(BitBoard board)
         {
             Pieces = new[] {board.Pieces[0], board.Pieces[1]};
@@ -31,7 +36,7 @@ namespace Reversi_mcts.Board
             return new BitBoard(board);
         }
 
-        public static bool Equals(this BitBoard board, BitBoard other)
+        public static bool IsEquals(this BitBoard board, BitBoard other)
         {
             return board.Pieces[Black] == other.Pieces[Black] &&
                    board.Pieces[White] == other.Pieces[White];

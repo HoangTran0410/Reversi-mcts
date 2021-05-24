@@ -7,11 +7,11 @@ namespace Reversi_mcts.PlayMode.SocketIo
 {
     public class SocketClient
     {
-        private readonly string _serverIp;
-        private readonly GameHandler _game;
-        private readonly SocketIO _client;
-        private readonly string _clientName;
-        private readonly Algorithm _algorithm;
+        private string _serverIp;
+        private GameHandler _game;
+        private SocketIO _client;
+        private string _clientName;
+        private Algorithm _algorithm;
 
         private ManualResetEvent _manualResetEvent;
 
