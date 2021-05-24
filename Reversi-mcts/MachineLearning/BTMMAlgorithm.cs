@@ -331,10 +331,12 @@ namespace Reversi_mcts.MachineLearning
                             if (denominator != 0)
                             {
                                 var win = patternMining.GetWin(patternCode, cellIndex, player);
-                                var gamma = patternMining.GetGamma(patternCode, cellIndex, player);
-                                var gamma1 = Math.Pow(gamma, 0.75) * Math.Pow(win / denominator, 0.25);
-
-                                var value = ((float) gamma1).LimitToRange(0.01f, 100f);
+                                var oldGamma = patternMining.GetGamma(patternCode, cellIndex, player);
+                                var newGamma = win / denominator;
+                                
+                                // Smooth Step: https://en.wikipedia.org/wiki/Smoothstep
+                                var smoothStep = Math.Pow(oldGamma, 0.75) * Math.Pow(newGamma, 0.25);
+                                var value = ((float) smoothStep).LimitToRange(0.01f, 100f);
                                 patternMining.SetGamma(patternCode, cellIndex, player, value);
 
                                 // reset gamma denominator

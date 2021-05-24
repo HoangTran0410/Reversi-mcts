@@ -27,10 +27,10 @@
             };
         }
 
-        public static float LimitToRange(this float value, float min, float max)
+        public static float LimitToRange(this float value, float lowerlimit, float upperlimit)
         {
-            if (value < min) return min;
-            if (value > max) return max;
+            if (value < lowerlimit) return lowerlimit;
+            if (value > upperlimit) return upperlimit;
             return value;
         }
     }
