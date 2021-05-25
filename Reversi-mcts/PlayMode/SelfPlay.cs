@@ -47,9 +47,8 @@ namespace Reversi_mcts.PlayMode
             {
                 var isBlack = state.Player == Constant.Black;
                 var timeout = isBlack ? blackTimeout : whiteTimeout;
-                var algoName = isBlack ? blackAlgorithm : whiteAlgorithm;
-
-                var move = Mcts.RunSearch(algoName, state, timeout);
+                var algorithm = isBlack ? blackAlgorithm : whiteAlgorithm;
+                var move = Mcts.RunSearch(algorithm, state, timeout);
 
                 state.NextState(move);
                 winner = state.Winner();

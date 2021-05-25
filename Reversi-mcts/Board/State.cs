@@ -6,7 +6,7 @@ namespace Reversi_mcts.Board
     public class State
     {
         public BitBoard Board { get; } // Bàn cờ hiện tại
-        public byte Player { get; set; } // Lươt chơi hiện tại. Người tiếp theo sẽ được đánh cờ.
+        public byte Player { get; set; } // Lươt chơi hiện tại. Người sẽ đánh nước cờ tiếp theo.
         public ulong BitLegalMoves { get; set; } // Lưu mọi legalmoves dưới dạng bit bằng 1 biến ulong
 
         // Mặc định người chơi Black sẽ đánh trước
@@ -34,12 +34,9 @@ namespace Reversi_mcts.Board
             var state = new State();
             for (var i = 0; i < recordText.Length; i += 2)
             {
-                // Check passing move
-                if (!state.Board.HasLegalMoves(state.Player))
-                    state.SwapPlayer();
-
                 var notation = recordText.Substring(i, 2).ToLower();
                 state.NextState(notation.ToBitMove());
+                if(!state.HasLegalMoves()) state.SwapPlayer();
             }
 
             return state;
@@ -48,14 +45,14 @@ namespace Reversi_mcts.Board
 
     public static class StateExtensions
     {
-        public static bool IsEquals(this State state, State other)
-        {
-            return state.Player == other.Player && state.Board.IsEquals(other.Board);
-        }
-        
         public static State Clone(this State state)
         {
             return new State(state.Board.Clone(), state.Player, state.BitLegalMoves);
+        }
+
+        public static bool IsEquals(this State state, State other)
+        {
+            return state.Player == other.Player && state.Board.IsEquals(other.Board);
         }
 
         public static bool IsTerminal(this State state)
@@ -63,23 +60,9 @@ namespace Reversi_mcts.Board
             return state.Board.IsGameComplete();
         }
 
-        public static void ReCalculateLegalMoves(this State state)
+        public static bool HasLegalMoves(this State state)
         {
-            state.BitLegalMoves = state.Board.GetLegalMoves(state.Player);
-        }
-
-        public static void SetPlayer(this State state, byte player)
-        {
-            if (player != state.Player)
-            {
-                state.Player = player;
-                state.ReCalculateLegalMoves();
-            }
-        }
-
-        public static void SwapPlayer(this State state)
-        {
-            state.SetPlayer(Constant.Opponent(state.Player));
+            return state.BitLegalMoves != 0;
         }
 
         // Đánh cờ tại vị trí move. Đánh trực tiếp vào bàn cờ, ko tạo State mới.
@@ -89,6 +72,17 @@ namespace Reversi_mcts.Board
             if (move != 0) state.Board.MakeMove(state.Player, move);
             state.SwapPlayer();
             return state;
+        }
+
+        public static void SwapPlayer(this State state)
+        {
+            state.SetPlayer(Constant.Opponent(state.Player));
+        }
+
+        public static void SetPlayer(this State state, byte player)
+        {
+            state.Player = player;
+            state.BitLegalMoves = state.Board.GetLegalMoves(state.Player);
         }
 
         public static List<ulong> GetListLegalMoves(this State state)

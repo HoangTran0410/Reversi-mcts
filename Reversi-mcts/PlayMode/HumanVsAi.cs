@@ -15,8 +15,9 @@ namespace Reversi_mcts.PlayMode
             var state = new State();
             var winner = Constant.Draw;
 
-            // show initial board
-            state.Board.DisplayWithLegalMoves(Constant.Black);
+            // show initial board for player
+            if (humanColor == Constant.Black)
+                state.Board.DisplayWithLegalMoves(Constant.Black);
 
             // begin
             while (!state.IsTerminal())

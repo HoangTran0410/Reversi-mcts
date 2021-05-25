@@ -96,6 +96,7 @@ namespace Reversi_mcts.PlayMode.SocketIo
         private void OnServerSendEndGame(SocketIOResponse response)
         {
             Console.WriteLine("\nEnd Game.\n");
+            _client.DisconnectAsync();
             _manualResetEvent.Set();
         }
 

@@ -13,6 +13,13 @@ namespace Reversi_mcts.MonteCarlo
 
         public static ulong RunSearch(Algorithm algoName, State state, int timeout)
         {
+            // Nếu không có legal move => trả về pass move
+            if (state.BitLegalMoves == 0) return 0UL;
+
+            // Nếu chỉ có 1 legal move => trả về legal move đó luôn
+            if (state.BitLegalMoves.PopCount() == 1) return state.BitLegalMoves;
+
+            // Nếu có >2 legal moves => MCTS
             var move = algoName switch
             {
                 Algorithm.Mcts => RunSearch(state, timeout),

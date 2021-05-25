@@ -26,7 +26,7 @@ namespace Reversi_mcts.PlayMode.SocketIo
         public (int row, int col) PerformAiMove(Algorithm algorithm)
         {
             var move = Mcts.RunSearch(algorithm, _state, _timeOut);
-            _state.NextState(move);
+            _state.NextState(move); // TODO auto swapPlayer in state.NextState will effect this
 
             var notation = move.ToNotation();
             if (move != 0) _recordText += notation;

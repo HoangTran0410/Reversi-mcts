@@ -100,6 +100,7 @@ namespace Reversi_mcts.Board
 
         public static bool IsLegalMove(this BitBoard board, byte player, ulong bitMove)
         {
+            if (board.GetPieceAt(bitMove) != Constant.EmptyCell) return false;
             var legalMoves = board.GetLegalMoves(player);
             return (bitMove & legalMoves) != 0;
         }

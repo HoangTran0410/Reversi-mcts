@@ -142,8 +142,6 @@ namespace Reversi_mcts.MachineLearning
             // Tách lấy record text (kifu text)
             var recordText = split[2];
 
-            // run game theo game record để lấy move và legal move của từng nước cờ
-            // code dưới này gần giống hàm State.FromRecordText
             moves = new List<ulong>();
             legalMoves = new List<List<ulong>>();
 
@@ -151,7 +149,7 @@ namespace Reversi_mcts.MachineLearning
             for (var i = 0; i < recordText.Length; i += 2)
             {
                 // Kiểm tra xem có phải passing move hay không
-                if (!stateClone.Board.HasLegalMoves(stateClone.Player))
+                if (!stateClone.HasLegalMoves())
                 {
                     // lưu lại Passing move
                     legalMoves.Add(new List<ulong>());
@@ -160,7 +158,7 @@ namespace Reversi_mcts.MachineLearning
                     // Đổi lượt
                     stateClone.SwapPlayer();
                 }
-
+                
                 var notation = recordText.Substring(i, 2).ToLower();
                 var bitMove = notation.ToBitMove();
                 var listLegalMoves = stateClone.GetListLegalMoves();
@@ -217,7 +215,7 @@ namespace Reversi_mcts.MachineLearning
                     case "B":
                     case "W":
                     {
-                        moves.Add(ParseMovesChunk(args));
+                        moves.Add(ParseMoveChunk(args));
                         break;
                     }
                 }
@@ -233,7 +231,6 @@ namespace Reversi_mcts.MachineLearning
                 if (move == 0)
                 {
                     legalMoves.Add(new List<ulong>());
-                    stateClone.SwapPlayer();
                 }
                 // Normal move
                 else
@@ -243,8 +240,9 @@ namespace Reversi_mcts.MachineLearning
                         throw new Exception("Invalid move.");
 
                     legalMoves.Add(listLegalMoves);
-                    stateClone.NextState(move);
                 }
+
+                stateClone.NextState(move);
             }
         }
 
@@ -293,14 +291,13 @@ namespace Reversi_mcts.MachineLearning
             }
 
             state.SetPlayer(segments[9] == "*" ? Constant.Black : Constant.White);
-            state.ReCalculateLegalMoves();
             return state;
         }
 
         //------------------------------------------------
         // parse moves
         //------------------------------------------------
-        private static ulong ParseMovesChunk(string args)
+        private static ulong ParseMoveChunk(string args)
         {
             // thông số của B|W là
             // o move
