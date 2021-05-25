@@ -9,26 +9,32 @@ namespace Reversi_mcts.Utils
         private const string FileName = "Train-log.txt";
         private static readonly StringBuilder StringBuilder = new StringBuilder();
 
-        public static void BeginTrain(int gameCount)
+        private static string GetDateTime()
         {
             // https://stackoverflow.com/a/1027274/11898496
-            var time = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
-            StringBuilder.Length = 0;
-            StringBuilder.Append($"Train: {gameCount.ToString()} games - DateTime: {time}");
-            StringBuilder.Append("TestPhase|LogLikelihood|AverageProbability");
+            return DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
         }
 
-        public static void EndTrain()
+        public static void WriteBeginTrain(int gameCount)
         {
-            var time = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
             StringBuilder.Length = 0;
-            StringBuilder.Append($"End Train - DateTime: {time}");
+            StringBuilder.AppendLine($"Train: {gameCount.ToString()} games - DateTime: {GetDateTime()}");
+            StringBuilder.AppendLine("TestPhase|LogLikelihood|AverageProbability");
+            WriteFile();
         }
 
-        public static void BeginTest(int loop, double likelihood, double averProb)
+        public static void WriteFinishTrain()
+        {
+            StringBuilder.Length = 0;
+            StringBuilder.AppendLine($"End Train - DateTime: {GetDateTime()}");
+            WriteFile();
+        }
+
+        public static void WriteMleLog(int loop, double likelihood, double averProb)
         {
             StringBuilder.Length = 0;
             StringBuilder.AppendFormat("{0}|{1:0.000000000000000}|{2:0.000000000000000}", loop, likelihood, averProb);
+            WriteFile();
         }
 
         public static void WriteFile()

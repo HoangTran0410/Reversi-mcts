@@ -1,6 +1,4 @@
-﻿using Reversi_mcts.MachineLearning;
-
-namespace Reversi_mcts
+﻿namespace Reversi_mcts
 {
     internal static class Program
     {
@@ -10,11 +8,11 @@ namespace Reversi_mcts
             // ----------- Menu GUI ------------
             // ---------------------------------
             Menu.MainMenu();
-            
+
             // ---------------------------------
             // --------- All functions ---------
             // ---------------------------------
-            // BTMMAlgorithm.TrainGameRecord(@"E:\z-Reversi\game-records\ALL.txt", @"E:\z-Reversi\trained-all");
+            // BTMMAlgorithm.TrainGameRecord(@"E:\z-Reversi\game-records\_330k.txt", @"E:\trained330k");
             // BTMMAlgorithm.LoadTrainedData(@"E:\z-Reversi\trained71k.bin");
             // SelfPlay.OneRound(blackTimeout, blackAlgorithm, whiteTimeout, whiteAlgorithm);
             // SelfPlay.MultiRounds(totalRounds, blackTimeout, blackAlgorithm, whiteTimeout, whiteAlgorithm);

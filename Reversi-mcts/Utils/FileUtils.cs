@@ -1,10 +1,25 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace Reversi_mcts.Utils
 {
     // source: https://stackoverflow.com/a/22417240/11898496
     public static class FileUtils
     {
+        public static string GetFileExtension(string filePath)
+        {
+            // Substring from end of string: https://stackoverflow.com/a/6413598/11898496
+            // Substring using range index: https://stackoverflow.com/a/55167466/11898496
+            var lastDotIndex = filePath.LastIndexOf('.');
+            var extLen = filePath.Length - lastDotIndex;
+            return lastDotIndex == -1 ? null : filePath[^extLen..];
+        }
+
+        public static bool CheckFileExtension(string filePath, string extension)
+        {
+            return string.Equals(GetFileExtension(filePath), extension, StringComparison.CurrentCultureIgnoreCase);
+        }
+        
         // -------------------------------------------
         // ------------------ BINARY -----------------
         // -------------------------------------------

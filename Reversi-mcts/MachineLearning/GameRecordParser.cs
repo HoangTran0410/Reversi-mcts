@@ -33,7 +33,7 @@ namespace Reversi_mcts.MachineLearning
                 //     Console.WriteLine($"Game {iState} is too short ({moveCount} moves). Pass.");
                 //     continue;
                 // }
-                
+
                 // get record text
                 var recordText = "";
                 foreach (var move in ParsedMoves[iState])
@@ -65,12 +65,17 @@ namespace Reversi_mcts.MachineLearning
             Console.WriteLine("> Saved");
         }
 
-        public void Parse(string fileName, bool isGgfFormat = false)
+        public void Parse(string filePath)
         {
             Console.WriteLine("> Reading...");
 
+            var isGgfFormat = FileUtils.CheckFileExtension(filePath, ".ggf");
+            Console.WriteLine(isGgfFormat
+                ? "> Found file extension '.ggf'. Using GGF Parser."
+                : "> Using game record (kifu) Parser.");
+
             var lineIndex = 0;
-            var lines = File.ReadLines(fileName);
+            var lines = File.ReadLines(filePath);
             var rawLines = lines as string[] ?? lines.ToArray();
             var totalLines = rawLines.Count();
             var progress = new ProgressBar();
@@ -81,6 +86,7 @@ namespace Reversi_mcts.MachineLearning
             // đọc từng dòng trong file
             foreach (var rawLine in rawLines)
             {
+                lineIndex++;
                 var line = rawLine.Trim();
 
                 // parse game line, if there are any error, ignore
@@ -100,11 +106,10 @@ namespace Reversi_mcts.MachineLearning
                 }
 
                 // Lưu lại parsed-move và parsed-legal-moves vào
-                if(!state.IsEquals(defaultState)) ParsedStates.Add(lineIndex, state);
+                if (!state.IsEquals(defaultState)) ParsedStates.Add(lineIndex - 1, state);
                 ParsedMoves.Add(moves);
                 ParsedLegalMoves.Add(legalMoves);
                 GameCount++;
-                lineIndex++;
 
                 // update loading bar
                 progress.Report((double) lineIndex / totalLines);
@@ -119,7 +124,7 @@ namespace Reversi_mcts.MachineLearning
             out List<ulong> moves,
             out List<List<ulong>> legalMoves)
         {
-            var split = strGame.Split("|");
+            var split = strGame.Split('|');
 
             // Tách dữ liệu state (nếu có)
             if (split.Length > 3)

@@ -46,8 +46,7 @@ namespace Reversi_mcts.MachineLearning
         }
 
         // Load game-record từ file
-        // Đọc và lưu tất cả MOVE
-        // Tính và lưu tất cả LegalMoves cho từng move trong từng game-record
+        // Đọc và lưu tất cả States(nếu cần), Moves (trong từng State), LegalMoves (của từng Move)
         private static void LoadGameDatabase(string filePath)
         {
             Console.WriteLine($"\nParsing game-records from {filePath}...");
@@ -75,8 +74,6 @@ namespace Reversi_mcts.MachineLearning
         // Thầy có 25 PatternShape ban đầu, sau khi flip/rotate/mirror 8 hướng thì được 25*8=200 pattern-mining
         private static void InitListPatternMining()
         {
-            var patternShapes = new List<PatternShape>();
-
             // patternShape của thầy, dưới dạng string
             var patternShapesString = new List<(string, string)>
             {
@@ -144,6 +141,7 @@ namespace Reversi_mcts.MachineLearning
 
             // ---------- Thêm các patternShapes và các flip/mirror/rotate của nó vào List ----------
             Console.WriteLine($"\nParsing {patternShapesString.Count} PatternShapes of nqhuy...");
+            var patternShapes = new List<PatternShape>();
             foreach (var (notations, targetNotation) in patternShapesString)
             {
                 var ps = PatternShape.Parse(notations, targetNotation);
@@ -166,7 +164,7 @@ namespace Reversi_mcts.MachineLearning
             Console.WriteLine($"> Created {_listPatternMining.Count} pattern minings.");
         }
 
-        private static void Train(int epoch = 20)
+        private static void Train(int epochs = 20)
         {
             // ---------- split test/train ----------
             Console.WriteLine("\nSplitting train/test...");
@@ -180,21 +178,19 @@ namespace Reversi_mcts.MachineLearning
             CalculateWi(testSize, _gameCount);
 
             // ---------- train ----------
-            Console.WriteLine($"\nStarting train {epoch} epochs ...");
-            GameLogger.BeginTrain(_gameCount);
-            GameLogger.WriteFile();
-            for (var i = 0; i < epoch; i++)
+            Console.WriteLine($"\nStarting train {epochs} epochs ...");
+            GameLogger.WriteBeginTrain(_gameCount);
+            for (var i = 0; i < epochs; i++)
             {
                 Console.WriteLine("\n---------------------------------");
                 Console.WriteLine($"----------- Epoch {i + 1} ------------");
                 Console.WriteLine("---------------------------------");
 
                 CalculateGammaTest(i, 0, testSize);
-                CalculateGamma(testSize, _gameCount);
+                CalculateGamma(i, testSize, _gameCount);
             }
 
-            GameLogger.EndTrain();
-            GameLogger.WriteFile();
+            GameLogger.WriteFinishTrain();
             Console.WriteLine("\n> Done training.");
         }
 
@@ -269,7 +265,6 @@ namespace Reversi_mcts.MachineLearning
             var progress = new ProgressBar();
             double likelihood = 0;
             double prob = 0;
-            var beginTime = DateTime.Now;
 
             var count = 0;
             for (var iGame = begin; iGame < end; iGame++)
@@ -297,17 +292,15 @@ namespace Reversi_mcts.MachineLearning
 
             progress.Dispose();
             Console.WriteLine("> Likelihood = {0:0.0000000000000000000000000}", likelihood / count);
-            Console.WriteLine("> Time spent = {0:0,000} ms", (DateTime.Now - beginTime).TotalMilliseconds);
             Console.WriteLine("> Aver_Prop: {0}", prob / count);
-            GameLogger.BeginTest(loop, likelihood / count, prob / count);
-            GameLogger.WriteFile();
+            GameLogger.WriteMleLog(loop, likelihood / count, prob / count);
         }
 
         // Calculate and update all strengths of all features in which attent in N moves
-        private static void CalculateGamma(int begin, int end)
+        private static void CalculateGamma(int loop, int begin, int end)
         {
             // Tính mẫu số SUM(Cij/E)
-            CalculateGammaDenominator(begin, end);
+            CalculateGammaDenominator(loop, begin, end);
 
             // ------------------------------------------------------------------
             // ------------------- Tính Gamma sau khi biết mẫu số ---------------
@@ -354,20 +347,22 @@ namespace Reversi_mcts.MachineLearning
         }
 
         // Tính mẫu số: SUM(cij / e)
-        private static void CalculateGammaDenominator(int begin, int end)
+        private static void CalculateGammaDenominator(int loop, int begin, int end)
         {
             Console.WriteLine("\nCalculate GammaDenominator SUM(Cij / E)...");
+            double likelihood = 0;
+            double prob = 0;
             var progress = new ProgressBar();
             for (var iGame = begin; iGame < end; iGame++)
             {
                 if (!_parsedStates.TryGetValue(iGame, out var state)) state = new State();
-                var listBitMove = _parsedMoves[iGame];
+                var moves = _parsedMoves[iGame];
 
                 // loop through all move in current game
-                for (var moveIdx = 0; moveIdx < listBitMove.Count; moveIdx++)
+                for (var iMove = 0; iMove < moves.Count; iMove++)
                 {
                     var player = state.Player;
-                    var legalMoves = _parsedLegalMoves[iGame][moveIdx];
+                    var legalMoves = _parsedLegalMoves[iGame][iMove];
                     var lenLegalMoves = legalMoves.Count;
 
                     // Nếu có từ 2 legal move trở lên mới tính
@@ -376,11 +371,18 @@ namespace Reversi_mcts.MachineLearning
                         // tính E và sức mạnh từng legalmoves
                         var e = 0f; // calculateE(state, legalMoves);
                         var strongLegalMoves = new float[lenLegalMoves];
+                        var iChoseLegalMove = -1;
                         for (var iLegalMove = 0; iLegalMove < lenLegalMoves; iLegalMove++)
                         {
                             strongLegalMoves[iLegalMove] = StrongOfAction(state, legalMoves[iLegalMove]);
                             e += strongLegalMoves[iLegalMove];
+                            if (legalMoves[iLegalMove] == moves[iMove])
+                                iChoseLegalMove = iLegalMove;
                         }
+                        
+                        var val = strongLegalMoves[iChoseLegalMove] / e;
+                        likelihood += Math.Log(val);
+                        prob += val;
 
                         // Tính mẫu số và cập nhật vào _listPatternMining
                         for (var iLegalMove = 0; iLegalMove < lenLegalMoves; iLegalMove++)
@@ -403,13 +405,16 @@ namespace Reversi_mcts.MachineLearning
                         } // end loop k
                     } // end if
 
-                    state.NextState(listBitMove[moveIdx]);
+                    state.NextState(moves[iMove]);
                 } // end loop moves
 
                 progress.Report((double) (iGame - begin) / (end - begin));
             } // end loop games
 
             progress.Dispose();
+            Console.WriteLine("> Likelihood = {0:0.0000000000000000000000000}", likelihood / _count);
+            Console.WriteLine("> Aver_Prop: {0}", prob / _count);
+            GameLogger.WriteMleLog(loop, likelihood / _count, prob / _count);
         }
 
         private static float CalculateCij(float strong, int iPat, int patternCode, int index, int player)

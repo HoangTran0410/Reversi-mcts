@@ -333,15 +333,25 @@ namespace Reversi_mcts
 
                 if (userChoice == 0) return;
                 if (userChoice == 1)
-                    _ggfFilePath = (string) ConsoleUtil.Prompt("GGF file", _ggfFilePath);
+                {
+                    var tempPath = (string) ConsoleUtil.Prompt("GGF file", _ggfFilePath);
+                    var validExtension = FileUtils.CheckFileExtension(tempPath, ".ggf");
+                    if (validExtension) _ggfFilePath = tempPath;
+                    else ConsoleUtil.WriteAndWaitKey("[!] GGF file extension must be '.ggf'");
+                }
                 else if (userChoice == 2)
-                    _saveConvertedFilePath = (string) ConsoleUtil.Prompt("Save to", _saveConvertedFilePath);
+                {
+                    var tempPath = (string) ConsoleUtil.Prompt("Save to", _saveConvertedFilePath);
+                    var validExtension = FileUtils.CheckFileExtension(tempPath, ".txt");
+                    if (validExtension) _saveConvertedFilePath = tempPath;
+                    else ConsoleUtil.WriteAndWaitKey("[!] Game-record file extension must be '.txt'");
+                }
                 else
                 {
                     try
                     {
                         var parser = new GameRecordParser();
-                        parser.Parse(_ggfFilePath, true);
+                        parser.Parse(_ggfFilePath);
                         parser.SaveParsedGame(_saveConvertedFilePath);
                     }
                     catch (Exception e)
