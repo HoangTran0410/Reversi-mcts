@@ -26,14 +26,6 @@ namespace Reversi_mcts.MachineLearning
 
             for (var iState = 0; iState < ParsedMoves.Count; iState++)
             {
-                // // if moves too short
-                // var moveCount = ParsedMoves[iState].Count;
-                // if (moveCount < 10)
-                // {
-                //     Console.WriteLine($"Game {iState} is too short ({moveCount} moves). Pass.");
-                //     continue;
-                // }
-
                 // get record text
                 var recordText = "";
                 foreach (var move in ParsedMoves[iState])
@@ -105,8 +97,11 @@ namespace Reversi_mcts.MachineLearning
                     continue;
                 }
 
-                // Lưu lại parsed-move và parsed-legal-moves vào
-                if (!state.IsEquals(defaultState)) ParsedStates.Add(lineIndex - 1, state);
+                // Nếu state không giống default state => lưu state
+                if (!state.IsEquals(defaultState))
+                    ParsedStates.Add(GameCount, state);
+                
+                // Lưu lại parsed-move và parsed-legal-moves
                 ParsedMoves.Add(moves);
                 ParsedLegalMoves.Add(legalMoves);
                 GameCount++;

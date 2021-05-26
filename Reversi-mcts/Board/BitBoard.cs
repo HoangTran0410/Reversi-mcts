@@ -14,7 +14,7 @@ namespace Reversi_mcts.Board
 
         public BitBoard(ulong blackPiece, ulong whitePiece)
         {
-            Pieces = new ulong[] {blackPiece, whitePiece};
+            Pieces = new[] {blackPiece, whitePiece};
         }
 
         public BitBoard(BitBoard board)

@@ -18,7 +18,7 @@ namespace Reversi_mcts.Utils
         public static void WriteBeginTrain(int gameCount)
         {
             StringBuilder.Length = 0;
-            StringBuilder.AppendLine($"Train: {gameCount.ToString()} games - DateTime: {GetDateTime()}");
+            StringBuilder.AppendLine($"\nTrain: {gameCount.ToString()} games - DateTime: {GetDateTime()}");
             StringBuilder.AppendLine("TestPhase|LogLikelihood|AverageProbability");
             WriteFile();
         }
@@ -26,14 +26,14 @@ namespace Reversi_mcts.Utils
         public static void WriteFinishTrain()
         {
             StringBuilder.Length = 0;
-            StringBuilder.AppendLine($"End Train - DateTime: {GetDateTime()}");
+            StringBuilder.AppendLine($"\nEnd Train - DateTime: {GetDateTime()}");
             WriteFile();
         }
 
         public static void WriteMleLog(int loop, double likelihood, double averProb)
         {
             StringBuilder.Length = 0;
-            StringBuilder.AppendFormat("{0}|{1:0.000000000000000}|{2:0.000000000000000}", loop, likelihood, averProb);
+            StringBuilder.AppendFormat("\n{0}|{1:0.000000000000000}|{2:0.000000000000000}", loop, likelihood, averProb);
             WriteFile();
         }
 
@@ -43,7 +43,7 @@ namespace Reversi_mcts.Utils
                 return;
 
             var writer = new StreamWriter(FileName, true, Encoding.ASCII);
-            writer.WriteLine(StringBuilder.ToString());
+            writer.Write(StringBuilder.ToString());
             writer.Close();
             StringBuilder.Length = 0;
         }

@@ -51,16 +51,18 @@ namespace Reversi_mcts.MachineLearning
             // for (var i = 0; i < len; i++)
             //     result += pattern[len - i - 1] * MathUtils.Power3(i);
 
-            // ---------- Version của nhóm - Cho kết quả giống thầy ---------- 
+            // ---------- Version của nhóm - force giá trị TargetBitCell về emptyCell ---------- 
             var result = 0;
             var len = ps.ArrayBitCells.Length;
             for (var i = 0; i < len; i++)
             {
-                var cellValue = bitBoard.GetPieceAt(ps.ArrayBitCells[i]);
+                var cellPos = ps.ArrayBitCells[i];
+                var cellValue = cellPos == ps.TargetBitCell ? Constant.EmptyCell : bitBoard.GetPieceAt(cellPos);
                 result += cellValue * MathUtils.Power3(len - i - 1);
             }
-
-            // Console.WriteLine(ps.HumanReadablePatternCode(result));
+            
+            // if(bitBoard.GetPieceAt(ps.TargetBitCell) != Constant.EmptyCell)
+            //     Console.WriteLine("SOMETHING WRONG HERE");
 
             return result;
         }
