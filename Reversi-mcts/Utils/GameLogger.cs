@@ -18,15 +18,15 @@ namespace Reversi_mcts.Utils
         public static void WriteBeginTrain(int gameCount)
         {
             StringBuilder.Length = 0;
-            StringBuilder.AppendLine($"\nTrain: {gameCount.ToString()} games - DateTime: {GetDateTime()}");
-            StringBuilder.AppendLine("TestPhase|LogLikelihood|AverageProbability");
+            StringBuilder.Append($"\n\nTrain: {gameCount.ToString()} games - DateTime: {GetDateTime()}");
+            StringBuilder.Append("\nTestPhase|LogLikelihood|AverageProbability");
             WriteFile();
         }
 
         public static void WriteFinishTrain()
         {
             StringBuilder.Length = 0;
-            StringBuilder.AppendLine($"\nEnd Train - DateTime: {GetDateTime()}");
+            StringBuilder.Append($"\nEnd Train - DateTime: {GetDateTime()}");
             WriteFile();
         }
 

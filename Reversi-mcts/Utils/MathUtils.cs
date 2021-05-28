@@ -1,4 +1,6 @@
-﻿namespace Reversi_mcts.Utils
+﻿using System;
+
+namespace Reversi_mcts.Utils
 {
     public static class MathUtils
     {
@@ -7,6 +9,7 @@
         {
             return exp switch
             {
+                0 => 1,
                 1 => 3,
                 2 => 9,
                 3 => 27,
@@ -23,14 +26,14 @@
                 14 => 4782969,
                 15 => 14348907,
                 16 => 43046721,
-                _ => 1
+                _ => (int) Math.Pow(3, exp)
             };
         }
 
-        public static float LimitToRange(this float value, float lowerlimit, float upperlimit)
+        public static float LimitToRange(this float value, float lowerLimit, float upperLimit)
         {
-            if (value < lowerlimit) return lowerlimit;
-            if (value > upperlimit) return upperlimit;
+            if (value < lowerLimit) return lowerLimit;
+            if (value > upperLimit) return upperLimit;
             return value;
         }
     }

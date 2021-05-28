@@ -42,10 +42,10 @@ namespace Reversi_mcts.MachineLearning
         public static int CalculatePatternCode(this PatternShape ps, BitBoard bitBoard)
         {
             // ---------- Version của thầy ---------- 
-            // var len = ps.BitCellsArray.Length;
+            // var len = ps.ArrayBitCells.Length;
             // var pattern = new int[len];
             // for (var i = 0; i < len; i++)
-            //     pattern[i] = bitBoard.GetPieceAt(ps.BitCellsArray[i]);
+            //     pattern[i] = bitBoard.GetPieceAt(ps.ArrayBitCells[i]);
             //
             // var result = 0;
             // for (var i = 0; i < len; i++)
@@ -57,26 +57,15 @@ namespace Reversi_mcts.MachineLearning
             for (var i = 0; i < len; i++)
             {
                 var cellPos = ps.ArrayBitCells[i];
-                var cellValue = cellPos == ps.TargetBitCell ? Constant.EmptyCell : bitBoard.GetPieceAt(cellPos);
+                // var cellValue = cellPos == ps.TargetBitCell ? Constant.EmptyCell : bitBoard.GetPieceAt(cellPos);
+                var cellValue = bitBoard.GetPieceAt(cellPos);
                 result += cellValue * MathUtils.Power3(len - i - 1);
             }
-            
+
             // if(bitBoard.GetPieceAt(ps.TargetBitCell) != Constant.EmptyCell)
             //     Console.WriteLine("SOMETHING WRONG HERE");
 
             return result;
-        }
-
-        public static string HumanReadablePatternCode(this PatternShape ps, int patternCode)
-        {
-            var str = new StringBuilder(ps.ArrayBitCells.Length);
-            for (var i = 0; i < ps.ArrayBitCells.Length; i++)
-            {
-                str.Insert(0, patternCode % 3);
-                patternCode /= 3;
-            }
-
-            return str.ToString();
         }
 
         // Trả về index của bitCell trong BitCellsArray
@@ -88,56 +77,53 @@ namespace Reversi_mcts.MachineLearning
         // Tạo ra các pattern được flip/mirror/rotate, rồi bỏ tất cả vào 1 List, trả về List
         public static List<PatternShape> Sym8(this PatternShape ps)
         {
-            var result = new List<PatternShape>(8);
-
-            // gộp mảng BitCellsArray vào 1 ulong, để tiện cho việc flip/rotate/mirror
-            var bitCellsUlong = 0UL;
-            foreach (var position in ps.ArrayBitCells)
-            {
-                bitCellsUlong |= position;
-            }
-
-            // 1. Normal
-            var tempBitCellsArray = bitCellsUlong.ToArrayBitMove();
-            var tempTargetCell = ps.TargetBitCell;
-            result.Add(new PatternShape(tempBitCellsArray, tempTargetCell));
-
-            // 2. FlipVertical
-            tempBitCellsArray = bitCellsUlong.FlipVertical().ToArrayBitMove();
-            tempTargetCell = ps.TargetBitCell.FlipVertical();
-            result.Add(new PatternShape(tempBitCellsArray, tempTargetCell));
-
-            // 3. MirrorHorizontal
-            tempBitCellsArray = bitCellsUlong.MirrorHorizontal().ToArrayBitMove();
-            tempTargetCell = ps.TargetBitCell.MirrorHorizontal();
-            result.Add(new PatternShape(tempBitCellsArray, tempTargetCell));
-
-            // 4. FlipDiagA1H8
-            tempBitCellsArray = bitCellsUlong.FlipDiagA1H8().ToArrayBitMove();
-            tempTargetCell = ps.TargetBitCell.FlipDiagA1H8();
-            result.Add(new PatternShape(tempBitCellsArray, tempTargetCell));
-
-            // 5. FlipDiagA8H1
-            tempBitCellsArray = bitCellsUlong.FlipDiagA8H1().ToArrayBitMove();
-            tempTargetCell = ps.TargetBitCell.FlipDiagA8H1();
-            result.Add(new PatternShape(tempBitCellsArray, tempTargetCell));
-
-            // 6. Rotate180
-            tempBitCellsArray = bitCellsUlong.Rotate180().ToArrayBitMove();
-            tempTargetCell = ps.TargetBitCell.Rotate180();
-            result.Add(new PatternShape(tempBitCellsArray, tempTargetCell));
-
-            // 7. Rotate90Clockwise
-            tempBitCellsArray = bitCellsUlong.Rotate90Clockwise().ToArrayBitMove();
-            tempTargetCell = ps.TargetBitCell.Rotate90Clockwise();
-            result.Add(new PatternShape(tempBitCellsArray, tempTargetCell));
-
-            // 8. Rotate90AntiClockwise
-            tempBitCellsArray = bitCellsUlong.Rotate90AntiClockwise().ToArrayBitMove();
-            tempTargetCell = ps.TargetBitCell.Rotate90AntiClockwise();
-            result.Add(new PatternShape(tempBitCellsArray, tempTargetCell));
-
+            var result = new List<PatternShape>();
+            var ps2 = ps.CopyByFlipMainDiagonal();
+            result.Add(ps);
+            result.Add(ps.CopyByFlipVertical());
+            result.Add(ps.CopyByFlipHorizontal());
+            result.Add(ps.CopyByFlipSubDiagonal());
+            result.Add(ps2);
+            result.Add(ps2.CopyByFlipVertical());
+            result.Add(ps2.CopyByFlipHorizontal());
+            result.Add(ps2.CopyByFlipSubDiagonal());
             return result;
+        }
+
+        private static PatternShape CopyByFlipHorizontal(this PatternShape ps)
+        {
+            var targetBitCell = ps.TargetBitCell.MirrorHorizontal();
+            var bitCellArray = new ulong[ps.ArrayBitCells.Length];
+            for (var i = 0; i < bitCellArray.Length; i++)
+                bitCellArray[i] = ps.ArrayBitCells[i].MirrorHorizontal();
+            return new PatternShape(bitCellArray, targetBitCell);
+        }
+
+        private static PatternShape CopyByFlipVertical(this PatternShape ps)
+        {
+            var targetBitCell = ps.TargetBitCell.FlipVertical();
+            var bitCellArray = new ulong[ps.ArrayBitCells.Length];
+            for (var i = 0; i < bitCellArray.Length; i++)
+                bitCellArray[i] = ps.ArrayBitCells[i].FlipVertical();
+            return new PatternShape(bitCellArray, targetBitCell);
+        }
+
+        private static PatternShape CopyByFlipMainDiagonal(this PatternShape ps)
+        {
+            var targetBitCell = ps.TargetBitCell.FlipDiagA8H1();
+            var bitCellArray = new ulong[ps.ArrayBitCells.Length];
+            for (var i = 0; i < bitCellArray.Length; i++)
+                bitCellArray[i] = ps.ArrayBitCells[i].FlipDiagA8H1();
+            return new PatternShape(bitCellArray, targetBitCell);
+        }
+
+        private static PatternShape CopyByFlipSubDiagonal(this PatternShape ps)
+        {
+            var targetBitCell = ps.TargetBitCell.FlipDiagA1H8();
+            var bitCellArray = new ulong[ps.ArrayBitCells.Length];
+            for (var i = 0; i < bitCellArray.Length; i++)
+                bitCellArray[i] = ps.ArrayBitCells[i].FlipDiagA1H8();
+            return new PatternShape(bitCellArray, targetBitCell);
         }
 
         // Kiem tra xem pattern hien tai co phai la cha (chứa) pattern other hay khong.
@@ -151,6 +137,18 @@ namespace Reversi_mcts.MachineLearning
                     return false;
 
             return true;
+        }
+
+        public static string HumanReadablePatternCode(this PatternShape ps, int patternCode)
+        {
+            var str = new StringBuilder(ps.ArrayBitCells.Length);
+            for (var i = 0; i < ps.ArrayBitCells.Length; i++)
+            {
+                str.Insert(0, patternCode % 3);
+                patternCode /= 3;
+            }
+
+            return str.ToString();
         }
     }
 }
