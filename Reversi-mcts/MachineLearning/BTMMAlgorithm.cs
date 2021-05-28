@@ -8,10 +8,10 @@ namespace Reversi_mcts.MachineLearning
 {
     public static class BTMMAlgorithm
     {
+        private static int _gameCount;
+        private static int _gameMiss;
+        private static int _numberOfFeatures;
         private static List<PatternMining> _listPatternMining = new List<PatternMining>();
-        private static int _gameCount = 0;
-        private static int _gameMiss = 0;
-        private static int _count = 0;
 
         // https://stackoverflow.com/a/3906931/11898496
         private static Dictionary<int, State> _parsedStates = new Dictionary<int, State>();
@@ -203,23 +203,22 @@ namespace Reversi_mcts.MachineLearning
             // Loop với từng game (ván cờ)
             for (var iGame = begin; iGame < end; iGame++)
             {
+                var state = GetParsedState(iGame);
                 var moves = _parsedMoves[iGame]; // lấy ra list-move của game thứ iGame từ ParsedGameMoves
-                var state = _parsedStates.TryGetValue(iGame, out var savedState) ? savedState.Clone() : new State();
 
                 for (var iMove = 0; iMove < moves.Count; iMove++) // Với từng move (nước đi) trong game đang xét
                 {
                     var move = moves[iMove];
-                    var legalMoves = _parsedLegalMoves[iGame][iMove]; // Lấy ra legalmoves
                     var player = state.Player; // lượt chơi hiện tại
+                    var legalMoves = _parsedLegalMoves[iGame][iMove]; // Lấy ra legalmoves
 
                     // Nếu có từ 2 legalMove trở lên MỚI CẦN TÍNH
                     // Nếu chỉ có 1 legalMove thì đánh nó luôn cần gì tính
                     // Nếu không có legalMove thì pass cần gì tính
                     if (legalMoves.Count > 1)
                     {
-                        _count++;
-
-                        // Với từng legalMove
+                        _numberOfFeatures++;
+                        
                         foreach (var legalMove in legalMoves)
                         {
                             // Lấy ra các patternShape có targetCell (ô đỏ) là legalMove đang xét
@@ -228,20 +227,16 @@ namespace Reversi_mcts.MachineLearning
                             // Với từng patternShape tìm được từ legalMove đang xét
                             foreach (var iPatternMining in patternIndexes)
                             {
-                                var pm = _listPatternMining[iPatternMining];
-
-                                // Lấy ra index của legalMove trong patterShape đó
-                                var cellIndex = pm.PatternShape.IndexOfBitCell(legalMove);
-
-                                // Và tính patternId (unique id của pattern)
-                                var patternCode = pm.PatternShape.CalculatePatternCode(state.Board);
+                                var patternMining = _listPatternMining[iPatternMining];
+                                var cellIndex = patternMining.PatternShape.IndexOfBitCell(legalMove);
+                                var patternCode = patternMining.PatternShape.CalculatePatternCode(state.Board);
+                                var key = PatternMiningExt.Key(patternCode, cellIndex, player); 
 
                                 // Nếu legalmove này được chọn làm move tiếp theo thì tăng win
-                                if (legalMove == move)
-                                    pm.AddWin(patternCode, cellIndex, player);
+                                if (legalMove == move) patternMining.AddWin(key);
 
                                 // Tăng canditate (số lần xuất hiện) cho pattern
-                                pm.AddCandidate(patternCode, cellIndex, player);
+                                patternMining.AddCandidate(key);
                             }
                         }
                     }
@@ -268,7 +263,7 @@ namespace Reversi_mcts.MachineLearning
             var count = 0;
             for (var iGame = begin; iGame < end; iGame++)
             {
-                var state = _parsedStates.TryGetValue(iGame, out var savedState) ? savedState.Clone() : new State();
+                var state = GetParsedState(iGame);
                 var listBitMove = _parsedMoves[iGame];
                 for (var iMove = 0; iMove < _parsedMoves[iGame].Count; iMove++)
                 {
@@ -319,20 +314,21 @@ namespace Reversi_mcts.MachineLearning
                     {
                         for (var player = 0; player <= 1; player++) // loop through 2 player: black-white
                         {
-                            var denominator = patternMining.GetGammaDenominator(patternCode, cellIndex, player);
+                            var key = PatternMiningExt.Key(patternCode, cellIndex, player);
+                            var denominator = patternMining.GetGammaDenominator(key);
                             if (denominator != 0)
                             {
-                                var win = patternMining.GetWin(patternCode, cellIndex, player);
-                                var oldGamma = patternMining.GetGamma(patternCode, cellIndex, player);
+                                var win = patternMining.GetWin(key);
+                                var oldGamma = patternMining.GetGamma(key);
                                 var newGamma = win / denominator;
                                 
                                 // Smooth Step: https://en.wikipedia.org/wiki/Smoothstep
                                 var smoothStep = Math.Pow(oldGamma, 0.75) * Math.Pow(newGamma, 0.25);
                                 var value = ((float) smoothStep).LimitToRange(0.01f, 100f);
-                                patternMining.SetGamma(patternCode, cellIndex, player, value);
+                                patternMining.SetGamma(key, value);
 
                                 // reset gamma denominator
-                                patternMining.SetGammaDenominator(patternCode, cellIndex, player, 0);
+                                patternMining.ResetGammaDenominator(key);
                             }
                         }
                     }
@@ -354,9 +350,7 @@ namespace Reversi_mcts.MachineLearning
             var progress = new ProgressBar();
             for (var iGame = begin; iGame < end; iGame++)
             {
-                // Console.SetCursorPosition(0, Console.CursorTop - 1);
-                // Console.WriteLine("Working with {0}", iGame);
-                var state = _parsedStates.TryGetValue(iGame, out var savedState) ? savedState.Clone() : new State();
+                var state = GetParsedState(iGame);
 
                 // loop through all move in current game
                 var moves = _parsedMoves[iGame];
@@ -415,9 +409,9 @@ namespace Reversi_mcts.MachineLearning
             } // end loop games
 
             progress.Dispose();
-            Console.WriteLine("> Likelihood = {0:0.0000000000000000000000000}", likelihood / _count);
-            Console.WriteLine("> Aver_Prop: {0}", prob / _count);
-            GameLogger.WriteMleLog(loop, likelihood / _count, prob / _count);
+            Console.WriteLine("> Likelihood = {0:0.0000000000000000000000000}", likelihood / _numberOfFeatures);
+            Console.WriteLine("> Aver_Prop: {0}", prob / _numberOfFeatures);
+            GameLogger.WriteMleLog(loop, likelihood / _numberOfFeatures, prob / _numberOfFeatures);
         }
 
         private static float Cij(float strong, int iPat, int patternCode, int index, int player)
@@ -450,6 +444,11 @@ namespace Reversi_mcts.MachineLearning
             }
 
             return strong;
+        }
+
+        private static State GetParsedState(int iGame)
+        {
+            return _parsedStates.TryGetValue(iGame, out var savedState) ? savedState.Clone() : new State();
         }
 
         // identify indices of pattern-minings that related to an action
