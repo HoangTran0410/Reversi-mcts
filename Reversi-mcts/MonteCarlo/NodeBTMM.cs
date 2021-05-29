@@ -31,10 +31,9 @@ namespace Reversi_mcts.MonteCarlo
         {
             var prob = node.Strength / node.ParentNode.AllChildStrength;
             var wins = isRootPlayer ? node.Wins : node.Visits - node.Wins;
-            // return wins / node.Visits + Constant.C * Math.Sqrt(Math.Log(node.ParentNode.Visits) / node.Visits);
             return wins / node.Visits
                    + Constant.C * Math.Sqrt(Math.Log(node.ParentNode.Visits) / node.Visits)
-                   + 0.5 * prob * Math.Sqrt(500.0 / (node.Visits + 500));
+                   + Constant.Cbt * prob * Math.Sqrt(Constant.K / (node.ParentNode.Visits + Constant.K));
         }
 
         // Phase 2: EXPANSION kết hợp dữ liệu BTMM trained

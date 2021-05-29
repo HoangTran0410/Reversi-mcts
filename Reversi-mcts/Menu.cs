@@ -374,8 +374,7 @@ namespace Reversi_mcts
             }
             else if (name == "mcts2")
             {
-                // if (CheckModelReady()) return Constant.Algorithm.Mcts2;
-                Console.WriteLine("> MCTS2 not available yet.");
+                if (CheckModelReady()) return Algorithm.Mcts2;
             }
             else Console.Write($"> Invalid algorithm name '{algorithmName}'. ");
 

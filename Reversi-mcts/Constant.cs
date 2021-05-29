@@ -22,7 +22,12 @@ namespace Reversi_mcts
             // return (byte) (Black + White - player);
             // return (byte)(1 ^ player);
         }
-
+        
+        // BTMM
+        public const double Cbt = 0.5; // hệ số điều chỉnh ảnh hưởng độ lệch
+        public const double K = 500.0; // tham số điều chỉnh tỷ lệ khi nước đi có xu hướng giảm số lần viếng thăm
+        
+        // MCTS
         public const double C = 0.85; // exploration constant
 
         // Cell value

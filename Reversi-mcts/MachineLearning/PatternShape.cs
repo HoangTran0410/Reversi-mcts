@@ -57,13 +57,10 @@ namespace Reversi_mcts.MachineLearning
             for (var i = 0; i < len; i++)
             {
                 var cellPos = ps.ArrayBitCells[i];
-                var cellValue = cellPos == ps.TargetBitCell ? Constant.EmptyCell : bitBoard.GetPieceAt(cellPos);
-                // var cellValue = bitBoard.GetPieceAt(cellPos);
+                // var cellValue = cellPos == ps.TargetBitCell ? Constant.EmptyCell : bitBoard.GetPieceAt(cellPos);
+                var cellValue = bitBoard.GetPieceAt(cellPos);
                 result += cellValue * MathUtils.Power3(len - i - 1);
             }
-
-            // if(bitBoard.GetPieceAt(ps.TargetBitCell) != Constant.EmptyCell)
-            //     Console.WriteLine("SOMETHING WRONG HERE");
 
             return result;
         }

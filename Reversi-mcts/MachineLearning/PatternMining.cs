@@ -49,11 +49,6 @@ namespace Reversi_mcts.MachineLearning
             var hasValue = p.Gamma.TryGetValue(key, out var value);
             return hasValue ? value : 1f; // default gamma value is 1f
         }
-        
-        public static void SetGamma(this PatternMining p, int patternCode, int cellIndex, int player, float value)
-        {
-            p.Gamma[Key(patternCode, cellIndex, player)] = value;
-        }
 
         public static void SetGamma(this PatternMining p, int key, float value)
         {

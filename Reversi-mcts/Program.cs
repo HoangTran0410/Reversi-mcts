@@ -1,9 +1,4 @@
-﻿using Reversi_mcts.Board;
-using Reversi_mcts.MachineLearning;
-using Reversi_mcts.PlayMode;
-using Reversi_mcts.PlayMode.SocketIo;
-
-namespace Reversi_mcts
+﻿namespace Reversi_mcts
 {
     internal static class Program
     {
@@ -17,7 +12,9 @@ namespace Reversi_mcts
             // ---------------------------------
             // --------- BTMM functions ---------
             // ---------------------------------
-            // BTMMAlgorithm.TrainGameRecord(@"E:\z-Reversi\Dataset\Othello.01e4.ggf", @"E:\trained");
+            // BTMMAlgorithm.TrainGameRecord(@"E:\z-Reversi\Dataset\Othello.latest.294420.ggf", @"E:\ggf-lastest");
+            // BTMMAlgorithm.TrainGameRecord(@"E:\z-Reversi\game-records\71k.txt", @"E:\71k_test-patternCode");
+            // BTMMAlgorithm.TrainGameRecord(@"E:\z-Reversi\game-records\330k.txt", @"E:\330k_fix-saved-states_new-pattern-code");
             // BTMMAlgorithm.LoadTrainedData(@"E:\z-Reversi\trained71k.bin");
 
             // ---------------------------------
