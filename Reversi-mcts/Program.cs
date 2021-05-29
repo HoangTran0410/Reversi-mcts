@@ -1,9 +1,4 @@
-﻿using Reversi_mcts.Board;
-using Reversi_mcts.MachineLearning;
-using Reversi_mcts.PlayMode;
-using Reversi_mcts.PlayMode.SocketIo;
-
-namespace Reversi_mcts
+﻿namespace Reversi_mcts
 {
     internal static class Program
     {

@@ -1,7 +1,6 @@
 ﻿using System;
 using Reversi_mcts.MachineLearning;
 using Reversi_mcts.PlayMode;
-using Reversi_mcts.PlayMode.SocketIo;
 using Reversi_mcts.Utils;
 
 namespace Reversi_mcts
@@ -294,8 +293,8 @@ namespace Reversi_mcts
                 }
                 else if (userChoice == 5)
                 {
-                    new SocketClient(serverIp, clientName, algorithm, timeout).Connect();
-                    ConsoleUtil.WriteAndWaitKey("> Fight through Socket IO End.");
+                    // new SocketClient(serverIp, clientName, algorithm, timeout).Connect();
+                    // ConsoleUtil.WriteAndWaitKey("> Fight through Socket IO End.");
                 }
             }
         }
