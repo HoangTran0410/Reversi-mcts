@@ -12,7 +12,8 @@ namespace Reversi_mcts.Utils
             // Substring using range index: https://stackoverflow.com/a/55167466/11898496
             var lastDotIndex = filePath.LastIndexOf('.');
             var extLen = filePath.Length - lastDotIndex;
-            return lastDotIndex == -1 ? null : filePath[^extLen..];
+            return lastDotIndex == -1 ? null : filePath.Substring(lastDotIndex, extLen);
+            // return lastDotIndex == -1 ? null : filePath[^extLen..];
         }
 
         public static bool CheckFileExtension(string filePath, string extension)
