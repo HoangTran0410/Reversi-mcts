@@ -17,6 +17,11 @@ namespace Reversi_mcts.MonteCarlo
         public int Visits { get; set; }
         public float Wins { get; set; }
 
+        // BTMM stuff
+        public double Strength = 0;
+        public double AllChildStrength = 0;
+        public Dictionary<ulong, double> ChildStrengths = null;
+        
         public Node(State state, Node parentNode, ulong parentMove)
         {
             State = state;

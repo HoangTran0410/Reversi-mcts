@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Reversi_mcts.Board;
 using Reversi_mcts.MachineLearning;
 
@@ -28,19 +29,41 @@ namespace Reversi_mcts.MonteCarlo
 
         private static double GetUcbBias(this Node node, bool isRootPlayer)
         {
+            var prob = node.Strength / node.ParentNode.AllChildStrength;
             var wins = isRootPlayer ? node.Wins : node.Visits - node.Wins;
-            return wins / node.Visits + Constant.C * Math.Sqrt(Math.Log(node.ParentNode.Visits) / node.Visits);
+            // return wins / node.Visits + Constant.C * Math.Sqrt(Math.Log(node.ParentNode.Visits) / node.Visits);
+            return wins / node.Visits
+                   + Constant.C * Math.Sqrt(Math.Log(node.ParentNode.Visits) / node.Visits)
+                   + 0.5 * prob * Math.Sqrt(500.0 / (node.Visits + 500));
         }
 
         // Phase 2: EXPANSION kết hợp dữ liệu BTMM trained
         public static Node ExpandChildBTMM(this Node node)
         {
+            // Tính & Lưu lại child Strength, để ko cần tính lại khi expand
+            // Cộng child strength để tính allChildStrength luôn
+            if (node.ChildStrengths == null)
+            {
+                node.ChildStrengths = new Dictionary<ulong, double>(node.UntriedMoves.Count);
+                double allChildStrength = 0;
+                foreach (var bitMove in node.UntriedMoves)
+                {
+                    double strength = BTMMAlgorithm.StrongOfAction(node.State, bitMove);
+                    node.ChildStrengths.Add(bitMove, strength);
+                    allChildStrength += strength;
+                }
+
+                node.AllChildStrength = allChildStrength;
+            }
+
+            // Expand random child
             var i = Constant.Random.Next(node.UntriedMoves.Count);
             var move = node.UntriedMoves[i];
             node.UntriedMoves.RemoveAt(i); // Untried -> Try
 
             var newState = node.State.Clone().NextState(move);
             var child = new Node(newState, node, move);
+            child.Strength = node.ChildStrengths[move]; // dùng lại child strength đã được tính trước đó
             node.ChildNodes.Add(child);
 
             return child;

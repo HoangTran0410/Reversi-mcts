@@ -1,7 +1,5 @@
 ﻿using System;
 using Reversi_mcts.Board;
-using Reversi_mcts.MachineLearning;
-using Reversi_mcts.Utils;
 
 namespace Reversi_mcts.MonteCarlo
 {
@@ -24,7 +22,7 @@ namespace Reversi_mcts.MonteCarlo
             {
                 Algorithm.Mcts => RunSearch(state, timeout),
                 Algorithm.Mcts1 => RunSearch1(state, timeout),
-                Algorithm.Mcts2 => throw new NotImplementedException(),
+                Algorithm.Mcts2 => RunSearch2(state, timeout),
                 _ => 0UL
             };
 
@@ -95,7 +93,30 @@ namespace Reversi_mcts.MonteCarlo
         }
 
         // Searh bằng MCTS kết hợp BTMM vào 2 giai đoạn SIMULATION + SELECTION
-        // ...
+        public static ulong RunSearch2(State state, int timeout = 1000)
+        {
+            var root = new Node(state, null, 0);
+            var doneTick = Environment.TickCount + timeout;
+            while (Environment.TickCount <= doneTick)
+            {
+                var node = root;
+
+                while (node.IsFullyExpanded() && node.HasChildNode())
+                    node = node.SelectChildBTMM(root.State.Player); // SELECT BTMM
+
+                if (!node.IsFullyExpanded())
+                    node = node.ExpandChildBTMM(); // EXPAND BTMM
+
+                var reward = node.SimulateBTMM(root.State.Player); // SIMULATE BTMM
+                node.BackPropagate(reward);
+            }
+
+            LastWinPercentage = (int) (root.Wins * 100f / root.Visits);
+            LastPlayout = root.Visits;
+            LastRunTime = timeout;
+
+            return BestMove(root);
+        }
 
         private static ulong BestMove(Node node, byte policy = Constant.RobustChild)
         {
