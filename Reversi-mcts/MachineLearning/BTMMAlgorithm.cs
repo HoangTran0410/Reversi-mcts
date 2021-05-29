@@ -11,7 +11,7 @@ namespace Reversi_mcts.MachineLearning
         private static int _gameCount;
         private static int _gameMiss;
         private static int _numberOfFeatures;
-        private static List<PatternMining> _listPatternMining = new List<PatternMining>();
+        public static List<PatternMining> _listPatternMining = new List<PatternMining>();
 
         // https://stackoverflow.com/a/3906931/11898496
         private static Dictionary<int, State> _parsedStates = new Dictionary<int, State>();
