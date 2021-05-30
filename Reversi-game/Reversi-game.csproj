@@ -7,11 +7,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Reversi-mcts\Reversi-mcts.csproj" />
+      <PackageReference Include="SocketIOClient" Version="2.2.0" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="SocketIOClient" Version="2.2.0" />
+      <Reference Include="Reversi-mcts, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\Reversi-mcts\bin\Debug\netcoreapp3.1\Reversi-mcts.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>
