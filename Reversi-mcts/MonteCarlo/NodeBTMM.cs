@@ -87,16 +87,18 @@ namespace Reversi_mcts.MonteCarlo
         // Distribute probability based on Roulette wheel method
         private static ulong RouletteWheelSelection(this State state)
         {
+            // Nếu chỉ có 1 legal move => trả về legal move đó luôn
+            if (state.BitLegalMoves.PopCount() == 1) return state.BitLegalMoves;
+            
+            // Có từ 2 legal moves trở lên mới cần tính roulette wheel
             var listLegalMoves = state.GetArrayLegalMoves();
             var moveCount = listLegalMoves.Length;
             var wheel = new int[moveCount];
             var maxWheel = 0;
-
-            if (moveCount == 1) return listLegalMoves[0];
-
             for (var i = 0; i < moveCount; i++)
             {
-                // StrongOfAction nằm trong khoảng [0.01, 100], nên nhân 1000 để cast int chính xác hơn
+                // StrongOfAction trả về giá trị nằm trong khoảng [0.01, 100], nên nhân 1000 để cast int chính xác hơn
+                // Câu trên SAI: Gamma nằm mới nằm trong khoảng [0.01, 100], còn strong thì được nhân bởi 1 hoặc nhiều gamma
                 var temp = (int) (1000 * BTMMAlgorithm.StrongOfAction(state, listLegalMoves[i]));
                 maxWheel += temp;
                 wheel[i] = maxWheel;

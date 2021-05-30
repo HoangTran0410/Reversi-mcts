@@ -11,12 +11,12 @@ namespace Reversi_mcts.MachineLearning
 {
     public class GameRecordParser
     {
-        public int GameCount = 0;
-        public int GameMiss = 0;
+        public int GameCount;
+        public int GameMiss;
 
-        public Dictionary<int, State> ParsedStates = new Dictionary<int, State>();
-        public List<List<ulong>> ParsedMoves = new List<List<ulong>>();
-        public List<List<List<ulong>>> ParsedLegalMoves = new List<List<List<ulong>>>();
+        public readonly Dictionary<int, State> ParsedStates = new Dictionary<int, State>();
+        public readonly List<List<ulong>> ParsedMoves = new List<List<ulong>>();
+        public readonly List<List<List<ulong>>> ParsedLegalMoves = new List<List<List<ulong>>>();
 
         public void SaveParsedGame(string filePathToSave)
         {

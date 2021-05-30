@@ -17,7 +17,7 @@ namespace Reversi_mcts.MonteCarlo
             // Nếu chỉ có 1 legal move => trả về legal move đó luôn
             if (state.BitLegalMoves.PopCount() == 1) return state.BitLegalMoves;
 
-            // Nếu có >2 legal moves => MCTS
+            // Nếu có >=2 legal moves => MCTS
             var move = algoName switch
             {
                 Algorithm.Mcts => RunSearch(state, timeout),
