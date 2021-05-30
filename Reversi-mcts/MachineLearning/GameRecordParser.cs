@@ -184,7 +184,7 @@ namespace Reversi_mcts.MachineLearning
             // kiểm tra xem có bắt đầu và kết thúc bằng (; ;)
             //-----------------------------------------------------
             if (strGame.StartsWith("1 ") || strGame.StartsWith("2 "))
-                strGame = strGame[2..];
+                strGame = strGame.Substring(0, 2);
 
             if (!strGame.StartsWith("(;") || !strGame.EndsWith(";)"))
                 throw new Exception("strGame does not contain any game");

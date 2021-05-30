@@ -31,6 +31,11 @@ namespace Reversi_mcts.MachineLearning
             SaveTrainedData(savePath);
         }
 
+        public static void SetTrainedData(List<PatternMining> listPatternMining)
+        {
+            _listPatternMining = listPatternMining;
+        }
+
         public static void LoadTrainedData(string filePath)
         {
             Console.WriteLine($"Loading trained data from {filePath} ...");

@@ -28,9 +28,7 @@ namespace Reversi_mcts.MachineLearning
             var notations = strNotations.Split(',');
             var arrayBitCells = new ulong[notations.Length];
             for (var i = 0; i < notations.Length; i++)
-            {
                 arrayBitCells[i] = notations[i].ToBitMove();
-            }
 
             return new PatternShape(arrayBitCells, targetBitCell);
         }
@@ -38,7 +36,7 @@ namespace Reversi_mcts.MachineLearning
 
     public static class PatternShapeExt
     {
-        // trả về unique id của pattern (pattern = patternShape & gameBoard)
+        // trả về index (unique id) của 1 pattern cụ thể (pattern = patternShape & gameBoard) 
         public static int CalculatePatternCode(this PatternShape ps, BitBoard bitBoard)
         {
             // ---------- Version của thầy ---------- 
@@ -51,13 +49,12 @@ namespace Reversi_mcts.MachineLearning
             // for (var i = 0; i < len; i++)
             //     result += pattern[len - i - 1] * MathUtils.Power3(i);
 
-            // ---------- Version của nhóm - force giá trị TargetBitCell về emptyCell ---------- 
+            // ---------- Version của nhóm - ra kết quả giống thầy, nhưng optimized, không cần dùng array ---------- 
             var result = 0;
             var len = ps.ArrayBitCells.Length;
             for (var i = 0; i < len; i++)
             {
                 var cellPos = ps.ArrayBitCells[i];
-                // var cellValue = cellPos == ps.TargetBitCell ? Constant.EmptyCell : bitBoard.GetPieceAt(cellPos);
                 var cellValue = bitBoard.GetPieceAt(cellPos);
                 result += cellValue * MathUtils.Power3(len - i - 1);
             }

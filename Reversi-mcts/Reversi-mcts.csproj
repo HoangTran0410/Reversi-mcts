@@ -3,7 +3,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RootNamespace>Reversi_mcts</RootNamespace>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFrameworks>net471;netcoreapp3.1</TargetFrameworks>
+    <LangVersion>default</LangVersion>
   </PropertyGroup>
 
 </Project>
