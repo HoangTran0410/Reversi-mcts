@@ -227,7 +227,7 @@ namespace Reversi_game
                     Console.Write("> Human color (0:black/1:white): ");
                     if (!byte.TryParse(Console.ReadLine(), out humanColor))
                     {
-                        humanColor = 0;
+                        humanColor = Constant.Black;
                         ConsoleUtil.WriteAndWaitKey("> Invalid. Color must be 0(black) or 1(white).");
                     }
                 }
@@ -247,7 +247,7 @@ namespace Reversi_game
                 }
                 else
                 {
-                    HumanVsAi.NewGame(Constant.White, aiTimeout, aiAlgorithm);
+                    HumanVsAi.NewGame(humanColor, aiTimeout, aiAlgorithm);
                     ConsoleUtil.WriteAndWaitKey("> Human vs AI End.");
                 }
             }
