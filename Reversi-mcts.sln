@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reversi-mcts", "Reversi-mcts\Reversi-mcts.csproj", "{6188738B-9244-49B6-8E2C-565350331157}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reversi-game", "Reversi-game\Reversi-game.csproj", "{FBC347B9-02B6-4B6B-A979-94E042D7EBB1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{6188738B-9244-49B6-8E2C-565350331157}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6188738B-9244-49B6-8E2C-565350331157}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6188738B-9244-49B6-8E2C-565350331157}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBC347B9-02B6-4B6B-A979-94E042D7EBB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBC347B9-02B6-4B6B-A979-94E042D7EBB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBC347B9-02B6-4B6B-A979-94E042D7EBB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBC347B9-02B6-4B6B-A979-94E042D7EBB1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

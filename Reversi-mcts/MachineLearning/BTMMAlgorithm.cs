@@ -309,9 +309,7 @@ namespace Reversi_mcts.MachineLearning
                 var iCard = MathUtils.Power3(len);
 
                 for (var patternCode = 0; patternCode < iCard; patternCode++) // loop through all pattern-code
-                {
                     for (var cellIndex = 0; cellIndex < len; cellIndex++) // loop through all cell-index
-                    {
                         for (var player = 0; player <= 1; player++) // loop through 2 player: black-white
                         {
                             var key = PatternMiningExt.Key(patternCode, cellIndex, player);
@@ -331,8 +329,6 @@ namespace Reversi_mcts.MachineLearning
                                 patternMining.ResetGammaDenominator(key);
                             }
                         }
-                    }
-                }
 
                 progress.Report((double) iPat / _listPatternMining.Count);
             }

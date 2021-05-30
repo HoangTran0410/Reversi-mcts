@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using Reversi_mcts;
 using Reversi_mcts.Board;
 using Reversi_mcts.MonteCarlo;
 
-namespace Reversi_mcts.PlayMode
+namespace Reversi_game.PlayMode
 {
     public static class HumanVsAi
     {

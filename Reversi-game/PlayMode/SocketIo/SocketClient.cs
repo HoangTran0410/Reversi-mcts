@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Reversi_mcts;
 using SocketIOClient;
 
-namespace Reversi_mcts.PlayMode.SocketIo
+namespace Reversi_game.PlayMode.SocketIo
 {
     public class SocketClient
     {

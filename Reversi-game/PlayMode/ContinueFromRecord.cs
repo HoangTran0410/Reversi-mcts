@@ -1,8 +1,6 @@
-﻿using System;
-using Reversi_mcts.Board;
-using Reversi_mcts.MonteCarlo;
+﻿using Reversi_mcts.Board;
 
-namespace Reversi_mcts.PlayMode
+namespace Reversi_game.PlayMode
 {
     public static class ContinueFromRecord
     {

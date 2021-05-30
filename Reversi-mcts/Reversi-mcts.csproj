@@ -6,8 +6,4 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="SocketIOClient" Version="2.2.0" />
-  </ItemGroup>
-
 </Project>

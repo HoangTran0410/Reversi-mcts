@@ -1,20 +1,17 @@
-﻿namespace Reversi_mcts
+﻿using System;
+using Reversi_mcts.Utils;
+
+namespace Reversi_mcts
 {
     internal static class Program
     {
         private static void Main(string[] args)
         {
-            // ---------------------------------
-            // ----------- Menu GUI ------------
-            // ---------------------------------
-            Menu.MainMenu();
-
+            ConsoleUtil.WriteAndWaitKey("This project (Reversi-mcts) doesn't have any GUI. Run Reversi-game instead!");
             // ---------------------------------
             // --------- BTMM functions ---------
             // ---------------------------------
             // BTMMAlgorithm.TrainGameRecord(@"E:\z-Reversi\Dataset\Othello.latest.294420.ggf", @"E:\ggf-lastest");
-            // BTMMAlgorithm.TrainGameRecord(@"E:\z-Reversi\game-records\71k.txt", @"E:\71k_test-patternCode");
-            // BTMMAlgorithm.TrainGameRecord(@"E:\z-Reversi\game-records\330k.txt", @"E:\330k_fix-saved-states_new-pattern-code");
             // BTMMAlgorithm.LoadTrainedData(@"E:\z-Reversi\trained71k.bin");
 
             // ---------------------------------

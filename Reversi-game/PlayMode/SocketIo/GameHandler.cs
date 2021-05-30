@@ -1,8 +1,9 @@
 ﻿using System;
+using Reversi_mcts;
 using Reversi_mcts.Board;
 using Reversi_mcts.MonteCarlo;
 
-namespace Reversi_mcts.PlayMode.SocketIo
+namespace Reversi_game.PlayMode.SocketIo
 {
     public class GameHandler
     {

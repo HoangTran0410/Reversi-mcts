@@ -1,9 +1,10 @@
 ﻿using System;
+using Reversi_mcts;
 using Reversi_mcts.Board;
 using Reversi_mcts.MonteCarlo;
 using Reversi_mcts.Utils;
 
-namespace Reversi_mcts.PlayMode
+namespace Reversi_game.PlayMode
 {
     public static class SelfPlay
     {

@@ -1,10 +1,11 @@
 ﻿using System;
+using Reversi_mcts;
+using Reversi_game.PlayMode;
+using Reversi_game.PlayMode.SocketIo;
 using Reversi_mcts.MachineLearning;
-using Reversi_mcts.PlayMode;
-using Reversi_mcts.PlayMode.SocketIo;
 using Reversi_mcts.Utils;
 
-namespace Reversi_mcts
+namespace Reversi_game
 {
     public static class Menu
     {
@@ -254,7 +255,8 @@ namespace Reversi_mcts
 
         private static void SocketIoMenu()
         {
-            var serverIp = "http://localhost:3000/";
+            var serverAddress = "http://localhost";
+            var serverPort = 3000;
             var clientName = "reversi-mcts-200ms";
             var algorithm = Algorithm.Mcts1;
             var timeout = 200;
@@ -266,7 +268,8 @@ namespace Reversi_mcts
                     "Socket IO Menu", new[]
                     {
                         "<- Back",
-                        $"+ Server IP  : {serverIp}",
+                        $"+ Server Address  : {serverAddress}",
+                        $"+ Server Port  : {serverPort}",
                         $"+ Client name: {clientName}",
                         $"+ Algorithm  : {algorithm}",
                         $"+ Timeout    : {timeout} (ms)",
@@ -275,15 +278,24 @@ namespace Reversi_mcts
 
                 if (userChoice == 0) return;
                 if (userChoice == 1)
-                    serverIp = (string) ConsoleUtil.Prompt("Server IP", serverIp);
+                    serverAddress = (string) ConsoleUtil.Prompt("Server Address", serverAddress);
                 else if (userChoice == 2)
-                    clientName = (string) ConsoleUtil.Prompt("Client name", clientName);
+                {
+                    Console.Write("> Timeout (ms): ");
+                    if (!int.TryParse(Console.ReadLine(), out serverPort))
+                    {
+                        serverPort = 3000;
+                        ConsoleUtil.WriteAndWaitKey("> Invalid. Port be int.");
+                    }
+                }
                 else if (userChoice == 3)
+                    clientName = (string) ConsoleUtil.Prompt("Client name", clientName);
+                else if (userChoice == 4)
                 {
                     Console.Write("> Algorithm (Mcts, Mcts1, Mcts2): ");
                     algorithm = GetAlgorithm(Console.ReadLine());
                 }
-                else if (userChoice == 4)
+                else if (userChoice == 5)
                 {
                     Console.Write("> Timeout (ms): ");
                     if (!int.TryParse(Console.ReadLine(), out timeout))
@@ -292,9 +304,9 @@ namespace Reversi_mcts
                         ConsoleUtil.WriteAndWaitKey("> Invalid. Timeout must be int.");
                     }
                 }
-                else if (userChoice == 5)
+                else if (userChoice == 6)
                 {
-                    new SocketClient(serverIp, clientName, algorithm, timeout).Connect();
+                    new SocketClient($"{serverAddress}:{serverPort}/", clientName, algorithm, timeout).Connect();
                     ConsoleUtil.WriteAndWaitKey("> Fight through Socket IO End.");
                 }
             }
@@ -404,7 +416,7 @@ namespace Reversi_mcts
                     case ConsoleKey.Enter:
                         return userChoice;
                     default:
-                        ConsoleUtil.WriteAndWaitKey("HELP: Press Arrow-keys to move. Enter-key to select");
+                        ConsoleUtil.WriteAndWaitKey(" <*> HELP: Press Arrow-keys to move. Enter-key to select");
                         break;
                 }
             }
