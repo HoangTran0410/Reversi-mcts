@@ -1,4 +1,4 @@
-﻿using Reversi_mcts.Utils;
+﻿using System;
 
 namespace Reversi_mcts
 {
@@ -6,7 +6,8 @@ namespace Reversi_mcts
     {
         private static void Main(string[] args)
         {
-            ConsoleUtil.WriteAndWaitKey("This project (Reversi-mcts) doesn't have any GUI. Run Reversi-game instead!");
+            Console.WriteLine("\n[!] This project (Reversi-mcts) doesn't have any GUI. Run Reversi-game instead!\n");
+            Console.ReadKey();
         }
     }
 }
