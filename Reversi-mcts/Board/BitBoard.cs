@@ -25,15 +25,19 @@ namespace Reversi_mcts.Board
 
     public static class BitboardExtensions
     {
-        // -------------------------- Cached - For performance boost --------------------------
+        #region Cached - For performance boost
+
         private static readonly Direction[] DirectionValues = (Direction[]) Enum.GetValues(typeof(Direction));
         private const byte Black = Constant.Black;
         private const byte White = Constant.White;
 
-        // ------------------------------------ Basic Stuffs ------------------------------------
+        #endregion
+
+        #region Basic Stuffs
+
         public static BitBoard Clone(this BitBoard board)
         {
-            return new BitBoard(board);
+            return new(board);
         }
 
         public static bool IsEquals(this BitBoard board, BitBoard other)
@@ -75,7 +79,10 @@ namespace Reversi_mcts.Board
             board.Pieces[White] = 0;
         }
 
-        // ------------------------------------ Move Stuffs ------------------------------------
+        #endregion
+
+        #region Move Stuffs
+
         public static void MakeMove(this BitBoard board, byte player, ulong bitMove)
         {
             var wouldFlips = board.GetWouldFlips(player, bitMove);
@@ -159,7 +166,10 @@ namespace Reversi_mcts.Board
             return wouldFlips;
         }
 
-        // ------------------------------------ Flip Rotate ------------------------------------
+        #endregion
+
+        #region Flip - Rotate
+
         public static BitBoard Rotate180(this BitBoard board)
         {
             var clone = board.Clone();
@@ -216,7 +226,10 @@ namespace Reversi_mcts.Board
             return clone;
         }
 
-        // ------------------------------------ Display Stuffs ------------------------------------
+        #endregion
+
+        #region Display Stuffs
+
         public static void Display(this BitBoard board)
         {
             Console.WriteLine("  a b c d e f g h");
@@ -330,5 +343,7 @@ namespace Reversi_mcts.Board
 
             Console.WriteLine();
         }
+
+        #endregion
     }
 }

@@ -14,10 +14,13 @@ namespace Reversi_mcts.MachineLearning
         public int GameCount;
         public int GameMiss;
 
-        public readonly Dictionary<int, State> ParsedStates = new Dictionary<int, State>();
-        public readonly List<List<ulong>> ParsedMoves = new List<List<ulong>>();
-        public readonly List<List<List<ulong>>> ParsedLegalMoves = new List<List<List<ulong>>>();
+        public readonly Dictionary<int, State> ParsedStates = new();
+        public readonly List<List<ulong>> ParsedMoves = new();
+        public readonly List<List<List<ulong>>> ParsedLegalMoves = new();
 
+        /// <summary>
+        /// Save parsed game records to file (save with Kifu format)
+        /// </summary>
         public void SaveParsedGame(string filePathToSave)
         {
             Console.WriteLine($"> Calculating score for {ParsedMoves.Count} games...");
@@ -100,7 +103,7 @@ namespace Reversi_mcts.MachineLearning
                 // Nếu state không giống default state => lưu state
                 if (!state.IsEquals(defaultState))
                     ParsedStates.Add(GameCount, state);
-                
+
                 // Lưu lại parsed-move và parsed-legal-moves
                 ParsedMoves.Add(moves);
                 ParsedLegalMoves.Add(legalMoves);
@@ -112,6 +115,8 @@ namespace Reversi_mcts.MachineLearning
 
             progress.Dispose();
         }
+
+        #region Parse Kifu game records
 
         private static void ParseGame(
             string strGame,
@@ -153,7 +158,7 @@ namespace Reversi_mcts.MachineLearning
                     // Đổi lượt
                     stateClone.SwapPlayer();
                 }
-                
+
                 var notation = recordText.Substring(i, 2).ToLower();
                 var bitMove = notation.ToBitMove();
                 var listLegalMoves = stateClone.GetListLegalMoves();
@@ -169,6 +174,10 @@ namespace Reversi_mcts.MachineLearning
                 stateClone.NextState(bitMove);
             }
         }
+
+        #endregion
+
+        #region Parse GGF game records
 
         private static void ParseGgfGame(
             string strGame,
@@ -303,5 +312,7 @@ namespace Reversi_mcts.MachineLearning
             var segments = args.Split('/');
             return segments[0].ToBitMove();
         }
+
+        #endregion
     }
 }

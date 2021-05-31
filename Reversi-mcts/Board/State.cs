@@ -55,49 +55,74 @@ namespace Reversi_mcts.Board
             return state.Player == other.Player && state.Board.IsEquals(other.Board);
         }
 
+        /// <summary>
+        /// Check if the game is terminal or not.
+        /// <para>State is Terminal if No one have any legal move OR The board is full.</para>
+        /// </summary>
         public static bool IsTerminal(this State state)
         {
             return state.Board.IsGameComplete();
         }
 
+        /// <summary>
+        /// Check if current player of the State have any legal move.
+        /// </summary>
         public static bool HasLegalMoves(this State state)
         {
             return state.BitLegalMoves != 0;
         }
-
-        // Đánh cờ tại vị trí move. Đánh trực tiếp vào bàn cờ, ko tạo State mới.
+        
+        /// <summary>
+        /// Đánh cờ tại vị trí move. Đánh trực tiếp vào bàn cờ, ko tạo State mới. 
+        /// </summary>
         public static State NextState(this State state, ulong move)
         {
-            // move == 0 => passing move
+            // if move == 0 => passing move
             if (move != 0) state.Board.MakeMove(state.Player, move);
             state.SwapPlayer();
             return state;
         }
 
+        /// <summary>
+        /// Swap current player with current opponent
+        /// </summary>
         public static void SwapPlayer(this State state)
         {
             state.SetPlayer(Constant.Opponent(state.Player));
         }
 
+        /// <summary>
+        /// Set current player for the State
+        /// </summary>
         public static void SetPlayer(this State state, byte player)
         {
             state.Player = player;
             state.BitLegalMoves = state.Board.GetLegalMoves(state.Player);
         }
 
+        /// <summary>
+        /// Get List of legal moves (List ulong)
+        /// </summary>
         public static List<ulong> GetListLegalMoves(this State state)
         {
             return state.BitLegalMoves.ToListBitMove();
         }
-
-        // Định dạng ulong[] ít tốn Ram hơn List<ulong>
+        
+        /// <summary>
+        /// Get Array of legal moves (ulong[])
+        /// <para>Định dạng ulong[] ít tốn Ram hơn List ulong</para>
+        /// </summary>
         public static ulong[] GetArrayLegalMoves(this State state)
         {
             return state.BitLegalMoves.ToArrayBitMove();
         }
-
-        // Optimized, Working with bit. FASTER THAN get random element from List<ulong> bitMoves.
-        // Use for mcts Simulation Phase
+        
+        /// <summary>
+        /// Get random move from legal moves
+        /// <para>Optimized, Working with bit. FASTER THAN get random element from List<ulong> bitMove</para>
+        /// <para>Use for MCTS Simulation Phase</para>
+        /// </summary>
+        /// <returns>A bit move (ulong) represent the random move selected</returns>
         public static ulong GetRandomMove(this State state)
         {
             var moves = state.BitLegalMoves;
@@ -115,6 +140,11 @@ namespace Reversi_mcts.Board
             return move;
         }
 
+        /// <summary>
+        /// Get winner of the state
+        /// </summary>
+        /// <param name="state"></param>
+        /// <returns>Winner of the state (Constant.Black, Constant.White or Constant.Draw)</returns>
         public static byte Winner(this State state)
         {
             int blackScore = state.Board.CountPieces(Constant.Black);

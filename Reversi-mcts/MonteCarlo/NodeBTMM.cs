@@ -7,6 +7,8 @@ namespace Reversi_mcts.MonteCarlo
 {
     public static class Node1Extensions
     {
+        #region BTMM in Selection phase
+
         // Phase 1: SELECTION Kết hợp với dữ liệu BTMM trained
         public static Node SelectChildBTMM(this Node node, byte rootPlayer)
         {
@@ -67,7 +69,11 @@ namespace Reversi_mcts.MonteCarlo
 
             return child;
         }
-        
+
+        #endregion
+
+        #region BTMM in Simulation phase
+
         // Phase 3: SIMULATION Kết hợp với dữ liệu BTMM trained
         public static float SimulateBTMM(this Node node, byte rootPlayer)
         {
@@ -89,7 +95,7 @@ namespace Reversi_mcts.MonteCarlo
         {
             // Nếu chỉ có 1 legal move => trả về legal move đó luôn
             if (state.BitLegalMoves.PopCount() == 1) return state.BitLegalMoves;
-            
+
             // Có từ 2 legal moves trở lên mới cần tính roulette wheel
             var listLegalMoves = state.GetArrayLegalMoves();
             var moveCount = listLegalMoves.Length;
@@ -111,5 +117,7 @@ namespace Reversi_mcts.MonteCarlo
 
             return 0UL;
         }
+
+        #endregion
     }
 }

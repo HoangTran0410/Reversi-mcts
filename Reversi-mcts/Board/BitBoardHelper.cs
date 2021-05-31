@@ -3,21 +3,22 @@ using System.Collections.Generic;
 
 namespace Reversi_mcts.Board
 {
-    public enum Direction : byte
+    public enum Direction
     {
-        UpLeft = 1,
-        Up = 2,
-        UpRight = 3,
-        Left = 4,
-        Right = 6,
-        DownLeft = 7,
-        Down = 8,
-        DownRight = 9
+        UpLeft,
+        Up,
+        UpRight,
+        Left,
+        Right,
+        DownLeft,
+        Down,
+        DownRight
     }
 
     public static class BitBoardHelper
     {
-        // ------------------------------------ Shift Stuffs ------------------------------------
+        #region Shift Stuffs
+
         public static ulong Shift(this ulong bits, Direction direction)
         {
             return direction switch
@@ -81,7 +82,10 @@ namespace Reversi_mcts.Board
             return bits >> 9 & LeftMask;
         }
 
-        // ------------------------------------ Flip Rotate ------------------------------------
+        #endregion
+
+        #region Flip - Rotate
+
         // https://www.chessprogramming.org/Flipping_Mirroring_and_Rotating
         public static ulong Rotate180(this ulong b)
         {
@@ -153,7 +157,13 @@ namespace Reversi_mcts.Board
             return b;
         }
 
-        // ------------------------------------ Bit Stuffs ------------------------------------
+        #endregion
+
+        #region Bit Stuffs
+
+        /// <summary>
+        /// Split all bit-one (1) to new ulong, and put that ulong to List, return List
+        /// </summary>
         public static List<ulong> ToListBitMove(this ulong bits)
         {
             var ret = new List<ulong>(bits.PopCount());
@@ -167,7 +177,10 @@ namespace Reversi_mcts.Board
             return ret;
         }
 
-        // Định dạng ulong[] ít tốn Ram hơn List<ulong>
+        /// <summary>
+        /// Split all bit-one (1) to new ulong, and put that ulong to Array, return Array
+        /// <para>Định dạng Array (ulong[]) ít tốn Ram hơn định dạng List ulong</para>
+        /// </summary>
         public static ulong[] ToArrayBitMove(this ulong bits)
         {
             var result = new ulong[bits.PopCount()];
@@ -257,6 +270,9 @@ namespace Reversi_mcts.Board
             return row * 8 + col;
         }
 
+        /// <summary>
+        /// Count the number of bit-one
+        /// </summary>
         public static byte PopCount(this ulong bits)
         {
             //https://stackoverflow.com/a/51388846/11898496
@@ -287,7 +303,10 @@ namespace Reversi_mcts.Board
             // https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/bitwise-and-shift-operators#right-shift-operator-
         }
 
-        // ------------------------------------ Display Stuffs ------------------------------------
+        #endregion
+
+        #region Display Stuffs
+
         public static void Display(this ulong bits)
         {
             for (var i = 0; i < 64; i++)
@@ -302,5 +321,7 @@ namespace Reversi_mcts.Board
 
             Console.WriteLine();
         }
+
+        #endregion
     }
 }

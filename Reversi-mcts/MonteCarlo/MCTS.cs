@@ -30,7 +30,7 @@ namespace Reversi_mcts.MonteCarlo
         }
 
         // Search bằng MCTS thông thường
-        public static ulong RunSearch(State state, int timeout = 1000)
+        private static ulong RunSearch(State state, int timeout)
         {
             // save root node ref, for find best-move later
             var root = new Node(state, null, 0);
@@ -67,7 +67,7 @@ namespace Reversi_mcts.MonteCarlo
         }
 
         // Search bằng MCTS kêt hợp BTMM vào giai đoạn SIMULATION
-        public static ulong RunSearch1(State state, int timeout = 1000)
+        private static ulong RunSearch1(State state, int timeout)
         {
             var root = new Node(state, null, 0);
             var doneTick = Environment.TickCount + timeout;
@@ -93,7 +93,7 @@ namespace Reversi_mcts.MonteCarlo
         }
 
         // Searh bằng MCTS kết hợp BTMM vào 2 giai đoạn SIMULATION + SELECTION
-        public static ulong RunSearch2(State state, int timeout = 1000)
+        private static ulong RunSearch2(State state, int timeout)
         {
             var root = new Node(state, null, 0);
             var doneTick = Environment.TickCount + timeout;

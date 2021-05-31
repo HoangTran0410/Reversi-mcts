@@ -8,34 +8,29 @@ namespace Reversi_mcts.MachineLearning
 {
     public static class BTMMAlgorithm
     {
-        private static int _gameCount;
-        private static int _gameMiss;
-        private static int _numberOfFeatures;
-        private static List<PatternMining> _listPatternMining = new List<PatternMining>();
+        #region BTMM For MCTS
 
-        // https://stackoverflow.com/a/3906931/11898496
-        private static Dictionary<int, State> _parsedStates = new Dictionary<int, State>();
-        private static List<List<ulong>> _parsedMoves = new List<List<ulong>>();
-        private static List<List<List<ulong>>> _parsedLegalMoves = new List<List<List<ulong>>>();
+        private static List<PatternMining> _listPatternMining = new();
 
+        /// <summary>
+        /// Check if BTMM model (trained data) is ready
+        /// </summary>
         public static bool IsModelReady()
         {
             return _listPatternMining.Count > 0;
         }
 
-        public static void TrainGameRecord(string gameRecordPath, string savePath)
-        {
-            LoadGameDatabase(gameRecordPath);
-            InitListPatternMining();
-            Train(20);
-            SaveTrainedData(savePath);
-        }
-
+        /// <summary>
+        /// Set trained data to BTMM, BTMM will use this trained data to calculate the strong of moves 
+        /// </summary>
         public static void SetTrainedData(List<PatternMining> listPatternMining)
         {
             _listPatternMining = listPatternMining;
         }
 
+        /// <summary>
+        /// Load trained data from file
+        /// </summary>
         public static void LoadTrainedData(string filePath)
         {
             Console.WriteLine($"Loading trained data from {filePath} ...");
@@ -43,11 +38,88 @@ namespace Reversi_mcts.MachineLearning
             Console.WriteLine("> Loaded.");
         }
 
-        private static void SaveTrainedData(string filePath)
+        /// <summary>
+        /// Calculate the strong of the move in the state
+        /// </summary>
+        public static float StrongOfAction(State state, ulong move)
         {
-            Console.WriteLine($"Saving trained data to {filePath} ...");
-            FileUtils.WriteToBinaryFile(filePath, _listPatternMining);
-            Console.WriteLine($"> Saved.");
+            var relatedPatterns = IdentifyPattern(move);
+            var player = state.Player;
+            var strong = 1f;
+            foreach (var iPat in relatedPatterns)
+            {
+                var cellIndex = _listPatternMining[iPat].PatternShape.IndexOfBitCell(move);
+                var patternCode = _listPatternMining[iPat].PatternShape.CalculatePatternCode(state.Board);
+                var gamma = _listPatternMining[iPat].GetGamma(patternCode, cellIndex, player);
+                strong *= gamma;
+            }
+
+            return strong;
+        }
+
+        /// <summary>
+        /// Identify indices of pattern-minings that related to an action
+        /// <para>Định dạng: Dictionary (bitMove, [pattern-idx1, pattern-idx2, pattern-idx3,...])</para>
+        /// </summary>
+        private static Dictionary<ulong, int[]> _identifyPatternCached;
+
+        // Trả về index của những patternShape có targetCell (ô đỏ) == bitMove
+        private static int[] IdentifyPattern(ulong bitMove)
+        {
+            // nếu chưa có thì init, có rồi thì thôi -> chỉ init 1 lần
+            _identifyPatternCached ??= InitIdentifyPatternCached();
+
+            return _identifyPatternCached[bitMove];
+        }
+
+        private static Dictionary<ulong, int[]> InitIdentifyPatternCached()
+        {
+            // tương ứng với 64 cells trên bàn cờ
+            // Mỗi cell sẽ thuộc 1 hoặc nhiều patternShape nào đó
+            var result = new Dictionary<ulong, int[]>(64);
+
+            // loop qua từng ô trên bàn cờ (8x8=64 ô)
+            for (var iCell = 0; iCell < 64; iCell++)
+            {
+                var patternIndexes = new List<int>();
+                var bitCell = 0UL.SetBitAdIndex(iCell);
+
+                // loop qua từng patternShapes
+                for (var iPat = 0; iPat < _listPatternMining.Count; iPat++)
+                {
+                    var patternShape = _listPatternMining[iPat].PatternShape;
+
+                    // Nếu ô đang xét là targetCell của pattern đang xét => Add index vào patternIndexes
+                    if (patternShape.TargetBitCell == bitCell)
+                        patternIndexes.Add(iPat);
+                }
+
+                // Lưu indexes để có thể dùng lại
+                result[bitCell] = patternIndexes.ToArray();
+            }
+
+            return result;
+        }
+
+        #endregion
+
+        #region Training BTMM
+
+        // https://stackoverflow.com/a/3906931/11898496
+        private static Dictionary<int, State> _parsedStates = new();
+        private static List<List<ulong>> _parsedMoves = new();
+        private static List<List<List<ulong>>> _parsedLegalMoves = new();
+        private static int _gameCount;
+        private static int _gameMiss;
+        private static int _numberOfFeatures;
+
+        public static void TrainGameRecord(string gameRecordPath, string savePath = null)
+        {
+            LoadGameDatabase(gameRecordPath);
+            InitListPatternMining();
+            Train(20);
+
+            if (savePath != null) SaveTrainedData(savePath);
         }
 
         // Load game-record từ file
@@ -169,7 +241,7 @@ namespace Reversi_mcts.MachineLearning
             Console.WriteLine($"> Created {_listPatternMining.Count} pattern minings.");
         }
 
-        private static void Train(int epochs = 20)
+        private static void Train(int epochs)
         {
             // ---------- split test/train ----------
             Console.WriteLine("\nSplitting train/test...");
@@ -198,6 +270,13 @@ namespace Reversi_mcts.MachineLearning
             Console.WriteLine("\n> Done training.");
         }
 
+        private static void SaveTrainedData(string filePath)
+        {
+            Console.WriteLine($"Saving trained data to {filePath} ...");
+            FileUtils.WriteToBinaryFile(filePath, _listPatternMining);
+            Console.WriteLine($"> Saved.");
+        }
+
         // Calculate Wi (win_count for each feature)
         private static void CalculateWi(int begin, int end)
         {
@@ -223,11 +302,11 @@ namespace Reversi_mcts.MachineLearning
                     if (legalMoves.Count > 1)
                     {
                         _numberOfFeatures++;
-                        
+
                         foreach (var legalMove in legalMoves)
                         {
                             // Lấy ra các patternShape có targetCell (ô đỏ) là legalMove đang xét
-                            var patternIndexes = IdentifyPattern(legalMove);
+                            var patternIndexes = BTMMAlgorithm.IdentifyPattern(legalMove);
 
                             // Với từng patternShape tìm được từ legalMove đang xét
                             foreach (var iPatternMining in patternIndexes)
@@ -235,7 +314,7 @@ namespace Reversi_mcts.MachineLearning
                                 var patternMining = _listPatternMining[iPatternMining];
                                 var cellIndex = patternMining.PatternShape.IndexOfBitCell(legalMove);
                                 var patternCode = patternMining.PatternShape.CalculatePatternCode(state.Board);
-                                var key = PatternMiningExt.Key(patternCode, cellIndex, player); 
+                                var key = PatternMiningExt.Key(patternCode, cellIndex, player);
 
                                 // Nếu legalmove này được chọn làm move tiếp theo thì tăng win
                                 if (legalMove == move) patternMining.AddWin(key);
@@ -277,7 +356,7 @@ namespace Reversi_mcts.MachineLearning
                     if (legalMoves.Count > 1)
                     {
                         double e = E(state, legalMoves);
-                        var val = StrongOfAction(state, move) / e;
+                        var val = BTMMAlgorithm.StrongOfAction(state, move) / e;
                         likelihood += Math.Log(val);
                         prob += val;
                         count++;
@@ -314,26 +393,26 @@ namespace Reversi_mcts.MachineLearning
                 var iCard = MathUtils.Power3(len);
 
                 for (var patternCode = 0; patternCode < iCard; patternCode++) // loop through all pattern-code
-                    for (var cellIndex = 0; cellIndex < len; cellIndex++) // loop through all cell-index
-                        for (var player = 0; player <= 1; player++) // loop through 2 player: black-white
-                        {
-                            var key = PatternMiningExt.Key(patternCode, cellIndex, player);
-                            var denominator = patternMining.GetGammaDenominator(key);
-                            if (denominator != 0)
-                            {
-                                var win = patternMining.GetWin(key);
-                                var oldGamma = patternMining.GetGamma(key);
-                                var newGamma = win / denominator;
-                                
-                                // Smooth Step: https://en.wikipedia.org/wiki/Smoothstep
-                                var smoothStep = Math.Pow(oldGamma, 0.75) * Math.Pow(newGamma, 0.25);
-                                var value = ((float) smoothStep).LimitToRange(0.01f, 100f);
-                                patternMining.SetGamma(key, value);
+                for (var cellIndex = 0; cellIndex < len; cellIndex++) // loop through all cell-index
+                for (var player = 0; player <= 1; player++) // loop through 2 player: black-white
+                {
+                    var key = PatternMiningExt.Key(patternCode, cellIndex, player);
+                    var denominator = patternMining.GetGammaDenominator(key);
+                    if (denominator != 0)
+                    {
+                        var win = patternMining.GetWin(key);
+                        var oldGamma = patternMining.GetGamma(key);
+                        var newGamma = win / denominator;
 
-                                // reset gamma denominator
-                                patternMining.ResetGammaDenominator(key);
-                            }
-                        }
+                        // Smooth Step: https://en.wikipedia.org/wiki/Smoothstep
+                        var smoothStep = Math.Pow(oldGamma, 0.75) * Math.Pow(newGamma, 0.25);
+                        var value = ((float) smoothStep).LimitToRange(0.01f, 100f);
+                        patternMining.SetGamma(key, value);
+
+                        // reset gamma denominator
+                        patternMining.ResetGammaDenominator(key);
+                    }
+                }
 
                 progress.Report((double) iPat / _listPatternMining.Count);
             }
@@ -371,18 +450,18 @@ namespace Reversi_mcts.MachineLearning
                         var iChoseLegalMove = -1;
                         for (var iLegalMove = 0; iLegalMove < lenLegalMoves; iLegalMove++)
                         {
-                            strongLegalMoves[iLegalMove] = StrongOfAction(state, legalMoves[iLegalMove]);
+                            strongLegalMoves[iLegalMove] = BTMMAlgorithm.StrongOfAction(state, legalMoves[iLegalMove]);
                             e += strongLegalMoves[iLegalMove];
                             if (legalMoves[iLegalMove] == move)
                                 iChoseLegalMove = iLegalMove;
                         }
-                        
+
                         var val = strongLegalMoves[iChoseLegalMove] / e;
 
                         // Tính mẫu số và cập nhật vào _listPatternMining
                         for (var k = 0; k < lenLegalMoves; k++)
                         {
-                            var patternsIndexes = IdentifyPattern(legalMoves[k]);
+                            var patternsIndexes = BTMMAlgorithm.IdentifyPattern(legalMoves[k]);
                             foreach (var iPat in patternsIndexes)
                             {
                                 var pattern = _listPatternMining[iPat];
@@ -392,7 +471,7 @@ namespace Reversi_mcts.MachineLearning
                                 if (candidate > 10)
                                 {
                                     var cij = Cij(strongLegalMoves[k], iPat, patternCode, cellIndex, player);
-                                    _listPatternMining[iPat].AddGammaDenominator(patternCode, cellIndex, player, 
+                                    _listPatternMining[iPat].AddGammaDenominator(patternCode, cellIndex, player,
                                         cij / e);
                                 }
                             }
@@ -400,7 +479,6 @@ namespace Reversi_mcts.MachineLearning
 
                         likelihood += Math.Log(val);
                         prob += val;
-
                     } // end if
 
                     state.NextState(move);
@@ -426,25 +504,8 @@ namespace Reversi_mcts.MachineLearning
         {
             float e = 0;
             foreach (var move in legalMoves)
-                e += StrongOfAction(state, move);
+                e += BTMMAlgorithm.StrongOfAction(state, move);
             return e;
-        }
-
-        // Trả về sức mạnh của 1 move trong 1 state
-        public static float StrongOfAction(State state, ulong move)
-        {
-            var relatedPatterns = IdentifyPattern(move);
-            var player = state.Player;
-            var strong = 1f;
-            foreach (var iPat in relatedPatterns)
-            {
-                var cellIndex = _listPatternMining[iPat].PatternShape.IndexOfBitCell(move);
-                var patternCode = _listPatternMining[iPat].PatternShape.CalculatePatternCode(state.Board);
-                var gamma = _listPatternMining[iPat].GetGamma(patternCode, cellIndex, player);
-                strong *= gamma;
-            }
-
-            return strong;
         }
 
         private static State GetParsedState(int iGame)
@@ -452,46 +513,6 @@ namespace Reversi_mcts.MachineLearning
             return _parsedStates.TryGetValue(iGame, out var savedState) ? savedState.Clone() : new State();
         }
 
-        // identify indices of pattern-minings that related to an action
-        // Định dạng: Dictionary<bitMove, [pattern-idx1, pattern-idx2, pattern-idx3,...]>
-        private static Dictionary<ulong, int[]> _identifyPatternCached;
-
-        // Trả về index của những patternShape có targetCell (ô đỏ) == bitMove
-        private static int[] IdentifyPattern(ulong bitMove)
-        {
-            // nếu chưa có thì init, có rồi thì thôi -> chỉ init 1 lần
-            _identifyPatternCached ??= InitIdentifyPatternCached();
-
-            return _identifyPatternCached[bitMove];
-        }
-
-        private static Dictionary<ulong, int[]> InitIdentifyPatternCached()
-        {
-            // tương ứng với 64 cells trên bàn cờ
-            // Mỗi cell sẽ thuộc 1 hoặc nhiều patternShape nào đó
-            var result = new Dictionary<ulong, int[]>(64);
-
-            // loop qua từng ô trên bàn cờ (8x8=64 ô)
-            for (var iCell = 0; iCell < 64; iCell++)
-            {
-                var patternIndexes = new List<int>();
-                var bitCell = 0UL.SetBitAdIndex(iCell);
-
-                // loop qua từng patternShapes
-                for (var iPat = 0; iPat < _listPatternMining.Count; iPat++)
-                {
-                    var patternShape = _listPatternMining[iPat].PatternShape;
-
-                    // Nếu ô đang xét là targetCell của pattern đang xét => Add index vào patternIndexes
-                    if (patternShape.TargetBitCell == bitCell)
-                        patternIndexes.Add(iPat);
-                }
-
-                // Lưu indexes để có thể dùng lại
-                result[bitCell] = patternIndexes.ToArray();
-            }
-
-            return result;
-        }
+        #endregion
     }
 }

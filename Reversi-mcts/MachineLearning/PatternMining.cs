@@ -38,12 +38,13 @@ namespace Reversi_mcts.MachineLearning
             return patternCode * 1000 + cellIndex * 10 + player;
         }
 
-        // ------------------------------- Gamma ------------------------------- 
+        #region Gamma
+
         public static float GetGamma(this PatternMining p, int patternCode, int cellIndex, int player)
         {
             return p.GetGamma(Key(patternCode, cellIndex, player));
         }
-        
+
         public static float GetGamma(this PatternMining p, int key)
         {
             var hasValue = p.Gamma.TryGetValue(key, out var value);
@@ -54,53 +55,64 @@ namespace Reversi_mcts.MachineLearning
         {
             p.Gamma[key] = value;
         }
-        
-        // ------------------------------- Win -------------------------------
+
+        #endregion
+
+        #region Win
+
         public static ushort GetWin(this PatternMining p, int key)
         {
             var hasValue = p.Win.TryGetValue(key, out var value);
-            return hasValue ? value :  (ushort) 0; // default Wi value is 0
+            return hasValue ? value : (ushort) 0; // default Wi value is 0
         }
-        
+
         public static void AddWin(this PatternMining p, int key)
         {
             p.Win[key] = (ushort) (p.GetWin(key) + 1);
         }
-        
-        // ------------------------------- Candidate -------------------------------
+
+        #endregion
+
+        #region Candidate
+
         public static ushort GetCandidate(this PatternMining p, int patternCode, int cellIndex, int player)
         {
             return p.GetCandidate(Key(patternCode, cellIndex, player));
         }
-        
+
         public static ushort GetCandidate(this PatternMining p, int key)
         {
             var hasValue = p.Candidate.TryGetValue(key, out var value);
             return hasValue ? value : (ushort) 0; // default Wi Candidate is 0
         }
-        
+
         public static void AddCandidate(this PatternMining p, int key)
         {
             p.Candidate[key] = (ushort) (p.GetCandidate(key) + 1);
         }
-        
-        // ------------------------------- GammaDenominator -------------------------------
+
+        #endregion
+
+        #region GammaDenominator
+
         public static float GetGammaDenominator(this PatternMining p, int key)
         {
             var hasValue = p.GammaDenominator.TryGetValue(key, out var value);
             return hasValue ? value : 0f;
         }
-        
+
         public static void ResetGammaDenominator(this PatternMining p, int key)
         {
             p.GammaDenominator.Remove(key);
         }
-        
+
         public static void AddGammaDenominator(this PatternMining p, int patternCode, int cellIndex, int player,
             float value)
         {
             var key = Key(patternCode, cellIndex, player);
             p.GammaDenominator[key] = p.GetGammaDenominator(key) + value;
         }
+
+        #endregion
     }
 }

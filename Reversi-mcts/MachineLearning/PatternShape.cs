@@ -18,7 +18,9 @@ namespace Reversi_mcts.MachineLearning
             TargetBitCell = targetBitCell;
         }
 
-        // chuyển dạng ("a1,b1,c1,d1,g1,h1", "a1") về PatternShape
+        /// <summary>
+        /// Convert ("a1,b1,c1,d1,g1,h1", "a1") to PatternShape
+        /// </summary>
         public static PatternShape Parse(string strNotations, string targetCellNotation)
         {
             // parse target cell
@@ -36,7 +38,10 @@ namespace Reversi_mcts.MachineLearning
 
     public static class PatternShapeExt
     {
-        // trả về index (unique id) của 1 pattern cụ thể (pattern = patternShape & gameBoard) 
+        /// <summary>
+        /// Calculate index of pattern (unique id of pattern)
+        /// <para>Trả về index (unique id) của 1 pattern cụ thể (pattern = patternShape & gameBoard)</para>
+        /// </summary>
         public static int CalculatePatternCode(this PatternShape ps, BitBoard bitBoard)
         {
             // ---------- Version của thầy ---------- 
@@ -62,13 +67,20 @@ namespace Reversi_mcts.MachineLearning
             return result;
         }
 
-        // Trả về index của bitCell trong BitCellsArray
+        /// <summary>
+        /// Return index of bitCell in BitCellsArray
+        /// </summary>
         public static int IndexOfBitCell(this PatternShape ps, ulong bitCell)
         {
             return Array.IndexOf(ps.ArrayBitCells, bitCell);
         }
 
-        // Tạo ra các pattern được flip/mirror/rotate, rồi bỏ tất cả vào 1 List, trả về List
+        #region Sym8 - Flip,Rotate
+
+        /// <summary>
+        /// Create List of pattern flipped/mirrored/rotated
+        /// <para>Tạo ra các pattern được flip/mirror/rotate, rồi bỏ tất cả vào 1 List, trả về List</para>
+        /// </summary>
         public static List<PatternShape> Sym8(this PatternShape ps)
         {
             var result = new List<PatternShape>();
@@ -120,6 +132,10 @@ namespace Reversi_mcts.MachineLearning
             return new PatternShape(bitCellArray, targetBitCell);
         }
 
+        #endregion
+
+        #region Utils
+
         // Kiem tra xem pattern hien tai co phai la cha (chứa) pattern other hay khong.
         public static bool Contains(this PatternShape ps, PatternShape other)
         {
@@ -144,5 +160,7 @@ namespace Reversi_mcts.MachineLearning
 
             return str.ToString();
         }
+
+        #endregion
     }
 }

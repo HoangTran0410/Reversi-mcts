@@ -1,5 +1,4 @@
-﻿using System;
-using Reversi_mcts.Utils;
+﻿using Reversi_mcts.Utils;
 
 namespace Reversi_mcts
 {

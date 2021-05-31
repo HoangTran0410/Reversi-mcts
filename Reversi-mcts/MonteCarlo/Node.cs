@@ -21,7 +21,7 @@ namespace Reversi_mcts.MonteCarlo
         public double Strength = 0;
         public double AllChildStrength = 0;
         public Dictionary<ulong, double> ChildStrengths = null;
-        
+
         public Node(State state, Node parentNode, ulong parentMove)
         {
             State = state;
@@ -40,7 +40,8 @@ namespace Reversi_mcts.MonteCarlo
 
     public static class NodeExtensions
     {
-        // Phase 1: SELECTION
+        #region Phase 1: SELECTION
+
         public static Node SelectChild(this Node node, byte rootPlayer)
         {
             var isRootPlayer = node.State.Player == rootPlayer;
@@ -66,7 +67,10 @@ namespace Reversi_mcts.MonteCarlo
             return wins / node.Visits + Constant.C * Math.Sqrt(Math.Log(node.ParentNode.Visits) / node.Visits);
         }
 
-        // Phase 2: EXPANSION
+        #endregion
+
+        #region Phase 2: EXPANSION
+
         public static Node ExpandChild(this Node node)
         {
             var i = Constant.Random.Next(node.UntriedMoves.Count);
@@ -80,7 +84,10 @@ namespace Reversi_mcts.MonteCarlo
             return child;
         }
 
-        // Phase 3: SIMULATION
+        #endregion
+
+        #region Phase 3: SIMULATION
+
         public static float Simulate(this Node node, byte rootPlayer)
         {
             var state = node.State.Clone();
@@ -96,7 +103,10 @@ namespace Reversi_mcts.MonteCarlo
             return winner == rootPlayer ? Constant.WinScore : Constant.LoseScore;
         }
 
-        // Phase 4: BACKPROPAGATION
+        #endregion
+
+        #region Phase 4: BACKPROPAGATION
+
         public static void BackPropagate(this Node node, float reward)
         {
             while (node != null)
@@ -107,6 +117,10 @@ namespace Reversi_mcts.MonteCarlo
                 node = node.ParentNode;
             }
         }
+
+        #endregion
+
+        #region Utils
 
         public static bool IsFullyExpanded(this Node node)
         {
@@ -122,5 +136,7 @@ namespace Reversi_mcts.MonteCarlo
         {
             return node.IsFullyExpanded() && !node.HasChildNode();
         }
+
+        #endregion
     }
 }
