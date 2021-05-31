@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <RootNamespace>Reversi_mcts</RootNamespace>
     <TargetFrameworks>net471;netcoreapp3.1</TargetFrameworks>
     <LangVersion>default</LangVersion>
